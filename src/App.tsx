@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useRef } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
-import { flowIndex } from './state/flow'
-import { Stepper } from './components/Stepper'
+import { FLOW } from './state/flow'
 import { LiveRegion } from './components/ui'
+import {
+  IconConflict,
+  IconLock,
+  IconProfile,
+  IconStrategy,
+  IconSummary,
+} from './components/icons'
 import { Landing } from './screens/Landing'
 import { BuildProfile } from './screens/BuildProfile'
 import { ProfileSummary } from './screens/ProfileSummary'
@@ -11,6 +17,15 @@ import { Strategy } from './screens/Strategy'
 import { ConflictInspector } from './screens/ConflictInspector'
 import { Locked } from './screens/Locked'
 import { isProfileValid } from './lib/validation'
+
+const NAV_ICONS: Record<Step, (props: { className?: string }) => JSX.Element> = {
+  landing: IconProfile,
+  profile: IconProfile,
+  summary: IconSummary,
+  strategy: IconStrategy,
+  conflicts: IconConflict,
+  locked: IconLock,
+}
 
 function Screen({ step }: { step: Step }) {
   switch (step) {
@@ -31,11 +46,11 @@ function Screen({ step }: { step: Step }) {
 
 function Shell() {
   const state = useAppState()
-  const { goTo } = useAppActions()
-  const headingRef = useRef<HTMLDivElement>(null)
+  const { goTo, lock } = useAppActions()
+  const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    headingRef.current?.focus()
+    mainRef.current?.focus()
   }, [state.step])
 
   const reachable = useMemo(() => {
@@ -47,34 +62,81 @@ function Shell() {
     return steps
   }, [state.profile, state.items, state.audit, state.lock.locked])
 
+  const currentIndex = FLOW.findIndex((f) => f.step === state.step)
+  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock.locked
+  const activeLabel =
+    FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
+
   return (
-    <div className="app">
+    <div className="shell">
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
 
-      <header className="appbar">
-        <div className="appbar__inner">
-          <button
-            className="brand"
-            style={{ background: 'none', border: 0, padding: 0, color: 'inherit' }}
-            onClick={() => goTo('landing')}
-            aria-label="CounselFlow home"
-          >
-            <span className="brand__mark" aria-hidden="true">
-              CF
-            </span>
-            CounselFlow
-          </button>
-          {flowIndex(state.step) >= 0 && (
-            <Stepper current={state.step} reachable={reachable} onNavigate={goTo} />
-          )}
-        </div>
-      </header>
+      <aside className="sidebar">
+        <button className="brand" onClick={() => goTo('landing')} aria-label="CounselFlow home">
+          <span className="brand__mark" aria-hidden="true">
+            CF
+          </span>
+          <span>CounselFlow</span>
+        </button>
 
-      <main className="main" id="main" tabIndex={-1} ref={headingRef}>
-        <Screen step={state.step} />
-      </main>
+        <nav className="sidebar__nav" aria-label="Counselling flow">
+          {FLOW.map((entry, i) => {
+            const Icon = NAV_ICONS[entry.step]
+            const isCurrent = entry.step === state.step
+            const isDone = currentIndex >= 0 && i < currentIndex
+            const enabled = reachable.includes(entry.step)
+            return (
+              <button
+                key={entry.step}
+                type="button"
+                className="navitem"
+                aria-current={isCurrent ? 'page' : undefined}
+                disabled={!enabled && !isCurrent}
+                onClick={() => goTo(entry.step)}
+              >
+                <Icon />
+                {entry.short}
+                {isDone && (
+                  <span className="navitem__done" aria-hidden="true">
+                    ✓
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </nav>
+
+        <div className="sidebar__foot">v0.1.0 · mock engine</div>
+      </aside>
+
+      <div className="shell__body">
+        <header className="topbar">
+          <nav className="crumb" aria-label="Breadcrumb">
+            <span>CounselFlow</span>
+            <span aria-hidden="true">/</span>
+            <strong>{activeLabel}</strong>
+          </nav>
+          <div className="row" style={{ gap: 12, flexWrap: 'nowrap' }}>
+            <button
+              type="button"
+              className="btn btn--sm"
+              disabled={!canLock || state.busy === 'lock'}
+              onClick={lock}
+            >
+              {state.lock.locked ? 'Locked' : 'Lock strategy'}
+            </button>
+            <span className="avatar" aria-hidden="true">
+              GB
+            </span>
+          </div>
+        </header>
+
+        <main className="main" id="main" tabIndex={-1} ref={mainRef}>
+          <Screen step={state.step} />
+        </main>
+      </div>
 
       <LiveRegion message={state.announcement} />
     </div>

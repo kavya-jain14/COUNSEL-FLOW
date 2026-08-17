@@ -7,7 +7,10 @@ export function Landing() {
   return (
     <div className="stack">
       <section className="hero">
-        <span className="section-label">AKTU / UPTAC counselling</span>
+        <span className="eyebrow">
+          <span aria-hidden="true">◆</span>
+          AKTU / UPTAC counselling
+        </span>
         <h1>Know what to fill, in what order, and why.</h1>
         <p>
           Predictors tell you what you might get. CounselFlow builds an ordered choice list

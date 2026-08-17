@@ -110,6 +110,38 @@ demo fix sequence converges to 0 critical / 0 warning / 1 info, then locks.
 
 ---
 
+## Design system
+
+The UI implements **CounselFlow Editorial Dark** from the Stitch export — the scheme all
+three mockup screens were built in. The full spec is in
+[`design/EDITORIAL_DARK.md`](design/EDITORIAL_DARK.md); the unused alternative is kept in
+[`design/MIDNIGHT_TECH_FORWARD.md`](design/MIDNIGHT_TECH_FORWARD.md) in case the team
+prefers it.
+
+It is implemented as CSS custom properties in
+[`src/styles/global.css`](src/styles/global.css) — no Tailwind, so there is no CDN
+dependency and the tokens are the single source of truth.
+
+| Token | Value | Role |
+|---|---|---|
+| `--bg` | `#0C0C0B` | deep charcoal canvas |
+| `--surface-2` | `#1c1b1a` | cards, conflict rows |
+| `--text` | `#DDD7CA` | warm parchment |
+| `--accent` | `#B86A45` | terracotta — the only action colour |
+| `--hard` | `#d6b583` | sand — hard constraints |
+
+Type is **Geist** for headings and UI, **Inter** for body copy, **Space Mono** for the
+"ledger" details (option IDs, positions, conflict provenance). Depth comes from tonal
+layering and 1px outlines rather than shadows, per the spec.
+
+Two deliberate departures from `DESIGN.md`, both following the actual mockups rather than
+the prose: corners are rounded (8/12px) where the doc says 0px, and cards sit on a
+slightly raised surface where the doc says to match the canvas.
+
+Layout follows the mockups: a fixed 248px left rail carrying the flow steps, and a sticky
+top bar with a breadcrumb and a Lock Strategy action that stays disabled until the audit
+says the list can lock. Below 900px the rail collapses into a horizontal pill bar.
+
 ## Accessibility
 
 Colour is never the only signal — every severity, tier, and hard/soft state also carries

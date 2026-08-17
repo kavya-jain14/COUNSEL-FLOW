@@ -64,7 +64,7 @@ export function Locked() {
             {items.map((item) => (
               <li className="srow" key={item.itemId}>
                 <span className="srow__pos" aria-hidden="true">
-                  {item.position}
+                  {String(item.position).padStart(2, '0')}
                 </span>
                 <div className="srow__body">
                   <div className="row" style={{ gap: 8 }}>

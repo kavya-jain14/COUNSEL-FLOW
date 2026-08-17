@@ -35,7 +35,7 @@ export function StrategyRow({
   return (
     <li className="srow" data-flagged={worst?.severity}>
       <span className="srow__pos" aria-hidden="true">
-        {item.position}
+        {String(item.position).padStart(2, '0')}
       </span>
 
       <div className="srow__body">
