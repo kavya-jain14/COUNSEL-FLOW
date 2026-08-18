@@ -76,7 +76,7 @@ function Shell() {
       <aside className="sidebar">
         <button className="brand" onClick={() => goTo('landing')} aria-label="CounselFlow home">
           <span className="brand__mark" aria-hidden="true">
-            CF
+            <img src="/brand/counselflow-mark.svg" alt="" />
           </span>
           <span>CounselFlow</span>
         </button>
