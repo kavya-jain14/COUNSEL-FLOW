@@ -1,0 +1,16 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "req-lock-001",
+  "snapshot": {
+    "locked": true,
+    "snapshotId": "snapshot-demo-001",
+    "lockedAt": "2026-08-19T02:30:00+05:30",
+    "profileRevision": "profile-rev-001",
+    "listRevision": "list-rev-001",
+    "datasetVersion": "uptac-sample-2024.1",
+    "engineVersion": "engine-0.1.0",
+    "auditRunId": 2,
+    "acknowledgedWarnings": [],
+    "itemOrder": ["item-1"]
+  }
+}

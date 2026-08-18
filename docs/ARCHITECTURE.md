@@ -13,7 +13,7 @@ flowchart TD
   W --> A["Deterministic conflict audit"]
   A --> R["Fix, justify or reorder"]
   R --> A
-  A -->|"No critical conflicts"| L["Versioned locked snapshot"]
+  A -->|"No unresolved blocking conflicts"| L["Versioned locked snapshot"]
 ```
 
 Optional AI sits behind an explanation adapter. It may summarize the engine's stored

@@ -212,8 +212,8 @@ accent, sand hard-constraint treatment, clear typography and non-color status cu
   ordered `StrategyItem[]`;
 - `POST /api/strategy/audit(profile, items, revision)` → stable conflicts, counts,
   audited revision, `canLock`;
-- `POST /api/strategy/lock(profile, items, audit, resolutions)` → reject stale/critical
-  state or return snapshot ID/version;
+- `POST /api/strategy/lock(profile, items, audit, resolutions)` → reject stale audits or
+  unresolved critical/warning decisions; otherwise return snapshot ID/version;
 - `GET /api/health` → deployment health.
 
 Server validates inputs and lock invariants even when the client already checked them.

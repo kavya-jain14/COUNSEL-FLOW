@@ -20,7 +20,8 @@ Initial endpoints:
 
 - `POST /api/strategy/generate` — validate profile, return ordered strategy items;
 - `POST /api/strategy/audit` — audit profile + latest order, return stable conflicts;
-- `POST /api/strategy/lock` — reject stale/critical state, persist versioned snapshot;
+- `POST /api/strategy/lock` — reject stale or unresolved blocking state, persist a
+  versioned snapshot;
 - `GET /api/health` — build/deployment health only.
 
 Do not choose a framework or database in a placeholder commit. Freeze the schemas in

@@ -3,9 +3,16 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check": "npm run typecheck && npm run contracts:test && npm run build",
+    "contracts:build": "tsc -p packages/contracts/tsconfig.json",
+    "contracts:test": "npm run contracts:build && node --test packages/contracts/test/*.test.mjs",
+    "contracts:typecheck": "tsc -p packages/contracts/tsconfig.json --noEmit",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

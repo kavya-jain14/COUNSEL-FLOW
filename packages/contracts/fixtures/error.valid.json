@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "req-invalid-001",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The candidate profile is invalid.",
+    "retryable": false,
+    "fieldErrors": {
+      "budget.value": ["Annual budget must be at least 20000."]
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "req-lock-001",
+  "profileRevision": "profile-rev-001",
+  "listRevision": "list-rev-001",
+  "profile": {
+    "rank": 12500,
+    "rankType": "CRL",
+    "category": "GEN",
+    "branchPriority": ["CSE", "IT", "ECE"],
+    "budget": { "value": 150000, "mode": "hard" },
+    "distance": { "value": 300, "mode": "soft" },
+    "hardExclusions": [
+      { "kind": "instituteType", "value": "PRIVATE" },
+      { "kind": "noHostel", "value": "true" }
+    ],
+    "factorWeights": {
+      "placements": 0.3,
+      "fees": 0.2,
+      "location": 0.2,
+      "campus": 0.15,
+      "hostel": 0.15
+    }
+  },
+  "items": [
+    {
+      "itemId": "item-1",
+      "option": {
+        "id": "hbtu-kanpur-cse",
+        "college": "Harcourt Butler Technical University, Kanpur",
+        "collegeShort": "HBTU Kanpur",
+        "branch": "CSE",
+        "instituteType": "GOVERNMENT",
+        "city": "Kanpur",
+        "annualFee": 142000,
+        "distanceKm": 90,
+        "hostelAvailable": true,
+        "placementScore": 82,
+        "campusScore": 78,
+        "closingRank": 8900,
+        "sourceLabel": "UPTAC sample cycle",
+        "sourceYear": 2024,
+        "missingFacts": []
+      },
+      "tier": "DREAM",
+      "position": 1,
+      "reasons": [
+        {
+          "code": "R-BRANCH-TOP",
+          "label": "Matches your top branch",
+          "detail": "CSE is first in the candidate's declared branch order.",
+          "polarity": "positive"
+        }
+      ],
+      "confidence": "high",
+      "manuallyPlaced": false
+    }
+  ],
+  "resolutions": [],
+  "audit": {
+    "runId": 2,
+    "profileRevision": "profile-rev-001",
+    "listRevision": "list-rev-001",
+    "conflicts": [],
+    "counts": { "CRITICAL": 0, "WARNING": 0, "INFO": 0 },
+    "canLock": true
+  }
+}

@@ -45,9 +45,10 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     setup: [
       'Declare CSE above ECE in branch priority.',
       'Place a comparable ECE option immediately above a CSE option.',
+      'Leave the warning unresolved; an explained override followed by re-audit unblocks it.',
     ],
     expectedConflictCodes: ['CF-01'],
-    expectedLockBlocked: false,
+    expectedLockBlocked: true,
   },
   {
     id: 'stale-audit-after-manual-move',
@@ -67,8 +68,9 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     setup: [
       'Include REC Banda from the seed dataset.',
       'Inspect reasons and evidence for its missing fee, closing-rank and placement facts.',
+      'Leave the warning unresolved; accepting uncertainty with a reason and re-auditing unblocks it.',
     ],
     expectedConflictCodes: ['CF-08'],
-    expectedLockBlocked: false,
+    expectedLockBlocked: true,
   },
 ] as const
