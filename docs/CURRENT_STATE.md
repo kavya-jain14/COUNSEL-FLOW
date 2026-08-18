@@ -7,9 +7,10 @@ Last updated: 2026-08-19
 - Remote: `https://github.com/kavya-jain14/COUNSE-FLOW`
 - Remote default branch: `feature/gargi-profile-conflicts`
 - Remote baseline tip when foundation work started: `a6d33fd`
-- Local `main` now points to the untouched baseline `a6d33fd`; it is not published yet.
+- Remote `main` points to the untouched baseline `a6d33fd`.
 - Current local branch: `chore/repo-foundation`
-- Important: the remote has no `main` branch yet. Preserve Gargi's branch and history.
+- Draft PR: `#1 chore: initialize CounselFlow repository foundation`
+- Important: preserve Gargi's branch and history when changing the default branch.
 
 ## Durable product decisions
 
@@ -28,23 +29,24 @@ Last updated: 2026-08-19
 - Feature-template, API boundary, shared-contract boundary and lab scenarios prepared.
 - GitHub CI and PR checklist prepared.
 - `git diff --check` passes and both SVG assets parse as valid XML.
+- On Kavya's Mac, `npm ci`, `npm run typecheck` and `npm run build` pass.
+- GitHub Actions CI run #1 passes for foundation commit `893aba5`.
 
 ## Validation and blockers
 
-- Baseline `npm ci` is currently blocked in this managed environment: npm repeatedly
-  falls back to unwritable `/root/.npm` and reports corrupt/retried tar entries.
-- Typecheck/build must be rerun in a normal shell or once npm registry/cache access is
-  available; no failure has yet been attributed to application code.
-- Publishing is blocked in this environment because GitHub CLI/auth is unavailable.
-  Do not pretend this branch was pushed or a PR was opened.
+- PR #1 is open, Draft and mergeable into `main`; its CI is green.
+- PR body must be filled before moving it out of Draft.
+- Repository default branch still needs to change to `main` after the PR is merged.
+- `npm ci` reports two dependency audit findings. Do not run `npm audit fix --force` in
+  the foundation PR; inspect them separately on `chore/dependency-audit`.
 
 ## Next three commands
 
 ```bash
-npm ci && npm run typecheck && npm run build
-git push origin main
-git push -u origin chore/repo-foundation
+gh pr ready 1 --repo kavya-jain14/COUNSE-FLOW
+gh pr merge 1 --repo kavya-jain14/COUNSE-FLOW --squash --delete-branch
+gh repo edit kavya-jain14/COUNSE-FLOW --default-branch main
 ```
 
-After both pushes: open the foundation PR into `main`, review it, then set `main` as the
-protected default branch before starting feature branches.
+After the default branch changes, protect `main`, update the local checkout, and create
+`feat/shared-contracts` from the latest `main`.

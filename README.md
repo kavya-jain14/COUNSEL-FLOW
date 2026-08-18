@@ -63,10 +63,10 @@ create a long-lived personal integration branch. The root Vite app is the shared
 integration lab: merge small features into it only after their contracts and golden
 scenario pass.
 
-The remote currently uses `feature/gargi-profile-conflicts` as its default branch and
-does not yet have `main`. The first repository-maintenance step is to publish this
-foundation, create `main` from the reviewed baseline, and make `main` the protected
-default. Until that is done, never force-push or rewrite Gargi's branch.
+The remote now has `main` at the reviewed frontend baseline, while
+`feature/gargi-profile-conflicts` remains the default until foundation PR #1 is merged.
+After that merge, make `main` the protected default. Never force-push or rewrite Gargi's
+historical branch.
 
 Read the [`hackathon master blueprint`](docs/MVP_BLUEPRINT.md), the working agreement in
 [`docs/TEAM_WORKFLOW.md`](docs/TEAM_WORKFLOW.md), the architecture in
