@@ -179,14 +179,14 @@ button {
   width: 30px;
   height: 30px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(150deg, var(--accent), #8f4e30);
-  color: var(--accent-text);
-  display: grid;
-  place-items: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+.brand__mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .sidebar__nav {

@@ -1,4 +1,85 @@
-# CounselFlow — candidate-facing frontend
+# CounselFlow
+
+![CounselFlow logo](public/brand/counselflow-logo.svg)
+
+CounselFlow is a counselling strategy workspace, not another college predictor. A
+candidate enters rank, category, budget, distance, branch priority and hard constraints;
+the product builds an explainable preference order, stress-tests it for contradictions,
+and lets the candidate fix, justify and lock the final list.
+
+> **Hackathon hero flow:** Profile → generated preference list → why this order →
+> conflict audit → fix or justify → re-audit → lock.
+
+The recommendation and conflict engine stays deterministic. Optional AI may turn stored
+facts into clearer explanations, but it never invents facts or silently changes the
+order.
+
+## Repository map
+
+| Path | Purpose | Owner |
+|---|---|---|
+| `src/` | Current candidate UI and local integration lab | Kavya + Gargi |
+| `src/features/` | Destination for isolated frontend/domain feature modules | Feature owner |
+| `src/lab/` | Golden demo and fault-injection scenarios | Kavya + reviewers |
+| `services/api/` | Backend service boundary; backend code must live here | Fuzail + backend contributor |
+| `packages/contracts/` | Shared validated API contracts | Kavya + Fuzail |
+| `public/brand/` | Approved repository and app logo assets | Team |
+| `docs/` | Architecture, workflow, handoff prompt and live checkpoint | Team |
+
+The existing `src/screens`, `src/mock`, `src/state` and `src/types` implementation is
+intentionally preserved. We will extract it feature-by-feature after the shared
+contracts are frozen, instead of doing a risky mass move before the demo works.
+
+## Start locally
+
+```bash
+npm ci
+npm run dev
+```
+
+Before opening a PR:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+## Branch rule
+
+Every independently reviewable feature gets its own short-lived branch from `main`:
+
+```text
+feat/profile
+feat/strategy-engine
+feat/conflict-audit
+feat/workspace
+feat/lock-strategy
+fix/<short-bug-name>
+chore/<repo-or-tooling-change>
+```
+
+Do not mix unrelated features, do not push feature work directly to `main`, and do not
+create a long-lived personal integration branch. The root Vite app is the shared
+integration lab: merge small features into it only after their contracts and golden
+scenario pass.
+
+The remote currently uses `feature/gargi-profile-conflicts` as its default branch and
+does not yet have `main`. The first repository-maintenance step is to publish this
+foundation, create `main` from the reviewed baseline, and make `main` the protected
+default. Until that is done, never force-push or rewrite Gargi's branch.
+
+Read the [`hackathon master blueprint`](docs/MVP_BLUEPRINT.md), the working agreement in
+[`docs/TEAM_WORKFLOW.md`](docs/TEAM_WORKFLOW.md), the architecture in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and the current checkpoint in
+[`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+
+If a session or tool limit interrupts the build, paste
+[`docs/ANTIGRAVITY_MASTER_PROMPT.md`](docs/ANTIGRAVITY_MASTER_PROMPT.md) into the next
+agent. It contains the locked scope, ownership, recovery checks and handoff format.
+
+---
+
+## Current candidate-facing frontend
 
 React + Vite + TypeScript. Covers the candidate side of the hackathon MVP:
 
@@ -10,7 +91,7 @@ Everything runs against a **local mock** of the strategy API, so this half of th
 product is demo-complete without the backend.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
