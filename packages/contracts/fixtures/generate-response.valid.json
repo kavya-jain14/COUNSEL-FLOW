@@ -1,0 +1,50 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "req-demo-001",
+  "profileRevision": "profile-rev-001",
+  "listRevision": "list-rev-001",
+  "datasetVersion": "uptac-sample-2024.1",
+  "engineVersion": "engine-0.1.0",
+  "items": [
+    {
+      "itemId": "item-1",
+      "option": {
+        "id": "hbtu-kanpur-cse",
+        "college": "Harcourt Butler Technical University, Kanpur",
+        "collegeShort": "HBTU Kanpur",
+        "branch": "CSE",
+        "instituteType": "GOVERNMENT",
+        "city": "Kanpur",
+        "annualFee": 142000,
+        "distanceKm": 90,
+        "hostelAvailable": true,
+        "placementScore": 82,
+        "campusScore": 78,
+        "closingRank": 8900,
+        "sourceLabel": "UPTAC sample cycle",
+        "sourceYear": 2024,
+        "missingFacts": []
+      },
+      "tier": "DREAM",
+      "position": 1,
+      "reasons": [
+        {
+          "code": "R-BRANCH-TOP",
+          "label": "Matches your top branch",
+          "detail": "CSE is first in the candidate's declared branch order.",
+          "polarity": "positive"
+        }
+      ],
+      "confidence": "high",
+      "manuallyPlaced": false
+    }
+  ],
+  "audit": {
+    "runId": 1,
+    "profileRevision": "profile-rev-001",
+    "listRevision": "list-rev-001",
+    "conflicts": [],
+    "counts": { "CRITICAL": 0, "WARNING": 0, "INFO": 0 },
+    "canLock": true
+  }
+}
