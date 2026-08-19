@@ -4,6 +4,7 @@ import type {
   FactorKey,
   ProfileErrors,
 } from '../types'
+import { candidateProfileSchema } from '@counselflow/contracts'
 import { BRANCH_LABELS } from '../data/reference'
 
 export const MIN_BUDGET = 20000
@@ -77,7 +78,7 @@ export function normalizeWeights(
 }
 
 export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
-  return {
+  return candidateProfileSchema.parse({
     rank: profile.rank as number,
     rankType: profile.rankType,
     category: profile.category!,
@@ -86,5 +87,5 @@ export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
     distance: { ...profile.distance },
     hardExclusions: profile.hardExclusions.map(({ kind, value }) => ({ kind, value })),
     factorWeights: normalizeWeights(profile.factorWeights),
-  }
+  })
 }

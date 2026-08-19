@@ -5,7 +5,18 @@ export function Locked() {
   const { lock, items, resolutions, profile } = useAppState()
   const { goTo, reset } = useAppActions()
 
-  const overrides = resolutions.filter((r) => r.kind !== 'FIXED')
+  if (!lock) {
+    return (
+      <div className="card empty">
+        <p>No locked snapshot exists yet.</p>
+        <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
+          Return to conflict inspector
+        </button>
+      </div>
+    )
+  }
+
+  const overrides = lock.acknowledgedWarnings
   const fixes = resolutions.filter((r) => r.kind === 'FIXED')
 
   return (
@@ -13,7 +24,8 @@ export function Locked() {
       <div>
         <h1>Your list is locked</h1>
         <p className="card__hint">
-          {items.length} choices, in this order, with zero unresolved critical conflicts.
+          {items.length} choices, in this order, with zero unresolved critical or warning
+          conflicts.
         </p>
       </div>
 
@@ -26,16 +38,22 @@ export function Locked() {
           <span className="section-label">Reproducibility</span>
           <dl className="summary-grid">
             <div className="summary-cell">
-              <dt>Profile version</dt>
-              <dd className="mono">{lock.profileVersion}</dd>
+              <dt>Profile revision</dt>
+              <dd className="mono">{lock.profileRevision}</dd>
             </div>
             <div className="summary-cell">
               <dt>Dataset</dt>
-              <dd style={{ fontSize: '0.88rem' }}>{lock.datasetLabel}</dd>
+              <dd style={{ fontSize: '0.88rem' }}>{lock.datasetVersion}</dd>
             </div>
             <div className="summary-cell">
               <dt>Engine version</dt>
               <dd className="mono">{lock.engineVersion}</dd>
+            </div>
+            <div className="summary-cell">
+              <dt>Locked at</dt>
+              <dd style={{ fontSize: '0.88rem' }}>
+                {new Date(lock.lockedAt).toLocaleString('en-IN')}
+              </dd>
             </div>
             <div className="summary-cell">
               <dt>Rank used</dt>

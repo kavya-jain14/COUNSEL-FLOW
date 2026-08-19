@@ -14,7 +14,8 @@ const GROUP_COPY: Record<Severity, string> = {
 }
 
 export function ConflictInspector() {
-  const { audit, items, resolutions, activity, auditStale, busy } = useAppState()
+  const { audit, items, resolutions, activity, auditStale, busy, lock: snapshot } =
+    useAppState()
   const { goTo, reaudit, lock, applyAction } = useAppActions()
   const resolutionMap = useResolutionMap()
 
@@ -41,8 +42,10 @@ export function ConflictInspector() {
 
   const { counts } = audit
   const total = counts.CRITICAL + counts.WARNING + counts.INFO
-  const canLock = audit.canLock && !auditStale
-  const acknowledged = resolutions.filter((r) => r.kind !== 'FIXED')
+  const canLock = audit.canLock && !auditStale && !snapshot
+  const acknowledged = resolutions.filter(
+    (resolution) => resolution.severity === 'WARNING' && resolution.kind === 'OVERRIDDEN',
+  )
 
   return (
     <div className="stack">
@@ -94,18 +97,31 @@ export function ConflictInspector() {
             changes.
           </span>
         </Banner>
+      ) : counts.WARNING > 0 ? (
+        <Banner
+          tone="warning"
+          title={`${counts.WARNING} warning decision${counts.WARNING > 1 ? 's' : ''} required`}
+        >
+          <span>
+            Fix each warning or keep it with a written reason, then re-audit before locking.
+          </span>
+        </Banner>
       ) : (
         <Banner
           tone="success"
-          title="No critical conflicts — this list can be locked"
+          title={snapshot ? 'This strategy is already locked' : 'No unresolved blocking conflicts'}
           action={
-            <button className="btn btn--sm btn--primary" onClick={lock} disabled={busy === 'lock'}>
+            <button
+              className="btn btn--sm btn--primary"
+              onClick={lock}
+              disabled={busy === 'lock' || Boolean(snapshot)}
+            >
               {busy === 'lock' ? (
                 <>
                   <span className="spinner" aria-hidden="true" /> Locking…
                 </>
               ) : (
-                'Lock my list'
+                snapshot ? 'Locked' : 'Lock my list'
               )}
             </button>
           }
@@ -147,7 +163,7 @@ export function ConflictInspector() {
                 conflict={conflict}
                 resolution={resolutionMap[conflict.id]}
                 items={items}
-                disabled={busy != null}
+                disabled={busy != null || Boolean(snapshot)}
                 onApply={applyAction}
               />
             ))}
@@ -183,7 +199,7 @@ export function ConflictInspector() {
         <button type="button" className="btn" onClick={() => goTo('strategy')}>
           Back to strategy
         </button>
-        {auditStale || counts.CRITICAL > 0 ? (
+        {auditStale ? (
           <button
             type="button"
             className="btn btn--primary btn--lg"
@@ -191,6 +207,10 @@ export function ConflictInspector() {
             disabled={busy === 'audit'}
           >
             {busy === 'audit' ? 'Re-auditing…' : 'Re-audit'}
+          </button>
+        ) : !audit.canLock ? (
+          <button type="button" className="btn btn--primary btn--lg" disabled>
+            Resolve conflicts above
           </button>
         ) : (
           <button

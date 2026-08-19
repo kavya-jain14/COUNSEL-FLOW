@@ -399,7 +399,7 @@ function compareAdjacent(
   if (profile.factorWeights.hostel > 0) {
     cmp.push({
       label: 'Hostel',
-      betterBelow: b.hostelAvailable && !a.hostelAvailable,
+      betterBelow: b.hostelAvailable === true && a.hostelAvailable !== true,
       equal: b.hostelAvailable === a.hostelAvailable,
       detail: `${b.hostelAvailable ? 'available' : 'not listed'} vs ${
         a.hostelAvailable ? 'available' : 'not listed'
@@ -493,6 +493,7 @@ function coverageConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
           effect:
             'Takes you back to your profile. Widening budget, distance or branches may surface a safe fallback.',
           intent: 'primary',
+          target: { constraint: 'budget', newValue: profile.budget.value },
         },
         {
           id: 'coverage:accept-risk',
@@ -615,5 +616,9 @@ export function runAudit(
   const counts: Record<Severity, number> = { CRITICAL: 0, WARNING: 0, INFO: 0 }
   for (const c of conflicts) counts[c.severity] += 1
 
-  return { conflicts, counts, canLock: counts.CRITICAL === 0 }
+  return {
+    conflicts,
+    counts,
+    canLock: counts.CRITICAL === 0 && counts.WARNING === 0,
+  }
 }
