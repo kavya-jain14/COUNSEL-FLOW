@@ -3,14 +3,20 @@ import type { Severity } from '../types'
 import { SEVERITY_ORDER } from '../mock/audit'
 import { useAppActions, useAppState, useResolutionMap } from '../state/store'
 import { ConflictCard } from '../components/ConflictCard'
-import { Banner, SEVERITY_META } from '../components/ui'
+import { Band, Banner, NextStep, PageHead } from '../components/ui'
+
+const GROUP_TITLE: Record<Severity, string> = {
+  CRITICAL: 'Must fix',
+  WARNING: 'Worth checking',
+  INFO: 'For information',
+}
 
 const GROUP_COPY: Record<Severity, string> = {
   CRITICAL:
-    'Each of these breaks a hard limit you set. Fix them — remove the option, change the limit, or make the limit a soft preference.',
+    'Each of these breaks a hard limit you set. Remove the option, raise the limit, or turn the limit into a soft preference — your call, but one of them has to happen.',
   WARNING:
-    'These contradict your stated priorities. You can keep your order, but we will record why.',
-  INFO: 'Tradeoffs worth knowing about. Nothing here is wrong.',
+    'These contradict your stated priorities without breaking any rule. Keep your order if you meant it; we only record why.',
+  INFO: 'Tradeoffs worth knowing about. Nothing here is wrong and nothing needs an answer.',
 }
 
 export function ConflictInspector() {
@@ -19,7 +25,7 @@ export function ConflictInspector() {
   const resolutionMap = useResolutionMap()
 
   const grouped = useMemo(() => {
-    const map: Record<Severity, typeof audit extends null ? never : NonNullable<typeof audit>['conflicts']> = {
+    const map: Record<Severity, NonNullable<typeof audit>['conflicts']> = {
       CRITICAL: [],
       WARNING: [],
       INFO: [],
@@ -30,12 +36,21 @@ export function ConflictInspector() {
 
   if (!audit) {
     return (
-      <div className="card empty">
-        <p>No audit yet. Generate a strategy first.</p>
-        <button className="btn btn--primary" style={{ marginTop: 12 }} onClick={() => goTo('profile')}>
-          Build my profile
-        </button>
-      </div>
+      <>
+        <PageHead
+          step={4}
+          total={5}
+          kicker="Conflicts"
+          title="Nothing audited yet"
+          lede="The conflict inspector opens once there is a strategy to check against your declared limits."
+        />
+        <div className="empty">
+          <p>Generate a strategy first and the audit runs automatically.</p>
+          <button className="btn btn--primary" onClick={() => goTo('profile')}>
+            Build my profile
+          </button>
+        </div>
+      </>
     )
   }
 
@@ -43,22 +58,52 @@ export function ConflictInspector() {
   const total = counts.CRITICAL + counts.WARNING + counts.INFO
   const canLock = audit.canLock && !auditStale
   const acknowledged = resolutions.filter((r) => r.kind !== 'FIXED')
+  const handled = audit.conflicts.filter((c) => resolutionMap[c.id]).length
 
   return (
-    <div className="stack">
-      <div className="row row--between">
-        <div>
-          <h1>Conflict inspector</h1>
-          <p className="card__hint">
-            Audit run #{audit.runId} over {items.length} options.
-          </p>
+    <>
+      <PageHead
+        step={4}
+        total={5}
+        kicker="Conflicts"
+        title={
+          total === 0
+            ? 'Your list contradicts nothing'
+            : counts.CRITICAL > 0
+              ? 'Where your list argues with itself'
+              : 'A few tradeoffs to sign off'
+        }
+        lede={
+          total === 0
+            ? `Audit run #${audit.runId} over ${items.length} options found nothing that conflicts with anything you declared.`
+            : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom — only the red group can stop you from locking.`
+        }
+        actions={
+          <button
+            type="button"
+            className="btn btn--sm"
+            onClick={reaudit}
+            disabled={busy === 'audit'}
+          >
+            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit'}
+          </button>
+        }
+      />
+
+      {total > 0 && (
+        <div className="progress" style={{ marginBottom: 26 }}>
+          <span className="progress__bar" aria-hidden="true">
+            <span
+              className="progress__fill"
+              style={{ width: `${Math.round((handled / total) * 100)}%` }}
+            />
+          </span>
+          <span className="progress__text">
+            <b>{handled}</b> of {total} handled
+            {counts.CRITICAL > 0 && ` · ${counts.CRITICAL} still blocking`}
+          </span>
         </div>
-        <div className="count-pills">
-          <span className="badge badge--critical">{counts.CRITICAL} critical</span>
-          <span className="badge badge--warning">{counts.WARNING} warning</span>
-          <span className="badge badge--info">{counts.INFO} info</span>
-        </div>
-      </div>
+      )}
 
       {auditStale ? (
         <Banner
@@ -85,19 +130,17 @@ export function ConflictInspector() {
       ) : counts.CRITICAL > 0 ? (
         <Banner
           tone="critical"
-          title={`Locking is blocked by ${counts.CRITICAL} critical conflict${
-            counts.CRITICAL > 1 ? 's' : ''
-          }`}
+          title={`${counts.CRITICAL} hard limit${counts.CRITICAL > 1 ? 's are' : ' is'} being broken`}
         >
           <span>
-            Critical conflicts cannot be acknowledged away — the option goes, or the constraint
-            changes.
+            These cannot be acknowledged away — either the option goes, or the limit changes.
+            Everything else on this page is optional.
           </span>
         </Banner>
       ) : (
         <Banner
           tone="success"
-          title="No critical conflicts — this list can be locked"
+          title="Nothing is blocking you — this list can be locked"
           action={
             <button className="btn btn--sm btn--primary" onClick={lock} disabled={busy === 'lock'}>
               {busy === 'lock' ? (
@@ -120,49 +163,37 @@ export function ConflictInspector() {
         </Banner>
       )}
 
-      {total === 0 && (
-        <div className="card empty">
-          <p>
-            <span aria-hidden="true">✓ </span>
-            Nothing flagged. Your list is consistent with everything you declared.
-          </p>
-        </div>
-      )}
+      <div style={{ marginTop: 34 }}>
+        {SEVERITY_ORDER.map((severity) => {
+          const list = grouped[severity]
+          if (list.length === 0) return null
+          return (
+            <Band
+              key={severity}
+              num={`${list.length} item${list.length > 1 ? 's' : ''}`}
+              title={GROUP_TITLE[severity]}
+              note={GROUP_COPY[severity]}
+            >
+              {list.map((conflict) => (
+                <ConflictCard
+                  key={conflict.id}
+                  conflict={conflict}
+                  resolution={resolutionMap[conflict.id]}
+                  items={items}
+                  disabled={busy != null}
+                  onApply={applyAction}
+                />
+              ))}
+            </Band>
+          )
+        })}
 
-      {SEVERITY_ORDER.map((severity) => {
-        const list = grouped[severity]
-        if (list.length === 0) return null
-        return (
-          <section className="stack stack--sm" key={severity} aria-labelledby={`group-${severity}`}>
-            <div className="row" style={{ gap: 10 }}>
-              <h2 id={`group-${severity}`}>
-                {SEVERITY_META[severity].label} · {list.length}
-              </h2>
-              <span className="badge badge--neutral">{SEVERITY_META[severity].blocking}</span>
-            </div>
-            <p className="card__hint">{GROUP_COPY[severity]}</p>
-            {list.map((conflict) => (
-              <ConflictCard
-                key={conflict.id}
-                conflict={conflict}
-                resolution={resolutionMap[conflict.id]}
-                items={items}
-                disabled={busy != null}
-                onApply={applyAction}
-              />
-            ))}
-          </section>
-        )
-      })}
-
-      {activity.length > 0 && (
-        <section className="card">
-          <div className="stack stack--sm">
-            <h2>What you have changed</h2>
-            <p className="card__hint">
-              Every proposal, fix and override, in order. This trail is stored with the locked
-              snapshot.
-            </p>
+        {activity.length > 0 && (
+          <Band
+            num={`${activity.length} entr${activity.length > 1 ? 'ies' : 'y'}`}
+            title="What you have changed"
+            note="Every proposal, fix and override, in order. This trail is stored with the locked snapshot."
+          >
             <ul className="activity">
               {activity.map((entry) => (
                 <li key={entry.id} data-tone={entry.tone}>
@@ -175,34 +206,51 @@ export function ConflictInspector() {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
-      )}
+          </Band>
+        )}
+      </div>
 
-      <div className="sticky-actions">
-        <button type="button" className="btn" onClick={() => goTo('strategy')}>
-          Back to strategy
-        </button>
-        {auditStale || counts.CRITICAL > 0 ? (
-          <button
-            type="button"
-            className="btn btn--primary btn--lg"
-            onClick={reaudit}
-            disabled={busy === 'audit'}
-          >
-            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit'}
+      {auditStale ? (
+        <NextStep
+          tone="wait"
+          what="Re-audit to confirm your fixes worked"
+          why="You changed things. Re-running the audit is the only way to know whether the flags are actually gone."
+        >
+          <button className="btn" onClick={() => goTo('strategy')}>
+            Back to list
           </button>
-        ) : (
+          <button className="btn btn--primary" onClick={reaudit} disabled={busy === 'audit'}>
+            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit now'}
+          </button>
+        </NextStep>
+      ) : counts.CRITICAL > 0 ? (
+        <NextStep
+          tone="blocked"
+          what={`${counts.CRITICAL} still blocking — pick a fix above`}
+          why="Every red item offers you the ways out. Choosing one either drops the option or relaxes the limit you set."
+        >
+          <button className="btn" onClick={() => goTo('strategy')}>
+            Back to list
+          </button>
+        </NextStep>
+      ) : (
+        <NextStep
+          tone="ready"
+          what="Lock your list"
+          why="This saves a snapshot with your order, your reasons, and the dataset version used — so the decision stays explainable later."
+        >
+          <button className="btn" onClick={() => goTo('strategy')}>
+            Back to list
+          </button>
           <button
-            type="button"
-            className="btn btn--primary btn--lg"
+            className="btn btn--primary"
             onClick={lock}
             disabled={!canLock || busy === 'lock'}
           >
             {busy === 'lock' ? 'Locking…' : 'Lock my list'}
           </button>
-        )}
-      </div>
-    </div>
+        </NextStep>
+      )}
+    </>
   )
 }

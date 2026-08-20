@@ -12,6 +12,7 @@ export function formatINRExact(value: number): string {
 }
 
 export function formatKm(value: number): string {
+  if (value === 0) return 'Same city'
   return `${value.toLocaleString('en-IN')} km`
 }
 
