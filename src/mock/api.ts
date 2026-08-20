@@ -6,7 +6,7 @@ import type {
   StrategyItem,
 } from '../types'
 import { DATASET_LABEL, ENGINE_VERSION, PROFILE_VERSION } from '../data/reference'
-import { generateMockStrategy } from './strategy'
+import { runStrategyEngine } from './engine'
 import { runAudit } from './audit'
 import { toPayload } from '../lib/validation'
 
@@ -22,7 +22,7 @@ export async function generateStrategy(
 
   void toPayload(profile)
 
-  const items = generateMockStrategy(profile)
+  const items = runStrategyEngine(profile)
   const result = runAudit(profile, items, [])
   return delay({ items, audit: { runId: 1, ...result } })
 }
