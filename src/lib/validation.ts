@@ -43,7 +43,7 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
   }
 
   const contradicted = profile.hardExclusions.filter(
-    (ex) => ex.kind === 'branch' && profile.branchPriority.includes(ex.value),
+    (ex) => ex.kind === 'branch' && (profile.branchPriority as string[]).includes(ex.value),
   )
   if (contradicted.length > 0) {
     const names = contradicted
