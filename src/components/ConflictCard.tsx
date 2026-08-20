@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Conflict, ConflictAction, Resolution, StrategyItem } from '../types'
-import { Dialog, SeverityBadge, SEVERITY_META } from './ui'
+import { Dialog, SEVERITY_META } from './ui'
 
 const MIN_REASON = 8
 
@@ -24,6 +24,9 @@ export function ConflictCard({
 
   const meta = SEVERITY_META[conflict.severity]
   const resolved = Boolean(resolution) && !reopened
+  const ordered = [...conflict.actions].sort((a, b) =>
+    a.intent === b.intent ? 0 : a.intent === 'primary' ? -1 : 1,
+  )
 
   function start(action: ConflictAction) {
     if (action.kind === 'SWAP' || action.requiresReason) {
@@ -64,10 +67,10 @@ export function ConflictCard({
       aria-label={`${meta.label} conflict ${conflict.code}: ${conflict.title}`}
     >
       <header className="conflict__head">
-        <div className="row" style={{ gap: 8 }}>
-          <SeverityBadge severity={conflict.severity} />
-          <span className="badge badge--neutral mono">{conflict.code}</span>
-          <span className="field__hint">{meta.blocking}</span>
+        <div className="conflict__kicker">
+          <span>{meta.label}</span>
+          <span className="mono">{conflict.code}</span>
+          <span className="mono">{meta.blocking}</span>
         </div>
         <h3 className="conflict__title">{conflict.title}</h3>
         <p className="conflict__summary">{conflict.summary}</p>
@@ -81,7 +84,6 @@ export function ConflictCard({
         <li className="sr-only">Evidence used for this flag:</li>
         {conflict.evidence.map((line, i) => (
           <li key={i}>
-            <span />
             <span>{line}</span>
           </li>
         ))}
@@ -114,30 +116,35 @@ export function ConflictCard({
         </div>
       ) : (
         <div className="conflict__actions">
-          {conflict.actions.map((action) => (
-            <div className="action-row" key={action.id}>
-              <button
-                type="button"
-                className={`btn btn--sm ${
-                  action.intent === 'primary'
-                    ? 'btn--primary'
-                    : action.kind === 'REMOVE_OPTION'
-                      ? 'btn--danger'
-                      : ''
-                }`}
-                onClick={() => start(action)}
-                disabled={disabled}
-              >
-                {action.label}
-                {action.requiresReason && (
-                  <span className="sr-only"> (requires a written reason)</span>
-                )}
-              </button>
-              <span className="action-effect">
-                {action.effect}
-                {action.requiresReason && ' A reason is required.'}
+          <span className="section-label">
+            Pick one — {conflict.actions.length} way
+            {conflict.actions.length > 1 ? 's' : ''} to settle this
+          </span>
+          {ordered.map((action) => (
+            <button
+              type="button"
+              className="choice"
+              key={action.id}
+              data-recommended={action.intent === 'primary'}
+              onClick={() => start(action)}
+              disabled={disabled}
+            >
+              <span className="choice__text">
+                <span className="choice__label">
+                  {action.label}
+                  {action.intent === 'primary' && (
+                    <span className="choice__tag">Suggested</span>
+                  )}
+                  {action.requiresReason && (
+                    <span className="badge badge--neutral">Needs a reason</span>
+                  )}
+                </span>
+                <span className="choice__effect">{action.effect}</span>
               </span>
-            </div>
+              <span className="choice__go" aria-hidden="true">
+                →
+              </span>
+            </button>
           ))}
         </div>
       )}

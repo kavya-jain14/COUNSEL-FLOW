@@ -234,3 +234,122 @@ export function LiveRegion({ message }: { message: string }) {
     </div>
   )
 }
+
+export function PageHead({
+  step,
+  total,
+  kicker,
+  title,
+  lede,
+  actions,
+}: {
+  step?: number
+  total?: number
+  kicker: string
+  title: string
+  lede?: ReactNode
+  actions?: ReactNode
+}) {
+  return (
+    <header className="page-head">
+      <div className="page-head__text">
+        <span className="stepmark">
+          <span className="stepmark__rule" aria-hidden="true" />
+          {step != null && total != null && (
+            <span>
+              Step {step}
+              <span className="stepmark__of"> / {total}</span>
+              <span aria-hidden="true"> · </span>
+            </span>
+          )}
+          {kicker}
+        </span>
+        <h1>{title}</h1>
+        {lede && <p className="page-head__lede">{lede}</p>}
+      </div>
+      {actions && <div className="page-head__actions">{actions}</div>}
+    </header>
+  )
+}
+
+export function Band({
+  num,
+  title,
+  note,
+  children,
+}: {
+  num: string
+  title: string
+  note?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <section className="band">
+      <div className="band__aside">
+        <span className="band__num">{num}</span>
+        <h2 className="band__title">{title}</h2>
+        {note && <p className="band__note">{note}</p>}
+      </div>
+      <div className="band__main">{children}</div>
+    </section>
+  )
+}
+
+const NEXT_GLYPH = {
+  go: '→',
+  blocked: '!',
+  ready: '✓',
+  wait: '·',
+} as const
+
+export function NextStep({
+  tone,
+  what,
+  why,
+  children,
+}: {
+  tone: keyof typeof NEXT_GLYPH
+  what: string
+  why: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <div className="nextstep" data-tone={tone} role="region" aria-label="What to do next">
+      <span className="nextstep__glyph" aria-hidden="true">
+        {NEXT_GLYPH[tone]}
+      </span>
+      <span className="nextstep__text">
+        <span className="nextstep__what">{what}</span>
+        <span className="nextstep__why">{why}</span>
+      </span>
+      <span className="nextstep__actions">{children}</span>
+    </div>
+  )
+}
+
+export function Meter({
+  label,
+  value,
+  detail,
+  polarity,
+  fill,
+}: {
+  label: string
+  value: string
+  detail?: string
+  polarity: 'positive' | 'negative' | 'neutral'
+  fill: number
+}) {
+  return (
+    <div className="meter" data-polarity={polarity}>
+      <div className="meter__top">
+        <span className="meter__label">{label}</span>
+        <span className="meter__value">{value}</span>
+      </div>
+      <div className="meter__track">
+        <span className="meter__fill" style={{ width: `${Math.round(fill * 100)}%` }} />
+      </div>
+      {detail && <p className="meter__detail">{detail}</p>}
+    </div>
+  )
+}

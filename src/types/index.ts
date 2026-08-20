@@ -26,6 +26,7 @@ export interface CandidateProfile {
   rank: number | null
   rankType: RankType
   category: Category | null
+  homeCity: string | null
 
   branchPriority: string[]
 
@@ -40,6 +41,7 @@ export interface CandidateProfilePayload {
   rank: number
   rankType: RankType
   category: Category
+  homeCity: string
   branchPriority: string[]
   budget: ConstraintSetting
   distance: ConstraintSetting
@@ -53,6 +55,7 @@ export type ProfileErrors = Partial<Record<ProfileField, string>>
 export type ProfileField =
   | 'rank'
   | 'category'
+  | 'homeCity'
   | 'branchPriority'
   | 'budget'
   | 'distance'

@@ -1,118 +1,91 @@
-import { useState } from 'react'
 import type { Conflict, StrategyItem } from '../types'
 import { formatINRExact, formatKm } from '../lib/format'
-import { SeverityBadge, TierBadge } from './ui'
+import { TierBadge } from './ui'
 
-const REASON_GLYPH = { positive: '+', negative: '−', neutral: '·' } as const
-
-const CONFIDENCE_LABEL = {
-  high: 'High confidence',
-  medium: 'Medium confidence',
-  low: 'Low confidence',
-} as const
+const SEVERITY_RANK = { CRITICAL: 0, WARNING: 1, INFO: 2 } as const
 
 export function StrategyRow({
   item,
   conflicts,
+  selected,
   isFirst,
   isLast,
   disabled,
+  onSelect,
   onMove,
   onRemove,
 }: {
   item: StrategyItem
   conflicts: Conflict[]
+  selected: boolean
   isFirst: boolean
   isLast: boolean
   disabled?: boolean
+  onSelect: (itemId: string) => void
   onMove: (itemId: string, direction: -1 | 1) => void
   onRemove: (itemId: string) => void
 }) {
-  const [open, setOpen] = useState(false)
-  const worst = conflicts.find((c) => c.severity === 'CRITICAL') ?? conflicts[0]
   const { option } = item
+  const worst = [...conflicts].sort(
+    (a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity],
+  )[0]
+  const name = `${option.collegeShort} · ${option.branch}`
 
   return (
-    <li className="srow" data-flagged={worst?.severity}>
-      <span className="srow__pos" aria-hidden="true">
-        {String(item.position).padStart(2, '0')}
-      </span>
+    <li className="lrow-wrap" data-flagged={worst?.severity}>
+      <button
+        type="button"
+        className="lrow"
+        aria-current={selected}
+        onClick={() => onSelect(item.itemId)}
+      >
+        <span className="lrow__pos" aria-hidden="true">
+          {String(item.position).padStart(2, '0')}
+        </span>
 
-      <div className="srow__body">
-        <div className="row" style={{ gap: 8 }}>
-          <span className="srow__title">
-            <span className="sr-only">Position {item.position}: </span>
-            {option.collegeShort} · {option.branch}
+        <span className="lrow__main">
+          <span className="lrow__name">
+            <span className="sr-only">Choice {item.position}: </span>
+            {name}
           </span>
-          <TierBadge tier={item.tier} />
-          {item.manuallyPlaced && <span className="badge badge--neutral">Moved by you</span>}
-          {item.confidence !== 'high' && (
-            <span className="badge badge--neutral">{CONFIDENCE_LABEL[item.confidence]}</span>
-          )}
-        </div>
-
-        <div className="srow__meta">
-          <span>{option.city}</span>
-          <span>
-            {option.annualFee == null ? 'Fee not on record' : `${formatINRExact(option.annualFee)}/yr`}
-          </span>
-          <span>{option.distanceKm == null ? 'Distance unknown' : formatKm(option.distanceKm)}</span>
-          <span>{option.hostelAvailable ? 'Hostel available' : 'No hostel listed'}</span>
-          <span className="mono">
-            {option.sourceLabel} {option.sourceYear}
-          </span>
-        </div>
-
-        {conflicts.length > 0 && (
-          <div className="row" style={{ gap: 6 }}>
-            {conflicts.map((c) => (
-              <span className="row" key={c.id} style={{ gap: 5 }}>
-                <SeverityBadge severity={c.severity} />
-                <span className="field__hint">
-                  {c.code} · {c.title}
-                </span>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div>
-          <button
-            type="button"
-            className="btn btn--sm btn--ghost"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? 'Hide why it is here' : 'Why is it here?'}
-          </button>
-        </div>
-
-        {open && (
-          <div className="why-panel">
-            <span className="section-label">
-              Why {option.collegeShort} · {option.branch} sits at #{item.position}
+          <span className="lrow__where">
+            <span>{option.city}</span>
+            <span>
+              {option.annualFee == null
+                ? 'Fee not on record'
+                : `${formatINRExact(option.annualFee)}/yr`}
             </span>
-            {item.reasons.map((reason) => (
-              <div className="reason" key={reason.code} data-polarity={reason.polarity}>
-                <span className="reason__glyph" aria-hidden="true">
-                  {REASON_GLYPH[reason.polarity]}
-                </span>
-                <span>
-                  <b>{reason.label}</b> <span>{reason.detail}</span>
-                </span>
-              </div>
-            ))}
-            {option.missingFacts.length > 0 && (
-              <p className="field__hint">
-                Not scored: {option.missingFacts.join(', ')} — missing from the dataset, so we
-                excluded it rather than guessing.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+            <span>{option.distanceKm == null ? 'Distance unknown' : formatKm(option.distanceKm)}</span>
+          </span>
+          {(item.manuallyPlaced || item.confidence !== 'high') && (
+            <span className="lrow__flags">
+              {item.manuallyPlaced && <span className="badge badge--neutral">Moved by you</span>}
+              {item.confidence !== 'high' && (
+                <span className="badge badge--neutral">{item.confidence} confidence</span>
+              )}
+            </span>
+          )}
+        </span>
 
-      <div className="srow__controls">
+        <span className="lrow__tier">
+          <TierBadge tier={item.tier} />
+        </span>
+
+        <span className="lrow__status">
+          {worst ? (
+            <span className="lrow__flag" data-severity={worst.severity}>
+              <span className="lrow__dot" aria-hidden="true" />
+              {conflicts.length} {conflicts.length > 1 ? 'issues' : 'issue'}
+            </span>
+          ) : (
+            <span className="lrow__clear">
+              <span aria-hidden="true">✓</span> Clear
+            </span>
+          )}
+        </span>
+      </button>
+
+      <span className="lrow-tools">
         <button
           type="button"
           className="icon-btn"
@@ -120,8 +93,8 @@ export function StrategyRow({
           onClick={() => onMove(item.itemId, -1)}
           aria-label={
             isFirst
-              ? `${option.collegeShort} ${option.branch} is already your first choice`
-              : `Move ${option.collegeShort} ${option.branch} up to position ${item.position - 1}`
+              ? `${name} is already your first choice`
+              : `Move ${name} up to position ${item.position - 1}`
           }
         >
           <span aria-hidden="true">↑</span>
@@ -133,8 +106,8 @@ export function StrategyRow({
           onClick={() => onMove(item.itemId, 1)}
           aria-label={
             isLast
-              ? `${option.collegeShort} ${option.branch} is already your last choice`
-              : `Move ${option.collegeShort} ${option.branch} down to position ${item.position + 1}`
+              ? `${name} is already your last choice`
+              : `Move ${name} down to position ${item.position + 1}`
           }
         >
           <span aria-hidden="true">↓</span>
@@ -144,11 +117,11 @@ export function StrategyRow({
           className="icon-btn"
           disabled={disabled}
           onClick={() => onRemove(item.itemId)}
-          aria-label={`Remove ${option.collegeShort} ${option.branch} from the list`}
+          aria-label={`Remove ${name} from the list`}
         >
           <span aria-hidden="true">✕</span>
         </button>
-      </div>
+      </span>
     </li>
   )
 }

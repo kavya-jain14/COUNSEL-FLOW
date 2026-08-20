@@ -7,6 +7,7 @@ import type {
   StrategyItem,
 } from '../types'
 import { formatINR, formatINRExact, formatKm } from '../lib/format'
+import { DISTANCE_METHOD } from '../data/geo'
 
 function conflictId(code: string, ...parts: string[]): string {
   return [code, ...parts].join(':')
@@ -145,10 +146,11 @@ function distanceConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
             km,
           )} away, further than you prefer, but distance is a soft preference.`,
       evidence: [
-        `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from your home location`,
+        `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from ${profile.homeCity ?? 'your home city'}`,
         `Your declared limit — ${formatKm(profile.distance.value)} (${
           hard ? 'hard constraint' : 'soft preference'
         })`,
+        `Measured as ${DISTANCE_METHOD}. Road travel is typically 20-30% longer, so treat this as a floor.`,
       ],
       causedBy: hard ? 'Hard constraint · Distance limit' : 'Soft preference · Distance',
       itemIds: [item.itemId],

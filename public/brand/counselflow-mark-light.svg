@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">CounselFlow mark</title>
+  <desc id="description">An ordered list flowing into a verified check.</desc>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="#F1E9DE" stroke="#D9C9B6" stroke-width="2"/>
+  <circle cx="16" cy="17" r="3" fill="#A5822F"/>
+  <circle cx="16" cy="31" r="3" fill="#A5822F"/>
+  <circle cx="16" cy="45" r="3" fill="#A5822F"/>
+  <path d="M25 17H45M25 31H39M25 45H35" stroke="#3B342C" stroke-width="4" stroke-linecap="round"/>
+  <path d="M43 27C50 31 51 39 46 44L41 49" stroke="#9C5330" stroke-width="4" stroke-linecap="round"/>
+  <path d="M36.5 45.5L41 50L50.5 39.5" stroke="#9C5330" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
