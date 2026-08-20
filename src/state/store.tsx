@@ -50,6 +50,7 @@ export const DEFAULT_PROFILE: CandidateProfile = {
   rank: null,
   rankType: 'CRL',
   category: null,
+  homeCity: null,
   branchPriority: ['CSE', 'IT', 'ECE'],
   budget: { value: 150000, mode: 'hard' },
   distance: { value: 300, mode: 'hard' },
@@ -68,6 +69,7 @@ export const DEMO_PROFILE: CandidateProfile = {
   rank: 12500,
   rankType: 'CRL',
   category: 'GEN',
+  homeCity: 'Lucknow',
 }
 
 const INITIAL_STATE: AppState = {

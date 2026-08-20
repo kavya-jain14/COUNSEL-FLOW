@@ -6,6 +6,7 @@ import type {
 } from '../types'
 import { candidateProfileSchema } from '@counselflow/contracts'
 import { BRANCH_LABELS } from '../data/reference'
+import { CITY_COORDS } from '../data/geo'
 
 export const MIN_BUDGET = 20000
 export const MAX_BUDGET = 600000
@@ -22,6 +23,12 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
     errors.rank = 'Rank must be a whole number of 1 or more.'
   } else if (profile.rank > MAX_RANK) {
     errors.rank = `That looks too large. Enter a rank up to ${MAX_RANK.toLocaleString('en-IN')}.`
+  }
+
+  if (!profile.homeCity) {
+    errors.homeCity = 'Choose your home city — the distance limit is measured from it.'
+  } else if (!CITY_COORDS[profile.homeCity]) {
+    errors.homeCity = 'We do not have coordinates for that city yet, so distance cannot be checked.'
   }
 
   if (!profile.category) {
@@ -82,6 +89,7 @@ export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
     rank: profile.rank as number,
     rankType: profile.rankType,
     category: profile.category!,
+    homeCity: profile.homeCity!,
     branchPriority: [...profile.branchPriority],
     budget: { ...profile.budget },
     distance: { ...profile.distance },

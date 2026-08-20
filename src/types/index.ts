@@ -55,6 +55,10 @@ export interface CandidateProfile {
   rankType: RankType
   category: Category | null
   branchPriority: BranchCode[]
+  homeCity: string | null
+
+  branchPriority: string[]
+
   budget: ConstraintSetting
   distance: ConstraintSetting
   hardExclusions: HardExclusion[]
@@ -62,12 +66,25 @@ export interface CandidateProfile {
 }
 
 export type CandidateProfilePayload = WireCandidateProfile
+export interface CandidateProfilePayload {
+  rank: number
+  rankType: RankType
+  category: Category
+  homeCity: string
+  branchPriority: string[]
+  budget: ConstraintSetting
+  distance: ConstraintSetting
+  hardExclusions: Array<Pick<HardExclusion, 'kind' | 'value'>>
+
+  factorWeights: FactorWeights
+}
 
 export type ProfileErrors = Partial<Record<ProfileField, string>>
 
 export type ProfileField =
   | 'rank'
   | 'category'
+  | 'homeCity'
   | 'branchPriority'
   | 'budget'
   | 'distance'

@@ -1,13 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Conflict } from '../types'
 import { DATASET_LABEL } from '../data/reference'
+import { formatRank } from '../lib/format'
 import { useAppActions, useAppState } from '../state/store'
 import { StrategyRow } from '../components/StrategyRow'
-import { Banner } from '../components/ui'
+import { StrategyInspector } from '../components/StrategyInspector'
+import { Banner, NextStep, PageHead } from '../components/ui'
 
 export function Strategy() {
   const { items, audit, auditStale, busy, profile } = useAppState()
   const { goTo, moveItem, removeItem, reaudit } = useAppActions()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const byItem = useMemo(() => {
     const map: Record<string, Conflict[]> = {}
@@ -19,111 +22,181 @@ export function Strategy() {
     return map
   }, [audit])
 
-  const counts = audit?.counts ?? { CRITICAL: 0, WARNING: 0, INFO: 0 }
-  const total = counts.CRITICAL + counts.WARNING + counts.INFO
+  const selected = items.find((i) => i.itemId === selectedId) ?? items[0] ?? null
 
   if (items.length === 0) {
     return (
-      <div className="card empty">
-        <p>No strategy yet. Complete your profile and generate one.</p>
-        <button className="btn btn--primary" style={{ marginTop: 12 }} onClick={() => goTo('profile')}>
-          Build my profile
-        </button>
-      </div>
+      <>
+        <PageHead
+          step={3}
+          total={5}
+          kicker="My strategy"
+          title="Nothing to rank yet"
+          lede="Your choice list is built from the profile you fill in — your rank, your limits, and the branches you actually want."
+        />
+        <div className="empty">
+          <p>Finish your profile and generate a strategy to see it here.</p>
+          <button className="btn btn--primary" onClick={() => goTo('profile')}>
+            Build my profile
+          </button>
+        </div>
+      </>
     )
   }
 
+  const counts = audit?.counts ?? { CRITICAL: 0, WARNING: 0, INFO: 0 }
+  const total = counts.CRITICAL + counts.WARNING + counts.INFO
+
   return (
-    <div className="stack">
-      <div className="row row--between">
-        <div>
-          <h1>My strategy</h1>
-          <p className="card__hint">
-            {items.length} options in your preference order, built from rank {profile.rank} and
-            your declared limits. Source: {DATASET_LABEL}.
+    <>
+      <PageHead
+        step={3}
+        total={5}
+        kicker="My strategy"
+        title="Your list, in the order you would fill it"
+        lede={
+          <>
+            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '—'}{' '}
+            and the limits you declared. Select any row to see exactly why it sits where it
+            does.
+          </>
+        }
+        actions={
+          <button
+            type="button"
+            className="btn btn--sm"
+            onClick={reaudit}
+            disabled={busy === 'audit'}
+          >
+            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit list'}
+          </button>
+        }
+      />
+
+      <div className="page page--rail">
+        <div className="page__flow">
+          {auditStale && (
+            <Banner
+              tone="stale"
+              title="These flags are one version behind"
+              live
+              action={
+                <button className="btn btn--sm" onClick={reaudit} disabled={busy === 'audit'}>
+                  {busy === 'audit' ? 'Re-auditing…' : 'Re-audit now'}
+                </button>
+              }
+            >
+              <span>
+                You changed the list. Re-audit to see what your edits actually changed.
+              </span>
+            </Banner>
+          )}
+
+          <div className="tally-set" style={{ margin: auditStale ? '24px 0 18px' : '0 0 18px' }}>
+            <span className="tally" data-tone={counts.CRITICAL > 0 ? 'critical' : 'zero'}>
+              <b>{counts.CRITICAL}</b> must fix
+            </span>
+            <span className="tally" data-tone={counts.WARNING > 0 ? 'warning' : 'zero'}>
+              <b>{counts.WARNING}</b> worth checking
+            </span>
+            <span className="tally" data-tone={counts.INFO > 0 ? 'info' : 'zero'}>
+              <b>{counts.INFO}</b> for information
+            </span>
+          </div>
+
+          <div className="ledger">
+            <div className="ledger__head" aria-hidden="true">
+              <span>Rank</span>
+              <span>Option</span>
+              <span>Reach</span>
+              <span>Status</span>
+            </div>
+            <ol className="ledger__list">
+              {items.map((item, i) => (
+                <StrategyRow
+                  key={item.itemId}
+                  item={item}
+                  conflicts={byItem[item.itemId] ?? []}
+                  selected={selected?.itemId === item.itemId}
+                  isFirst={i === 0}
+                  isLast={i === items.length - 1}
+                  disabled={busy != null}
+                  onSelect={setSelectedId}
+                  onMove={moveItem}
+                  onRemove={removeItem}
+                />
+              ))}
+            </ol>
+          </div>
+
+          <p className="band__note" style={{ marginTop: 18, maxWidth: '62ch' }}>
+            Reach labels come from historical closing ranks and are not a guarantee. They tell
+            you how much coverage your list has — they never decide what you prefer. Source:{' '}
+            {DATASET_LABEL}.
           </p>
+
         </div>
-        <div className="count-pills">
-          <span className="badge badge--critical">{counts.CRITICAL} critical</span>
-          <span className="badge badge--warning">{counts.WARNING} warning</span>
-          <span className="badge badge--info">{counts.INFO} info</span>
-        </div>
+
+        <StrategyInspector
+          item={selected}
+          conflicts={selected ? (byItem[selected.itemId] ?? []) : []}
+          profile={profile}
+          total={items.length}
+          disabled={busy != null}
+          onMove={moveItem}
+          onRemove={removeItem}
+          onOpenConflicts={() => goTo('conflicts')}
+        />
       </div>
 
       {auditStale ? (
-        <Banner
-          tone="stale"
-          title="You changed the list"
-          live
-          action={
-            <button className="btn btn--sm" onClick={reaudit} disabled={busy === 'audit'}>
-              {busy === 'audit' ? 'Re-auditing…' : 'Re-audit now'}
-            </button>
-          }
+        <NextStep
+          tone="wait"
+          what="Re-audit before you go further"
+          why="Your edits are in, but the verdict below them is not. One click brings them back in sync."
         >
-          <span>
-            The conflicts below are from the previous version. Re-audit to see what your edits
-            actually changed.
-          </span>
-        </Banner>
+          <button
+            className="btn btn--primary"
+            onClick={reaudit}
+            disabled={busy === 'audit'}
+          >
+            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit now'}
+          </button>
+        </NextStep>
       ) : counts.CRITICAL > 0 ? (
-        <Banner
-          tone="critical"
-          title={`${counts.CRITICAL} critical conflict${counts.CRITICAL > 1 ? 's' : ''} block locking`}
-          action={
-            <button className="btn btn--sm btn--primary" onClick={() => goTo('conflicts')}>
-              Open Conflict Inspector
-            </button>
-          }
+        <NextStep
+          tone="blocked"
+          what={`Fix ${counts.CRITICAL} thing${counts.CRITICAL > 1 ? 's' : ''} before you can lock`}
+          why="Each one breaks a hard limit you set yourself. The inspector shows you the options — you pick which one you meant."
         >
-          <span>Each one breaks a hard limit you set. They have to be fixed, not dismissed.</span>
-        </Banner>
+          <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
+            Show me what to fix
+          </button>
+        </NextStep>
       ) : total > 0 ? (
-        <Banner
-          tone="warning"
-          title="No critical conflicts, but there are things worth checking"
-          action={
-            <button className="btn btn--sm" onClick={() => goTo('conflicts')}>
-              Review conflicts
-            </button>
-          }
+        <NextStep
+          tone="go"
+          what={`Nothing blocks you — ${total} note${total > 1 ? 's' : ''} to skim`}
+          why="These are tradeoffs, not errors. Keep your order if you want; we only ask you to say why."
         >
-          <span>Warnings can be kept — we will just ask you to say why.</span>
-        </Banner>
+          <button className="btn" onClick={() => goTo('summary')}>
+            Back to profile
+          </button>
+          <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
+            Skim the {total} note{total > 1 ? 's' : ''}
+          </button>
+        </NextStep>
       ) : (
-        <Banner tone="success" title="Clean list">
-          <span>Nothing contradicts your declared priorities. You can lock this.</span>
-        </Banner>
+        <NextStep
+          tone="ready"
+          what="This list is ready to lock"
+          why="Nothing in it contradicts anything you declared. Locking saves a snapshot you can reproduce later."
+        >
+          <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
+            Review and lock
+          </button>
+        </NextStep>
       )}
-
-      <ol className="strategy-list">
-        {items.map((item, i) => (
-          <StrategyRow
-            key={item.itemId}
-            item={item}
-            conflicts={byItem[item.itemId] ?? []}
-            isFirst={i === 0}
-            isLast={i === items.length - 1}
-            disabled={busy != null}
-            onMove={moveItem}
-            onRemove={removeItem}
-          />
-        ))}
-      </ol>
-
-      <p className="card__hint">
-        Reachability labels come from historical closing ranks and are not a guarantee. They
-        tell you how much coverage your list has — they never decide what you prefer.
-      </p>
-
-      <div className="sticky-actions">
-        <button type="button" className="btn" onClick={() => goTo('summary')}>
-          Back to profile
-        </button>
-        <button type="button" className="btn btn--primary btn--lg" onClick={() => goTo('conflicts')}>
-          {total > 0 ? `Inspect ${total} conflict${total > 1 ? 's' : ''}` : 'Continue to lock'}
-        </button>
-      </div>
-    </div>
+    </>
   )
 }

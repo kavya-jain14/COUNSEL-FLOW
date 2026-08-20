@@ -7,6 +7,7 @@ import type {
 } from '../types'
 import { BRANCH_LABELS, INSTITUTE_TYPE_LABELS } from '../data/reference'
 import { OPTIONS_BY_ID } from '../data/seedOptions'
+import { distanceBetweenCities } from '../data/geo'
 import { formatINR, formatKm } from '../lib/format'
 
 const MOCK_ORDER: string[] = [
@@ -99,7 +100,7 @@ export function reasonsFor(
     reasons.push({
       code: within ? 'R-DIST-OK' : 'R-DIST-OVER',
       label: within ? 'Within your travel limit' : 'Beyond your travel limit',
-      detail: `${formatKm(option.distanceKm)} from home against a ${formatKm(
+      detail: `${formatKm(option.distanceKm)} from ${profile.homeCity ?? 'your home city'} against a ${formatKm(
         profile.distance.value,
       )} ${profile.distance.mode === 'hard' ? 'hard limit' : 'preference'}.`,
       polarity: within ? 'positive' : 'negative',
@@ -138,7 +139,11 @@ export function reasonsFor(
 
 export function generateMockStrategy(profile: CandidateProfile): StrategyItem[] {
   return MOCK_ORDER.map((optionId, i) => {
-    const option = OPTIONS_BY_ID[optionId]
+    const seed = OPTIONS_BY_ID[optionId]
+    const option = {
+      ...seed,
+      distanceKm: distanceBetweenCities(profile.homeCity, seed.city),
+    }
     return {
       itemId: `item-${i + 1}`,
       option,
