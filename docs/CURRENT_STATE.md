@@ -1,6 +1,6 @@
 # Current state
 
-Last updated: 2026-08-19
+Last updated: 2026-08-21
 
 ## Repository
 
@@ -33,6 +33,20 @@ Last updated: 2026-08-19
 - Provisional frontend types remain in place; `packages/contracts/MIGRATION.md` documents
   the later adapter work instead of mixing it into this branch.
 - Updated lab expectations so unresolved warnings block until a reason and re-audit.
+
+## Strategy-engine checkpoint
+
+- Active branch: `feat/strategy-engine` — pushed, PR to be opened.
+- Tier buffers extracted to `TIER_DREAM_RATIO_MAX` (0.90) and `TIER_TARGET_RATIO_MAX` (1.40)
+  with JSDoc in `src/mock/strategy.ts`.
+- Golden boundary tests added at `src/mock/strategy.test.ts` (run via
+  `npx tsx --test src/mock/strategy.test.ts`).
+- TierBadge and StrategyInspector lede updated to cite buffer boundaries.
+- Lab scenario `tier-boundary-classification` added to `src/lab/scenarios.ts`.
+- macOS ghost duplicate directories (`@types/react 2`, `react-dom 2`,
+  `src/features/contracts/* 2`) cleaned up; pre-existing TS2688 is resolved.
+- `tsconfig.json` now excludes `*.test.ts` from the browser-lib compile.
+- `npm run check` passes: 14 contract tests, typecheck, vite build.
 
 ## Validation and blockers
 
