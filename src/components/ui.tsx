@@ -43,10 +43,10 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
 }
 
 const TIER_META: Record<Tier, { label: string; glyph: string; hint: string }> = {
-  DREAM: { label: 'Dream', glyph: '▲', hint: 'Closed above your rank last cycle' },
-  TARGET: { label: 'Target', glyph: '●', hint: 'Closed near your rank last cycle' },
-  SAFE: { label: 'Safe', glyph: '■', hint: 'Closed well below your rank last cycle' },
-  UNKNOWN: { label: 'No data', glyph: '?', hint: 'No closing-rank evidence on record' },
+  DREAM: { label: 'Dream', glyph: '▲', hint: 'Closed ≥10% above your rank last cycle — a stretch worth keeping near the top' },
+  TARGET: { label: 'Target', glyph: '●', hint: 'Closed within the ±40% band around your rank last cycle — your core options' },
+  SAFE: { label: 'Safe', glyph: '■', hint: 'Closed ≥40% below your rank last cycle — a reliable fallback' },
+  UNKNOWN: { label: 'No data', glyph: '?', hint: 'No closing-rank evidence on record — confidence downgraded to low' },
 }
 
 export function TierBadge({ tier }: { tier: Tier }) {

@@ -73,4 +73,18 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     expectedConflictCodes: ['CF-08'],
     expectedLockBlocked: true,
   },
+  {
+    id: 'tier-boundary-classification',
+    title: 'Tier labels derive from named ratio buffers, not opaque guesses',
+    proves: 'The deterministic classification is transparent: DREAM < 90% of rank, TARGET 90–140%, SAFE ≥ 140%.',
+    setup: [
+      'Use rank 10000 with the default seed dataset.',
+      'Verify HBTU Kanpur CSE (closingRank 8900, ratio ≈ 0.89) shows as Dream.',
+      'Verify IET Lucknow IT (closingRank 11400, ratio 1.14) shows as Target.',
+      'Verify HBTU Kanpur EE (closingRank 19500, ratio 1.95) shows as Safe.',
+      'Hover each tier badge to confirm the tooltip cites the buffer boundary, not a "chance" or "probability".',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
 ] as const
