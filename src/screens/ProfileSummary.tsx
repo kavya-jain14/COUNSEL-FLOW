@@ -152,7 +152,7 @@ export function ProfileSummary() {
         </div>
       </Band>
 
-      {/* {payload && (
+      {payload && (
         <Band
           num="04"
           title="Under the hood"
@@ -179,7 +179,7 @@ export function ProfileSummary() {
             </pre>
           </details>
         </Band>
-      )} */}
+      )}
 
       {valid ? (
         <NextStep
