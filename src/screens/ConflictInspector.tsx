@@ -115,13 +115,7 @@ export function ConflictInspector() {
           live
           action={
             <button className="btn btn--sm btn--primary" onClick={reaudit} disabled={busy === 'audit'}>
-              {busy === 'audit' ? (
-                <>
-                  <span className="spinner" aria-hidden="true" /> Re-auditing…
-                </>
-              ) : (
-                'Re-audit'
-              )}
+              {busy === 'audit' ? 'Reviewing list…' : 'Re-audit'}
             </button>
           }
         >
@@ -159,13 +153,7 @@ export function ConflictInspector() {
               onClick={lock}
               disabled={busy === 'lock' || Boolean(snapshot)}
             >
-              {busy === 'lock' ? (
-                <>
-                  <span className="spinner" aria-hidden="true" /> Locking…
-                </>
-              ) : (
-                snapshot ? 'Locked' : 'Lock my list'
-              )}
+              {busy === 'lock' ? 'Filing strategy…' : snapshot ? 'Locked' : 'Lock my list'}
             </button>
           }
         >

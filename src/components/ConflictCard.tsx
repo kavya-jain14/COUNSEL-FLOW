@@ -184,10 +184,7 @@ export function ConflictCard({
                   {swapPreview.lower.option.collegeShort} · {swapPreview.lower.option.branch}
                 </span>
               </div>
-              <div className="preview-swap__arrow" aria-hidden="true">
-                ↓
-              </div>
-              <span className="section-label">After the swap</span>
+              <span className="section-label">Reordered result</span>
               <div className="preview-swap__line">
                 <span className="preview-swap__pos">#{swapPreview.upper.position}</span>
                 <span>

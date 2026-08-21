@@ -181,8 +181,11 @@ export function Landing() {
       </section>
 
       <footer className="document-foot">
-        <span>Hackathon demonstration dataset</span>
-        <span>Deterministic engine with explicit source revisions</span>
+        <span>Reference dataset · verify final choices with official UPTAC notices</span>
+        <span className="document-foot__links">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms of use</a>
+        </span>
         <span className="mono">CF-MVP / 2026</span>
       </footer>
     </div>

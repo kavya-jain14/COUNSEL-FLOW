@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="560" height="128" viewBox="0 0 560 128" fill="none" role="img" aria-labelledby="title description">
   <title id="title">CounselFlow</title>
   <desc id="description">CounselFlow wordmark with an ordered list flowing into a verified check.</desc>
-  <rect width="560" height="128" rx="24" fill="#0C0C0B"/>
+  <rect width="560" height="128" fill="#FBFAF5"/>
   <g transform="translate(24 24)">
-    <rect x="1" y="1" width="78" height="78" rx="18" fill="#1C1B1A" stroke="#3A3631" stroke-width="2"/>
-    <circle cx="20" cy="22" r="3.75" fill="#D6B583"/>
-    <circle cx="20" cy="40" r="3.75" fill="#D6B583"/>
-    <circle cx="20" cy="58" r="3.75" fill="#D6B583"/>
-    <path d="M31 22H56M31 40H49M31 58H44" stroke="#DDD7CA" stroke-width="5" stroke-linecap="round"/>
-    <path d="M54 35C63 39 64 49 58 56L52 62" stroke="#B86A45" stroke-width="5" stroke-linecap="round"/>
-    <path d="M46 58L52 64L65 50" stroke="#B86A45" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="1" y="1" width="78" height="78" fill="#DCECF5" stroke="#112A46" stroke-width="2"/>
+    <circle cx="20" cy="22" r="3.75" fill="#4F7894"/>
+    <circle cx="20" cy="40" r="3.75" fill="#4F7894"/>
+    <circle cx="20" cy="58" r="3.75" fill="#4F7894"/>
+    <path d="M31 22H56M31 40H49M31 58H44" stroke="#112A46" stroke-width="5" stroke-linecap="square"/>
+    <path d="M54 35C63 39 64 49 58 56L52 62" stroke="#4F7894" stroke-width="5" stroke-linecap="square"/>
+    <path d="M46 58L52 64L65 50" stroke="#4F7894" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
   </g>
-  <text x="126" y="76" fill="#DDD7CA" font-family="Geist, Inter, Arial, sans-serif" font-size="48" font-weight="650" letter-spacing="-1.8">Counsel<tspan fill="#B86A45">Flow</tspan></text>
-  <text x="128" y="100" fill="#918B80" font-family="Space Mono, monospace" font-size="12" letter-spacing="1.4">PREFERENCE STRATEGY, EXPLAINED</text>
+  <text x="126" y="76" fill="#112A46" font-family="Libre Baskerville, Georgia, serif" font-size="44" font-weight="400" letter-spacing="-1">Counsel<tspan fill="#4F7894">Flow</tspan></text>
+  <text x="128" y="100" fill="#4F7894" font-family="IBM Plex Mono, Consolas, monospace" font-size="12" letter-spacing="1.4">PREFERENCE STRATEGY, EXPLAINED</text>
 </svg>

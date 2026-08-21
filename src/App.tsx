@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
@@ -9,11 +9,10 @@ import { ProfileSummary } from './screens/ProfileSummary'
 import { Strategy } from './screens/Strategy'
 import { ConflictInspector } from './screens/ConflictInspector'
 import { Locked } from './screens/Locked'
-import { LabDashboard } from './screens/LabDashboard'
 import { isProfileValid } from './lib/validation'
 import { ENGINE_VERSION } from './data/reference'
 
-function Screen({ step }: { step: Step | 'lab' }) {
+function Screen({ step }: { step: Step }) {
   switch (step) {
     case 'landing':
       return <Landing />
@@ -27,8 +26,6 @@ function Screen({ step }: { step: Step | 'lab' }) {
       return <ConflictInspector />
     case 'locked':
       return <Locked />
-    case 'lab':
-      return <LabDashboard />
   }
 }
 
@@ -36,7 +33,6 @@ function Shell() {
   const state = useAppState()
   const { goTo, lock } = useAppActions()
   const mainRef = useRef<HTMLDivElement>(null)
-  const [showLab, setShowLab] = useState(false)
 
   useEffect(() => {
     mainRef.current?.focus()
@@ -136,14 +132,6 @@ function Shell() {
             Deterministic ordering
           </span>
           <span className="mono">{ENGINE_VERSION}</span>
-          <button
-            type="button"
-            className="lab-switch mono"
-            title="Integration lab"
-            onClick={() => setShowLab((v) => !v)}
-          >
-            {showLab ? 'Return to app' : 'Open lab'}
-          </button>
         </div>
       </aside>
 
@@ -181,7 +169,7 @@ function Shell() {
               </span>
             </Banner>
           )}
-          <Screen step={showLab ? 'lab' : state.step} />
+          <Screen step={state.step} />
         </main>
       </div>
 

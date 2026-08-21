@@ -36,6 +36,10 @@ Last updated: 2026-08-22
   options and exactly two warnings, CF-01 and CF-08.
 - Gradients, shadows, glass, decorative emoji, pill navigation, oversized corner radii,
   purple-black styling and decorative motion are disabled by the active visual layer.
+- Removed candidate-facing API payloads, integration-lab navigation, spinner glyphs and
+  decorative reorder arrows.
+- Added deployable privacy and terms notices linked from the landing document footer.
+- Updated every active brand asset to the Calm Scholar palette and typography.
 - The redesign is isolated in `src/styles/calm-scholar.css`; strategy, audit, lock and
   contract behavior remain unchanged.
 - Full design notes: `design/CALM_SCHOLAR.md`.
@@ -45,7 +49,8 @@ Last updated: 2026-08-22
 - Shared-contract TypeScript build: passed.
 - Root TypeScript `--noEmit`: passed.
 - Contract test suite: 14 passed, 0 failed.
-- Production Vite build: passed, 132 modules transformed.
+- Production Vite build: passed, 130 modules transformed.
+- Privacy and terms pages are included in the production output.
 - `git diff --check`: passed.
 - Golden engine and audit run: 7 options, 0 critical, 2 warnings (CF-01 and CF-08).
 - Responsive desktop/mobile rules are implemented at 900 px and 680 px.

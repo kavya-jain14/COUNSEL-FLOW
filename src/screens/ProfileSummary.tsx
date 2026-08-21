@@ -194,14 +194,7 @@ export function ProfileSummary() {
             disabled={busy === 'generate'}
             onClick={generate}
           >
-            {busy === 'generate' ? (
-              <>
-                <span className="spinner" aria-hidden="true" />
-                Generating…
-              </>
-            ) : (
-              'Generate my strategy'
-            )}
+            {busy === 'generate' ? 'Preparing strategy…' : 'Generate my strategy'}
           </button>
         </NextStep>
       ) : (

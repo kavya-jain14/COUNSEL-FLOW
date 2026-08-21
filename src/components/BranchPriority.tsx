@@ -56,7 +56,7 @@ export function BranchPriority({
                       : `Move ${branch} up to priority ${i}`
                   }
                 >
-                  <span aria-hidden="true">↑</span>
+                  <span aria-hidden="true">Up</span>
                 </button>
                 <button
                   type="button"
@@ -69,7 +69,7 @@ export function BranchPriority({
                       : `Move ${branch} down to priority ${i + 2}`
                   }
                 >
-                  <span aria-hidden="true">↓</span>
+                  <span aria-hidden="true">Down</span>
                 </button>
                 <button
                   type="button"
@@ -77,7 +77,7 @@ export function BranchPriority({
                   onClick={() => onChange(value.filter((b) => b !== branch))}
                   aria-label={`Remove ${branch} from your branch order`}
                 >
-                  <span aria-hidden="true">Del</span>
+                  <span aria-hidden="true">Remove</span>
                 </button>
               </span>
               <span className="sr-only">

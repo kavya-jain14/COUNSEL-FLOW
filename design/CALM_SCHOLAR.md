@@ -45,6 +45,20 @@ testimonials, pricing patterns, bento grids, dot fields, radial shapes, neon, pu
 themes, oversized rounded corners, or decorative checkmark lists. Motion is disabled in
 the visual layer.
 
+## Final acceptance gate
+
+- The candidate shell exposes only the five product steps. The integration lab remains a
+  development file and has no candidate-facing navigation.
+- The active stylesheet forces flat backgrounds, square geometry, static hover states,
+  zero blur, zero shadow and zero decorative animation.
+- Reorder controls use written labels instead of an icon library or decorative arrows.
+- Loading states use plain status copy instead of a spinner or skeleton surface.
+- The landing page contains a real seven-row product specimen with two reproducible audit
+  findings.
+- Privacy and terms links open complete, deployable notices using the same palette and type
+  system.
+- Brand SVGs use only the Calm Scholar palette and the approved type families.
+
 ## Implementation boundary
 
 `src/styles/calm-scholar.css` is loaded after the legacy stylesheet. It owns the active
@@ -61,4 +75,3 @@ The landing specimen is generated from the golden demo profile:
 - 300 km hard distance limit from Lucknow;
 - seven surviving options;
 - two audit warnings: CF-01 branch priority conflict and CF-08 evidence gap.
-

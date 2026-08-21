@@ -95,7 +95,7 @@ export function StrategyRow({
               : `Move ${name} up to position ${item.position - 1}`
           }
         >
-          <span aria-hidden="true">↑</span>
+          <span aria-hidden="true">Up</span>
         </button>
         <button
           type="button"
@@ -108,7 +108,7 @@ export function StrategyRow({
               : `Move ${name} down to position ${item.position + 1}`
           }
         >
-          <span aria-hidden="true">↓</span>
+          <span aria-hidden="true">Down</span>
         </button>
         <button
           type="button"
@@ -117,7 +117,7 @@ export function StrategyRow({
           onClick={() => onRemove(item.itemId)}
           aria-label={`Remove ${name} from the list`}
         >
-          <span aria-hidden="true">Del</span>
+          <span aria-hidden="true">Remove</span>
         </button>
       </span>
     </li>

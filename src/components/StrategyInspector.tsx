@@ -191,7 +191,7 @@ export function StrategyInspector({
           disabled={item.position === 1 || disabled}
           onClick={() => onMove(item.itemId, -1)}
         >
-          ↑ Move up
+          Move up
         </button>
         <button
           type="button"
@@ -199,7 +199,7 @@ export function StrategyInspector({
           disabled={item.position === total || disabled}
           onClick={() => onMove(item.itemId, 1)}
         >
-          ↓ Move down
+          Move down
         </button>
         <button
           type="button"
@@ -213,4 +213,3 @@ export function StrategyInspector({
     </aside>
   )
 }
-
