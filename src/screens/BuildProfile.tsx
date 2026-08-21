@@ -117,7 +117,7 @@ export function BuildProfile() {
             >
               {AUTHORITY_LIST.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.label} — {a.fullName}
+                  {a.label}: {a.fullName}
                 </option>
               ))}
             </select>
@@ -203,7 +203,7 @@ export function BuildProfile() {
       <Band
         num="02 · Required"
         title="What you want"
-        note="Branch order guides ranking. A lower priority branch can still appear when its college and constraints justify the position."
+        note="Branch order is a preference, not a filter: a lower-ranked branch can still appear, it just has to earn its place."
       >
         <BranchPriority
           value={profile.branchPriority}

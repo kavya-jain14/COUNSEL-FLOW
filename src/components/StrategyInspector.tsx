@@ -87,7 +87,7 @@ export function StrategyInspector({
           aria-haspopup="dialog"
           onClick={() => onExplain(item.itemId)}
         >
-          What choosing this means for you →
+          Review candidate impact
         </button>
       )}
 
@@ -100,7 +100,7 @@ export function StrategyInspector({
             </div>
           ))}
           <button type="button" className="btn--link" onClick={onOpenConflicts}>
-            Fix this in the inspector  to 
+            Review this conflict
           </button>
         </div>
       )}

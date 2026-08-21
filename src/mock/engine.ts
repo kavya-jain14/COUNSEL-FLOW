@@ -12,10 +12,10 @@
  *   8. Emit reason facts and engine version metadata.
  *
  * Rules:
- *   - This module is DETERMINISTIC: same profile + same dataset to same order every time.
+ *   - This module is DETERMINISTIC: same profile + same dataset same order every time.
  *   - Do NOT import React, call fetch, or introduce side effects.
  *   - Weights are normalized before scoring so all 0s produce a 0 total (blocked by
- *     validation), and changing scale (e.g. all 5 to 10) produces no reordering.
+ *     validation), and changing scale (e.g. all 5to10) produces no reordering.
  *   - Scoring is additive; each factor contributes its normalized weight × normalized
  *     option value. Factor values are normalized to [0, 1] across the surviving set.
  *   - Branch priority contributes a fixed BRANCH_WEIGHT fraction outside factor scoring
@@ -106,9 +106,9 @@ function rawFactorValues(
   distanceKm: number | null,
 ): Record<keyof CandidateProfile['factorWeights'], number | null> {
   return {
-    // lower fee is better to negate so higher = better
+    // lower fee is better negate so higher = better
     fees: option.annualFee != null ? -option.annualFee : null,
-    // closer is better to negate distance
+    // closer is better negate distance
     location: distanceKm != null ? -distanceKm : null,
     placements: option.placementScore,
     campus: option.campusScore,
@@ -153,7 +153,7 @@ function normalizeAcrossSet(
     for (const key of factorKeys) {
       const raw = rawPerFactor[key][i]
       if (raw == null) {
-        out[key] = 0.5 // unknown to neutral
+        out[key] = 0.5 // unknown neutral
       } else {
         const range = maxs[key] - mins[key]
         out[key] = range === 0 ? 0.5 : (raw - mins[key]) / range
@@ -167,7 +167,7 @@ function normalizeAcrossSet(
 
 /**
  * Convert branch priority position to a [0, 1] score.
- * #1 branch to 1.0, last branch to 0.0/(n-1), unlisted branch to 0.
+ * #1 branch 1.0, last branch 0.0/(n-1), unlisted branch 0.
  */
 function branchScore(option: CollegeOption, profile: CandidateProfile): number {
   const branches = profile.branchPriority as string[]
@@ -318,7 +318,7 @@ function assignTier(option: CollegeOption, rank: number | null): Tier {
  * Generate a deterministic, profile-personalized strategy list from the seed dataset.
  *
  * This replaces the hardcoded MOCK_ORDER in the old generateMockStrategy.
- * The result is fully deterministic: identical profile to identical order.
+ * The result is fully deterministic: identical profile identical order.
  */
 export const MAX_LIST_LENGTH = 60
 
@@ -432,4 +432,3 @@ export function runStrategyEngine(
     } satisfies StrategyItem
   })
 }
-

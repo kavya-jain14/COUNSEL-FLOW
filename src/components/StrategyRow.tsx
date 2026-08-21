@@ -76,7 +76,7 @@ export function StrategyRow({
                   {fit.coverage < 1 && <span aria-hidden="true">~</span>}
                   {fit.score}/100 fit for you
                   <span className="sr-only">
-                    {' '}— {FIT_WORD[fit.band]} against your profile
+                    {' '}- {FIT_WORD[fit.band]} against your profile
                     {fit.coverage < 1
                       ? `, measured on ${Math.round(fit.coverage * 100)}% of what you weighted`
                       : ''}
@@ -102,7 +102,9 @@ export function StrategyRow({
               {conflicts.length} {conflicts.length > 1 ? 'issues' : 'issue'}
             </span>
           ) : (
-            <span className="lrow__clear">Clear</span>
+            <span className="lrow__clear">
+              Clear
+            </span>
           )}
         </span>
       </button>

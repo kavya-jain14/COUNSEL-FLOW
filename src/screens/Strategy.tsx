@@ -81,7 +81,7 @@ export function Strategy() {
         title="Your list, in the order you would fill it"
         lede={
           <>
-            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '—'}{' '}
+            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '-'}{' '}
             and the limits you declared. Open any row for its decision impact: what
             choosing that one costs and gains <em>you</em>, measured against your own
             profile.
