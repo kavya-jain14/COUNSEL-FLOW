@@ -35,7 +35,8 @@ function Shell() {
   const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    mainRef.current?.focus()
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    mainRef.current?.focus({ preventScroll: true })
   }, [state.step])
 
   const profileReady = isProfileValid(state.profile)
@@ -63,9 +64,15 @@ function Shell() {
         ? `${counts.CRITICAL} must be fixed`
         : state.auditStale
           ? 'Re-audit pending'
-          : 'Nothing blocking'
+          : counts.WARNING > 0
+            ? `${counts.WARNING} decision${counts.WARNING > 1 ? 's' : ''} pending`
+            : 'Review complete'
       : 'Opens after the first audit',
-    locked: state.lock ? 'Snapshot saved' : 'Clear all critical conflicts',
+    locked: state.lock
+      ? 'Snapshot saved'
+      : counts.CRITICAL + counts.WARNING > 0
+        ? 'Resolve required decisions'
+        : 'Ready after review',
   }
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)

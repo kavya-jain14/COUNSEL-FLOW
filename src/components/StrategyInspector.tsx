@@ -78,7 +78,28 @@ export function StrategyInspector({
         Why {name} is #{item.position}
       </h2>
 
+      {conflicts.length > 0 && (
+        <div className="rail__alert rail__alert--priority">
+          <span className="section-label">Decision required</span>
+          {conflicts.map((c) => (
+            <div className="rail__alert-row" key={c.id}>
+              <SeverityBadge severity={c.severity} />
+              <span>{c.title}</span>
+            </div>
+          ))}
+          <button type="button" className="btn btn--primary btn--sm" onClick={onOpenConflicts}>
+            Resolve this now
+          </button>
+        </div>
+      )}
+
       <p className="rail__lede">{TIER_LEDE[item.tier]}</p>
+
+      <div className="rail__quick-actions" aria-label={`Edit ${name}`}>
+        <button type="button" className="btn btn--sm" disabled={item.position === 1 || disabled} onClick={() => onMove(item.itemId, -1)}>Move up</button>
+        <button type="button" className="btn btn--sm" disabled={item.position === total || disabled} onClick={() => onMove(item.itemId, 1)}>Move down</button>
+        <button type="button" className="btn btn--sm btn--danger" disabled={disabled} onClick={() => onRemove(item.itemId)}>Remove</button>
+      </div>
 
       {onExplain && (
         <button
@@ -89,20 +110,6 @@ export function StrategyInspector({
         >
           Review candidate impact
         </button>
-      )}
-
-      {conflicts.length > 0 && (
-        <div className="rail__alert">
-          {conflicts.map((c) => (
-            <div className="rail__alert-row" key={c.id}>
-              <SeverityBadge severity={c.severity} />
-              <span>{c.title}</span>
-            </div>
-          ))}
-          <button type="button" className="btn--link" onClick={onOpenConflicts}>
-            Review this conflict
-          </button>
-        </div>
       )}
 
       <div className="rail__group">
@@ -197,32 +204,6 @@ export function StrategyInspector({
         )}
       </div>
 
-      <div className="rail__actions">
-        <button
-          type="button"
-          className="btn btn--sm"
-          disabled={item.position === 1 || disabled}
-          onClick={() => onMove(item.itemId, -1)}
-        >
-          Move up
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm"
-          disabled={item.position === total || disabled}
-          onClick={() => onMove(item.itemId, 1)}
-        >
-          Move down
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm btn--danger"
-          disabled={disabled}
-          onClick={() => onRemove(item.itemId)}
-        >
-          Remove
-        </button>
-      </div>
     </aside>
   )
 }

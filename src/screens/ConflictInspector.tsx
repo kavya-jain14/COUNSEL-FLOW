@@ -7,7 +7,7 @@ import { Band, Banner, NextStep, PageHead } from '../components/ui'
 
 const GROUP_TITLE: Record<Severity, string> = {
   CRITICAL: 'Must fix',
-  WARNING: 'Worth checking',
+  WARNING: 'Decisions required',
   INFO: 'For information',
 }
 
@@ -61,7 +61,12 @@ export function ConflictInspector() {
   const acknowledged = resolutions.filter(
     (resolution) => resolution.severity === 'WARNING' && resolution.kind === 'OVERRIDDEN',
   )
-  const handled = audit.conflicts.filter((c) => resolutionMap[c.id]).length
+  const decisions = audit.conflicts.filter((c) => c.severity !== 'INFO')
+  const handledDecisions = decisions.filter((c) => resolutionMap[c.id]).length
+  const firstUnresolved = decisions.find((c) => !resolutionMap[c.id]) ?? null
+  const firstAffected = firstUnresolved
+    ? items.find((item) => firstUnresolved.itemIds.includes(item.itemId))
+    : null
 
   return (
     <>
@@ -79,7 +84,7 @@ export function ConflictInspector() {
         lede={
           total === 0
             ? `Audit run #${audit.runId} over ${items.length} options found nothing that conflicts with anything you declared.`
-            : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom. Only the critical group can stop locking.`
+            : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom. Critical flags and unresolved warnings must be settled before locking.`
         }
         actions={
           <button
@@ -93,16 +98,42 @@ export function ConflictInspector() {
         }
       />
 
-      {total > 0 && (
+      {firstUnresolved && !auditStale && (
+        <section className="decision-brief" aria-labelledby="decision-brief-title">
+          <span className="decision-brief__number mono">01</span>
+          <div>
+            <span className="section-label">Start with this decision</span>
+            <h2 id="decision-brief-title">{firstUnresolved.title}</h2>
+            <p>
+              {firstAffected
+                ? `This affects ${firstAffected.option.collegeShort} · ${firstAffected.option.branch}. ${firstUnresolved.summary}`
+                : firstUnresolved.summary}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => {
+              const target = document.getElementById(`conflict-${firstUnresolved.id}`)
+              target?.scrollIntoView({ block: 'center' })
+              target?.focus({ preventScroll: true })
+            }}
+          >
+            Make this decision
+          </button>
+        </section>
+      )}
+
+      {decisions.length > 0 && (
         <div className="progress" style={{ marginBottom: 26 }}>
           <span className="progress__bar" aria-hidden="true">
             <span
               className="progress__fill"
-              style={{ width: `${Math.round((handled / total) * 100)}%` }}
+              style={{ width: `${Math.round((handledDecisions / decisions.length) * 100)}%` }}
             />
           </span>
           <span className="progress__text">
-            <b>{handled}</b> of {total} handled
+            <b>{handledDecisions}</b> of {decisions.length} required decisions completed
             {counts.CRITICAL > 0 && ` · ${counts.CRITICAL} still blocking`}
           </span>
         </div>
@@ -185,6 +216,7 @@ export function ConflictInspector() {
                   resolution={resolutionMap[conflict.id]}
                   items={items}
                   disabled={busy != null}
+                  priority={conflict.id === firstUnresolved?.id}
                   onApply={applyAction}
                 />
               ))}
@@ -236,6 +268,22 @@ export function ConflictInspector() {
           <button className="btn" onClick={() => goTo('strategy')}>
             Back to list
           </button>
+        </NextStep>
+      ) : counts.WARNING > 0 ? (
+        <NextStep
+          tone="blocked"
+          what={`${counts.WARNING} decision${counts.WARNING > 1 ? 's' : ''} still waiting for you`}
+          why="Choose a fix, or keep the tradeoff with a short reason. The first unresolved decision is highlighted above."
+        >
+          <button className="btn" onClick={() => goTo('strategy')}>Back to list</button>
+          {firstUnresolved && (
+            <button
+              className="btn btn--primary"
+              onClick={() => document.getElementById(`conflict-${firstUnresolved.id}`)?.scrollIntoView({ block: 'center' })}
+            >
+              Continue first decision
+            </button>
+          )}
         </NextStep>
       ) : (
         <NextStep

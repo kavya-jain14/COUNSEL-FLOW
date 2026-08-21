@@ -51,6 +51,36 @@ export function ProfileSummary() {
         </div>
       )}
 
+      <section className="review-brief" aria-labelledby="review-brief-title">
+        <div className="review-brief__copy">
+          <span className="section-label">Check these four things first</span>
+          <h2 id="review-brief-title">
+            {valid ? 'Ready to build your preference list' : 'Your profile still needs attention'}
+          </h2>
+          <p>
+            These inputs have the biggest effect on what appears and where it appears. The full
+            record remains below if you want to inspect every detail.
+          </p>
+        </div>
+        <dl className="review-brief__facts">
+          <div><dt>Rank pool</dt><dd className="mono">{profile.rank == null ? 'Not set' : formatRank(profile.rank)} · {categoryLabel}</dd></div>
+          <div><dt>Branch order</dt><dd>{profile.branchPriority.join(' › ') || 'Not set'}</dd></div>
+          <div><dt>Budget</dt><dd className="mono">{formatINRExact(profile.budget.value)} · {profile.budget.mode}</dd></div>
+          <div><dt>Distance</dt><dd className="mono">{formatKm(profile.distance.value)} · {profile.distance.mode}</dd></div>
+        </dl>
+        <div className="review-brief__actions">
+          <button type="button" className="btn" onClick={() => goTo('profile')}>Edit inputs</button>
+          <button
+            type="button"
+            className="btn btn--primary"
+            disabled={!valid || busy === 'generate'}
+            onClick={generate}
+          >
+            {busy === 'generate' ? 'Preparing strategy…' : 'Generate strategy'}
+          </button>
+        </div>
+      </section>
+
       <Band
         num="01"
         title="Candidate"

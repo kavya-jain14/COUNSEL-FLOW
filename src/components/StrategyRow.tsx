@@ -18,23 +18,13 @@ export function StrategyRow({
   conflicts,
   fit,
   selected,
-  isFirst,
-  isLast,
-  disabled,
   onSelect,
-  onMove,
-  onRemove,
 }: {
   item: StrategyItem
   conflicts: Conflict[]
   fit?: { score: number; band: FitBand; coverage: number }
   selected: boolean
-  isFirst: boolean
-  isLast: boolean
-  disabled?: boolean
   onSelect: (itemId: string) => void
-  onMove: (itemId: string, direction: -1 | 1) => void
-  onRemove: (itemId: string) => void
 }) {
   const { option } = item
   const worst = [...conflicts].sort(
@@ -43,12 +33,11 @@ export function StrategyRow({
   const name = `${option.collegeShort} · ${option.branch}`
 
   return (
-    <li className="lrow-wrap" data-flagged={worst?.severity}>
+    <li className="lrow-wrap" data-flagged={worst?.severity} data-attention={Boolean(worst)}>
       <button
         type="button"
         className="lrow"
         aria-current={selected}
-        aria-haspopup="dialog"
         onClick={() => onSelect(item.itemId)}
       >
         <span className="lrow__pos" aria-hidden="true">
@@ -99,7 +88,10 @@ export function StrategyRow({
           {worst ? (
             <span className="lrow__flag" data-severity={worst.severity}>
               <span className="lrow__dot" aria-hidden="true" />
-              {conflicts.length} {conflicts.length > 1 ? 'issues' : 'issue'}
+              <span>
+                <b>{worst.severity === 'CRITICAL' ? 'Must fix' : worst.severity === 'WARNING' ? 'Review' : 'Note'}</b>
+                <small>{worst.title}</small>
+              </span>
             </span>
           ) : (
             <span className="lrow__clear">
@@ -108,44 +100,6 @@ export function StrategyRow({
           )}
         </span>
       </button>
-
-      <span className="lrow-tools">
-        <button
-          type="button"
-          className="icon-btn"
-          disabled={isFirst || disabled}
-          onClick={() => onMove(item.itemId, -1)}
-          aria-label={
-            isFirst
-              ? `${name} is already your first choice`
-              : `Move ${name} up to position ${item.position - 1}`
-          }
-        >
-          <span aria-hidden="true">Up</span>
-        </button>
-        <button
-          type="button"
-          className="icon-btn"
-          disabled={isLast || disabled}
-          onClick={() => onMove(item.itemId, 1)}
-          aria-label={
-            isLast
-              ? `${name} is already your last choice`
-              : `Move ${name} down to position ${item.position + 1}`
-          }
-        >
-          <span aria-hidden="true">Down</span>
-        </button>
-        <button
-          type="button"
-          className="icon-btn"
-          disabled={disabled}
-          onClick={() => onRemove(item.itemId)}
-          aria-label={`Remove ${name} from the list`}
-        >
-          <span aria-hidden="true">Remove</span>
-        </button>
-      </span>
     </li>
   )
 }

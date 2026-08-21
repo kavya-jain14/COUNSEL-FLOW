@@ -53,7 +53,18 @@ export function Strategy() {
     return map
   }, [items, profile, authorityId])
 
-  const selected = items.find((i) => i.itemId === selectedId) ?? items[0] ?? null
+  const attentionConflicts = useMemo(
+    () => (audit?.conflicts ?? []).filter((conflict) => conflict.severity !== 'INFO'),
+    [audit],
+  )
+  const firstAttentionItemId = attentionConflicts
+    .flatMap((conflict) => conflict.itemIds)
+    .find((itemId) => items.some((item) => item.itemId === itemId))
+  const selected =
+    items.find((item) => item.itemId === selectedId) ??
+    items.find((item) => item.itemId === firstAttentionItemId) ??
+    items[0] ??
+    null
   const impactItem = items.find((i) => i.itemId === impactId) ?? null
 
   const openImpact = useCallback((itemId: string) => {
@@ -82,8 +93,6 @@ export function Strategy() {
   }
 
   const counts = audit?.counts ?? { CRITICAL: 0, WARNING: 0, INFO: 0 }
-  const total = counts.CRITICAL + counts.WARNING + counts.INFO
-
   return (
     <>
       <PageHead
@@ -140,12 +149,45 @@ export function Strategy() {
             </Banner>
           )}
 
+          {attentionConflicts.length > 0 && !auditStale && (
+            <section className="attention-queue" aria-labelledby="attention-title">
+              <div className="attention-queue__lead">
+                <span className="section-label">Start here</span>
+                <h2 id="attention-title">
+                  {attentionConflicts.length} decision{attentionConflicts.length > 1 ? 's' : ''} need your review
+                </h2>
+                <p>
+                  We selected the first affected option for you. Resolve these before trying to lock the list.
+                </p>
+                <button type="button" className="btn btn--primary" onClick={() => goTo('conflicts')}>
+                  Review first decision
+                </button>
+              </div>
+              <ol className="attention-queue__list">
+                {attentionConflicts.map((conflict, index) => {
+                  const affected = items.find((item) => conflict.itemIds.includes(item.itemId))
+                  return (
+                    <li key={conflict.id} data-current={selected?.itemId === affected?.itemId}>
+                      <button
+                        type="button"
+                        onClick={() => affected && setSelectedId(affected.itemId)}
+                      >
+                        <span className="mono">{String(index + 1).padStart(2, '0')}</span>
+                        <span><b>{conflict.title}</b><small>{affected ? `${affected.option.collegeShort} · ${affected.option.branch}` : 'List-wide decision'}</small></span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+          )}
+
           <div className="tally-set" style={{ margin: auditStale ? '24px 0 18px' : '0 0 18px' }}>
             <span className="tally" data-tone={counts.CRITICAL > 0 ? 'critical' : 'zero'}>
               <b>{counts.CRITICAL}</b> must fix
             </span>
             <span className="tally" data-tone={counts.WARNING > 0 ? 'warning' : 'zero'}>
-              <b>{counts.WARNING}</b> worth checking
+              <b>{counts.WARNING}</b> decisions pending
             </span>
             <span className="tally" data-tone={counts.INFO > 0 ? 'info' : 'zero'}>
               <b>{counts.INFO}</b> for information
@@ -160,19 +202,14 @@ export function Strategy() {
               <span>Status</span>
             </div>
             <ol className="ledger__list">
-              {items.map((item, i) => (
+              {items.map((item) => (
                 <StrategyRow
                   key={item.itemId}
                   item={item}
                   conflicts={byItem[item.itemId] ?? []}
                   fit={fits[item.itemId]}
                   selected={selected?.itemId === item.itemId}
-                  isFirst={i === 0}
-                  isLast={i === items.length - 1}
-                  disabled={busy != null}
-                  onSelect={openImpact}
-                  onMove={moveItem}
-                  onRemove={removeItem}
+                  onSelect={setSelectedId}
                 />
               ))}
             </ol>
@@ -241,17 +278,17 @@ export function Strategy() {
             Show me what to fix
           </button>
         </NextStep>
-      ) : total > 0 ? (
+      ) : counts.WARNING > 0 ? (
         <NextStep
-          tone="go"
-          what={`Nothing blocks you: ${total} note${total > 1 ? 's' : ''} to skim`}
-          why="These are tradeoffs, not errors. Keep your order if you want; we only ask you to say why."
+          tone="blocked"
+          what={`${counts.WARNING} decision${counts.WARNING > 1 ? 's' : ''} still need your review`}
+          why="Each warning must be fixed or intentionally kept with a reason before the list can lock."
         >
           <button className="btn" onClick={() => goTo('summary')}>
             Back to profile
           </button>
           <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
-            Skim the {total} note{total > 1 ? 's' : ''}
+            Review the {counts.WARNING} decision{counts.WARNING > 1 ? 's' : ''}
           </button>
         </NextStep>
       ) : (

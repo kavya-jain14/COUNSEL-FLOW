@@ -50,6 +50,24 @@ export function Locked() {
         <span className="mono">{lock.snapshotId}</span>
       </Banner>
 
+      <section className="locked-brief" aria-labelledby="locked-brief-title">
+        <div>
+          <span className="section-label">Your next action</span>
+          <h2 id="locked-brief-title">Record the seat you get after round {currentRound}</h2>
+          <p>
+            The list itself is final. When allotment arrives, record it and CounselFlow will keep
+            only genuine improvements for the next round.
+          </p>
+        </div>
+        <dl className="locked-brief__facts">
+          <div><dt>Choices locked</dt><dd className="mono">{items.length}</dd></div>
+          <div><dt>Fixes applied</dt><dd className="mono">{fixes.length}</dd></div>
+          <div><dt>Explained overrides</dt><dd className="mono">{overrides.length}</dd></div>
+          <div><dt>Current round</dt><dd className="mono">{currentRound}/{authority.rounds}</dd></div>
+        </dl>
+        <a className="btn btn--primary" href="#round-decision">Record allotment</a>
+      </section>
+
       <div style={{ marginTop: 34 }}>
         <Band
           num={`${items.length} choices`}
@@ -182,7 +200,7 @@ export function Locked() {
         )}
       </div>
 
-      <div style={{ marginTop: 34 }}>
+      <div id="round-decision" style={{ marginTop: 34, scrollMarginTop: 100 }}>
         <Band
           num={`Round ${currentRound} of ${authority.rounds}`}
           title="What did you actually get?"
