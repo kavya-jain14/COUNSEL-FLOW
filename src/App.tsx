@@ -96,7 +96,10 @@ function Shell() {
               <small>Candidate preference dossier</small>
             </span>
           </button>
-          <span className="document-ref mono">CF / UPTAC / 2026</span>
+          <span className="document-ref mono">
+            <span>CF / MULTI-COUNSELLING / 2026</span>
+            <small>UPTAC · JoSAA · IPU</small>
+          </span>
         </div>
 
         <span className="sidebar__title" aria-hidden="true">

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Category, Domicile, RankType, SubQuota } from '../types'
-import { CATEGORIES, DOMICILES, SUB_QUOTAS } from '../data/reference'
+import { CATEGORIES, SUB_QUOTAS } from '../data/reference'
 import { AUTHORITY_LIST, AUTHORITIES } from '../data/authorities'
 import { DISTANCE_METHOD_NOTE, HOME_CITIES } from '../data/geo'
 import { formatINR, formatKm } from '../lib/format'
@@ -31,6 +31,13 @@ export function BuildProfile() {
   const errors = useMemo(() => validateProfile(profile), [profile])
   const show = (field: keyof typeof errors) => (submitted ? errors[field] : undefined)
   const errorCount = Object.keys(errors).length
+  const authority = AUTHORITIES[authorityId]
+  const availableCategories = CATEGORIES.filter((category) =>
+    authority.categories.includes(category.value),
+  )
+  const availableQuotas = SUB_QUOTAS.filter((quota) =>
+    authority.subQuotas.includes(quota.value),
+  )
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -70,7 +77,7 @@ export function BuildProfile() {
         title="Your rank"
         note="Eligibility and reachability are both computed from this, so it has to be exact."
       >
-        <div className="grid-2">
+        <div className="grid-2 profile-core-grid">
           <Field label="Rank" error={show('rank')} htmlFor="rank">
             <input
               id="rank"
@@ -137,7 +144,7 @@ export function BuildProfile() {
               onChange={(e) => patchProfile({ category: (e.target.value || null) as Category })}
             >
               <option value="">Select your category…</option>
-              {CATEGORIES.map((c) => (
+              {availableCategories.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
                 </option>
@@ -145,7 +152,7 @@ export function BuildProfile() {
             </select>
           </Field>
 
-          <Field label="Domicile" error={show('domicile')} htmlFor="domicile">
+          <Field label={authority.region.label} error={show('domicile')} htmlFor="domicile">
             <select
               id="domicile"
               className="select"
@@ -154,16 +161,10 @@ export function BuildProfile() {
               onChange={(e) => patchProfile({ domicile: (e.target.value || null) as Domicile })}
             >
               <option value="">Select your domicile…</option>
-              {DOMICILES.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
+              <option value="UP">{authority.region.home}</option>
+              <option value="OTHER">{authority.region.other}</option>
             </select>
-            <span className="field__hint">
-              {DOMICILES.find((d) => d.value === profile.domicile)?.hint ??
-                'Home-state and other-state seats are filled from separate pools.'}
-            </span>
+            <span className="field__hint">{authority.region.hint}</span>
           </Field>
         </div>
 
@@ -174,7 +175,7 @@ export function BuildProfile() {
             remove an option from your list.
           </span>
           <div className="quota-grid">
-            {SUB_QUOTAS.map((quota) => {
+            {availableQuotas.map((quota) => {
               const checked = profile.subQuotas.includes(quota.value)
               return (
                 <label className="quota-opt" key={quota.value} data-checked={checked}>
