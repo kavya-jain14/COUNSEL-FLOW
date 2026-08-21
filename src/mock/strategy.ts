@@ -72,7 +72,7 @@ export function reasonsFor(
 ): ReasonFact[] {
   const reasons: ReasonFact[] = []
 
-  const branchIndex = profile.branchPriority.indexOf(option.branch)
+  const branchIndex = (profile.branchPriority as string[]).indexOf(option.branch)
   if (branchIndex === 0) {
     reasons.push({
       code: 'R-BRANCH-TOP',
@@ -109,9 +109,8 @@ export function reasonsFor(
     reasons.push({
       code: 'R-FEE-OK',
       label: 'Within your budget',
-      detail: `${formatINR(option.annualFee)}/year against your ${
-        profile.budget.mode === 'hard' ? 'hard ceiling' : 'preferred budget'
-      } of ${formatINR(profile.budget.value)}.`,
+      detail: `${formatINR(option.annualFee)}/year against your ${profile.budget.mode === 'hard' ? 'hard ceiling' : 'preferred budget'
+        } of ${formatINR(profile.budget.value)}.`,
       polarity: 'positive',
     })
   } else {

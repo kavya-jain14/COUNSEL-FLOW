@@ -7,8 +7,10 @@ Last updated: 2026-08-21
 - Remote: `https://github.com/kavya-jain14/COUNSEL-FLOW`
 - Remote default branch: `main`
 - Foundation PR `#1` was squash-merged into `main` at `25a75cb`.
+- Shared-contract PR `#2` was squash-merged into `main` at `34e09ae` after approvals
+  from Fuzail and Gargi; its `CI/frontend` check passed.
 - Gargi's existing `feature/gargi-profile-conflicts` branch and history remain preserved.
-- Active feature branch: `feat/strategy-engine` — pushed, Draft PR #6 open.
+- Active feature branch: `main` — all latest PRs merged.
 
 ## Durable product decisions
 
@@ -20,25 +22,28 @@ Last updated: 2026-08-21
 - An unresolved critical or warning conflict blocks locking. A kept warning becomes an
   explained override, then the changed state must be re-audited.
 
-## Shared-contract checkpoint (PR #2 merged)
+## Frontend-adapter & Strategy-engine checkpoint (PR 5 & 6 merged)
 
-- Added versioned schemas and inferred types for profile, strategy, audit, lock and API
-  error envelopes under `packages/contracts`.
-- Added revision checks, strict unknown-field rejection, normalized-weight validation,
-  unique IDs, conflict-count checks and stale-audit lock protection.
-- Added explicit missing-fact/null consistency and immutable snapshot metadata.
-- Added valid/invalid JSON fixtures plus Node contract tests.
-- Root npm workspace/scripts and GitHub CI now include contract compilation/tests.
+- Frontend domain types now derive from `@counselflow/contracts`; only incomplete form
+  state and display metadata remain UI-local.
+- Added `src/features/contracts` as the single boundary for request IDs, stable profile/
+  list revisions, validation failures and API error envelopes.
+- Generate, audit and lock mocks now construct and parse the real versioned wire shapes.
+- Stale profile/list revisions are re-computed after edits and rechecked at lock time.
+- Unresolved warnings now block locking until fixed or overridden with a written reason
+  and a successful re-audit.
+- Locked state is the immutable contract snapshot, including timestamp, dataset/engine
+  versions, audit run and acknowledged warning decisions.
+- Adapter failures clear busy state and surface a shared error envelope in the app shell.
+- Contract compilation now runs before standalone dev, typecheck and build commands.
 
-## Strategy-engine checkpoint (PR #6 open — feat/strategy-engine)
-
-### Tier buffers (commit 9ceb423)
+### Tier buffers
 - Extracted `TIER_DREAM_RATIO_MAX` (0.90) and `TIER_TARGET_RATIO_MAX` (1.40) with JSDoc.
 - TierBadge and StrategyInspector lede updated to cite buffer boundaries explicitly.
 - Boundary test file: `src/mock/strategy.test.ts`.
 - Lab scenario `tier-boundary-classification` added.
 
-### Deterministic scoring engine (commit e8d9f99)
+### Deterministic scoring engine
 - New `src/mock/engine.ts` implements the full Blueprint §9 pipeline:
   1. Live `distanceKm` via `haversineKm(homeCity → college city)`.
   2. Hard filter — budget, distance, exclusions — before any scoring.
@@ -50,25 +55,13 @@ Last updated: 2026-08-21
 - `src/mock/api.ts` wired to `runStrategyEngine` (was `generateMockStrategy`).
 - `ENGINE_VERSION` bumped to `engine-0.2.0` in `src/data/reference.ts`.
 
-### Integration lab dashboard (latest commit on feat/strategy-engine)
+### Integration lab dashboard
 - New `src/screens/LabDashboard.tsx` — golden scenario runner UI.
 - Accessible via the `lab` button in the sidebar footer.
 - Runs all 8 scenarios in `src/lab/scenarios.ts` against the live engine and audit.
 - Shows pass/fail verdict, conflict codes, canLock status, and manual setup steps.
 - **Verified: 8/8 scenarios pass** as of 2026-08-21.
 - `App.tsx` footer now shows live `ENGINE_VERSION` instead of hardcoded string.
-
-### Lab scenarios (8 total)
-| ID | Proves |
-|---|---|
-| golden-fix-and-lock | Full hero loop converges |
-| hard-budget-breach | CF-02 is raised for over-budget options |
-| branch-priority-inversion | CF-01 fires for comparable ECE-over-CSE violations |
-| stale-audit-after-manual-move | Manual (stale-gate requires multi-step interaction) |
-| missing-evidence | CF-08 fires for options with missing facts |
-| tier-boundary-classification | DREAM/TARGET/SAFE boundaries from named ratio buffers |
-| deterministic-factor-scoring | Weights change order deterministically |
-| hard-distance-filter | Gorakhpur filtered out at 100 km hard limit |
 
 ## Current validation status
 
@@ -80,9 +73,6 @@ Last updated: 2026-08-21
 ## Next commands after importing this checkpoint
 
 ```bash
-git checkout feat/strategy-engine
+git checkout main
 npm run check
 ```
-
-Open PR #6 for review. Request Fuzail's review on engine scoring logic and
-Gargi's review on LabDashboard UI copy before marking it ready for merge.

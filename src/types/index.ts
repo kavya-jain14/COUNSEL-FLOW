@@ -1,54 +1,70 @@
-export type Category = 'GEN' | 'EWS' | 'OBC' | 'SC' | 'ST'
+import type {
+  ApiErrorEnvelope as WireApiErrorEnvelope,
+  AuditResult as WireAuditResult,
+  BranchCode as WireBranchCode,
+  CandidateProfile as WireCandidateProfile,
+  Category as WireCategory,
+  CollegeOption as WireCollegeOption,
+  Confidence as WireConfidence,
+  Conflict as WireConflict,
+  ConflictAction as WireConflictAction,
+  ConflictActionKind as WireConflictActionKind,
+  ConflictCode as WireConflictCode,
+  ConstraintMode as WireConstraintMode,
+  FactorKey as WireFactorKey,
+  FactorWeights as WireFactorWeights,
+  HardExclusion as WireHardExclusion,
+  InstituteType as WireInstituteType,
+  LockedStrategySnapshot as WireLockedStrategySnapshot,
+  MissingFact as WireMissingFact,
+  RankType as WireRankType,
+  ReasonFact as WireReasonFact,
+  Resolution as WireResolution,
+  ResolutionKind as WireResolutionKind,
+  Severity as WireSeverity,
+  StrategyGenerateResponse as WireStrategyGenerateResponse,
+  StrategyItem as WireStrategyItem,
+  Tier as WireTier,
+} from '@counselflow/contracts'
 
-export type RankType = 'CRL' | 'CATEGORY'
+export type Category = WireCategory
+export type RankType = WireRankType
+export type BranchCode = WireBranchCode
+export type FactorKey = WireFactorKey
+export type FactorWeights = WireFactorWeights
+export type ConstraintMode = WireConstraintMode
 
-export type FactorKey = 'placements' | 'fees' | 'location' | 'campus' | 'hostel'
+export type HardExclusionKind = WireHardExclusion['kind']
 
-export type FactorWeights = Record<FactorKey, number>
-
-export type HardExclusionKind = 'branch' | 'instituteType' | 'location' | 'noHostel'
-
+/** UI-only metadata. The API receives only `kind` and `value`. */
 export interface HardExclusion {
   id: string
   kind: HardExclusionKind
-
   value: string
-
   label: string
 }
 
 export interface ConstraintSetting {
   value: number
-  mode: 'hard' | 'soft'
+  mode: ConstraintMode
 }
 
+/** Editable form state; incomplete rank/category values never cross the API boundary. */
 export interface CandidateProfile {
   rank: number | null
   rankType: RankType
   category: Category | null
+  branchPriority: BranchCode[]
   homeCity: string | null
 
-  branchPriority: string[]
-
   budget: ConstraintSetting
-
   distance: ConstraintSetting
   hardExclusions: HardExclusion[]
   factorWeights: FactorWeights
 }
 
-export interface CandidateProfilePayload {
-  rank: number
-  rankType: RankType
-  category: Category
-  homeCity: string
-  branchPriority: string[]
-  budget: ConstraintSetting
-  distance: ConstraintSetting
-  hardExclusions: Array<Pick<HardExclusion, 'kind' | 'value'>>
+export type CandidateProfilePayload = WireCandidateProfile
 
-  factorWeights: FactorWeights
-}
 
 export type ProfileErrors = Partial<Record<ProfileField, string>>
 
@@ -62,140 +78,24 @@ export type ProfileField =
   | 'hardExclusions'
   | 'factorWeights'
 
-export type InstituteType = 'GOVERNMENT' | 'AIDED' | 'PRIVATE'
-
-export type Tier = 'DREAM' | 'TARGET' | 'SAFE' | 'UNKNOWN'
-
-export interface CollegeOption {
-
-  id: string
-  college: string
-  collegeShort: string
-  branch: string
-  instituteType: InstituteType
-  city: string
-
-  annualFee: number | null
-  distanceKm: number | null
-  hostelAvailable: boolean
-  placementScore: number | null
-  campusScore: number | null
-  closingRank: number | null
-
-  sourceLabel: string
-  sourceYear: number
-
-  missingFacts: string[]
-}
-
-export interface ReasonFact {
-  code: string
-  label: string
-  detail: string
-  polarity: 'positive' | 'negative' | 'neutral'
-}
-
-export interface StrategyItem {
-
-  itemId: string
-  option: CollegeOption
-  tier: Tier
-
-  position: number
-  reasons: ReasonFact[]
-  confidence: 'high' | 'medium' | 'low'
-
-  manuallyPlaced: boolean
-}
-
-export type ConflictCode =
-  | 'CF-01'
-  | 'CF-02'
-  | 'CF-03'
-  | 'CF-04'
-  | 'CF-05'
-  | 'CF-06'
-  | 'CF-07'
-  | 'CF-08'
-
-export type Severity = 'CRITICAL' | 'WARNING' | 'INFO'
-
-export type ConflictActionKind =
-  | 'REMOVE_OPTION'
-  | 'CHANGE_CONSTRAINT'
-  | 'CONVERT_TO_SOFT'
-  | 'SWAP'
-  | 'MOVE'
-  | 'DEDUPE'
-  | 'KEEP'
-  | 'ACKNOWLEDGE'
-
-export interface ConflictAction {
-  id: string
-  kind: ConflictActionKind
-  label: string
-
-  effect: string
-
-  intent: 'primary' | 'secondary'
-
-  requiresReason?: boolean
-
-  target?: {
-    itemId?: string
-    withItemId?: string
-    constraint?: 'budget' | 'distance'
-    newValue?: number
-    exclusionId?: string
-  }
-}
-
-export interface Conflict {
-  id: string
-  code: ConflictCode
-  severity: Severity
-  title: string
-
-  summary: string
-
-  evidence: string[]
-
-  causedBy: string
-
-  itemIds: string[]
-  actions: ConflictAction[]
-}
-
-export type ResolutionKind = 'FIXED' | 'OVERRIDDEN' | 'ACKNOWLEDGED'
-
-export interface Resolution {
-  conflictId: string
-  code: ConflictCode
-  kind: ResolutionKind
-  actionLabel: string
-  reason?: string
-
-  atAuditRun: number
-}
-
-export interface AuditResult {
-
-  runId: number
-  conflicts: Conflict[]
-  counts: Record<Severity, number>
-
-  canLock: boolean
-}
-
-export interface LockState {
-  locked: boolean
-  snapshotId: string | null
-  profileVersion: string
-  datasetLabel: string
-  engineVersion: string
-  acknowledgedWarnings: Resolution[]
-  itemOrder: string[]
-}
+export type InstituteType = WireInstituteType
+export type Tier = WireTier
+export type Confidence = WireConfidence
+export type MissingFact = WireMissingFact
+export type CollegeOption = WireCollegeOption
+export type ReasonFact = WireReasonFact
+export type StrategyItem = WireStrategyItem
+export type ConflictCode = WireConflictCode
+export type Severity = WireSeverity
+export type ConflictActionKind = WireConflictActionKind
+export type ConflictAction = WireConflictAction
+export type Conflict = WireConflict
+export type ResolutionKind = WireResolutionKind
+export type Resolution = WireResolution
+export type AuditResult = WireAuditResult
+export type LockState = WireLockedStrategySnapshot
+export type ApiErrorEnvelope = WireApiErrorEnvelope
+export type StrategyGenerateResponse = WireStrategyGenerateResponse
 
 export type Step =
   | 'landing'
