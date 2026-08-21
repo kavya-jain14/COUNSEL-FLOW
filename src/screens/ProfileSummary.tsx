@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { BRANCH_LABELS, CATEGORIES, DOMICILES, FACTORS, SUB_QUOTAS } from '../data/reference'
 import { formatINRExact, formatKm, formatRank } from '../lib/format'
-import { toPayload, validateProfile } from '../lib/validation'
+import { validateProfile } from '../lib/validation'
 import { useAppActions, useAppState } from '../state/store'
 import { Band, Banner, HardSoftBadge, NextStep, PageHead } from '../components/ui'
 
@@ -13,7 +13,6 @@ export function ProfileSummary() {
 
   const errors = useMemo(() => validateProfile(profile), [profile])
   const valid = Object.keys(errors).length === 0
-  const payload = useMemo(() => (valid ? toPayload(profile) : null), [profile, valid])
 
   const categoryLabel = CATEGORIES.find((c) => c.value === profile.category)?.label ?? 'Not set'
   const domicileLabel = DOMICILES.find((d) => d.value === profile.domicile)?.label ?? 'Not set'
@@ -34,7 +33,7 @@ export function ProfileSummary() {
         title="What we are about to run"
         lede={
           hardCount === 0
-            ? 'You have set no hard limits, so nothing will be removed outright — every option will be ranked instead.'
+            ? 'You have set no hard limits, so nothing will be removed outright: every option will be ranked instead.'
             : `${hardCount} hard limit${hardCount > 1 ? 's' : ''} can remove options and block your final list. Everything else only changes the order.`
         }
         actions={
@@ -47,7 +46,7 @@ export function ProfileSummary() {
       {!valid && (
         <div style={{ marginBottom: 30 }}>
           <Banner tone="critical" title="Your profile is incomplete" live>
-            <span>Go back and fix the highlighted fields — we will not guess missing inputs.</span>
+            <span>Go back and fix the highlighted fields: we will not guess missing inputs.</span>
           </Banner>
         </div>
       )}
@@ -61,7 +60,7 @@ export function ProfileSummary() {
           <div className="summary-cell">
             <dt>Rank</dt>
             <dd>
-              {profile.rank == null ? '—' : formatRank(profile.rank)}
+              {profile.rank == null ? ' - ' : formatRank(profile.rank)}
               <small>{profile.rankType === 'CRL' ? 'Common rank' : 'Category rank'}</small>
             </dd>
           </div>
@@ -78,9 +77,9 @@ export function ProfileSummary() {
               {domicileLabel}
               <small>
                 {profile.domicile === 'UP'
-                  ? 'Home-state pool — the larger share of UPTAC seats'
+                  ? 'Home-state pool: the larger share of UPTAC seats'
                   : profile.domicile === 'OTHER'
-                    ? 'Other-state pool — smaller, so cutoffs run tighter'
+                    ? 'Other-state pool: smaller, so cutoffs run tighter'
                     : 'Needed before we can pick the right seat pool'}
               </small>
             </dd>
@@ -92,14 +91,14 @@ export function ProfileSummary() {
               <small>
                 {quotaLabels.length === 0
                   ? 'Only the open and category pools apply'
-                  : `${quotaLabels.join(' · ')} — sample cutoffs are open-category only, so these are recorded but not yet scored`}
+                  : `${quotaLabels.join(' · ')}: sample cutoffs are open-category only, so these are recorded but not yet scored`}
               </small>
             </dd>
           </div>
           <div className="summary-cell">
             <dt>Branch order</dt>
             <dd>
-              {profile.branchPriority.join(' › ') || '—'}
+              {profile.branchPriority.join(' › ') || ' - '}
               <small>
                 {profile.branchPriority[0]
                   ? `Top choice: ${BRANCH_LABELS[profile.branchPriority[0]]}`
@@ -126,8 +125,8 @@ export function ProfileSummary() {
               {formatINRExact(profile.budget.value)}
               <small>
                 {profile.budget.mode === 'hard'
-                  ? 'Hard ceiling — over-budget options are flagged critical'
-                  : 'Soft preference — over-budget options only rank lower'}
+                  ? 'Hard ceiling: over-budget options are flagged critical'
+                  : 'Soft preference: over-budget options only rank lower'}
               </small>
             </dd>
           </div>
@@ -137,8 +136,8 @@ export function ProfileSummary() {
               {formatKm(profile.distance.value)}
               <small>
                 {profile.distance.mode === 'hard'
-                  ? 'Hard limit — further colleges are flagged critical'
-                  : 'Soft preference — further colleges only rank lower'}
+                  ? 'Hard limit: further colleges are flagged critical'
+                  : 'Soft preference: further colleges only rank lower'}
               </small>
             </dd>
           </div>
@@ -180,35 +179,6 @@ export function ProfileSummary() {
         </div>
       </Band>
 
-      {payload && (
-        <Band
-          num="04"
-          title="Under the hood"
-          note="Nothing hidden — this is the exact request your profile turns into."
-        >
-          <details>
-            <summary>What we send to the strategy API</summary>
-            <p className="field__hint" style={{ margin: '10px 0' }}>
-              <code className="mono">POST /api/strategy/generate</code> — weights are
-              normalised to sum 1.0 before sending. Currently answered by a local mock.
-            </p>
-            <pre
-              className="mono"
-              style={{
-                overflowX: 'auto',
-                background: 'var(--surface-2)',
-                border: '1px solid var(--border)',
-                padding: 16,
-                borderRadius: 8,
-                margin: 0,
-              }}
-            >
-              {JSON.stringify(payload, null, 2)}
-            </pre>
-          </details>
-        </Band>
-      )}
-
       {valid ? (
         <NextStep
           tone="go"
@@ -224,14 +194,7 @@ export function ProfileSummary() {
             disabled={busy === 'generate'}
             onClick={generate}
           >
-            {busy === 'generate' ? (
-              <>
-                <span className="spinner" aria-hidden="true" />
-                Generating…
-              </>
-            ) : (
-              'Generate my strategy →'
-            )}
+            {busy === 'generate' ? 'Preparing strategy…' : 'Generate my strategy'}
           </button>
         </NextStep>
       ) : (

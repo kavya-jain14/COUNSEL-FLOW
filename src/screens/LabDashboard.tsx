@@ -36,7 +36,7 @@ function profileForScenario(id: string): CandidateProfile {
       return BASE_PROFILE
 
     case 'hard-budget-breach':
-      // Use SOFT budget so the high-fee option is not filtered by the engine —
+      // Use SOFT budget so the high-fee option is not filtered by the engine  - 
       // only then will the audit see it and raise CF-02.
       // The scenario describes what happens when you cannot "acknowledge away" a hard breach.
       // In the lab we verify that CF-02 is raised (audit side); the hard-filtering is
@@ -48,7 +48,7 @@ function profileForScenario(id: string): CandidateProfile {
       // an ECE option before a CSE option, then flip the order in the expected conflict check.
       // The engine scores by priority, so to get CF-01 we need to have a CSE item above ECE
       // in the list despite ECE being ranked higher. We achieve this by setting CSE as top priority
-      // and ECE as second, then the engine puts CSE first — but the audit checks if any ECE
+      // and ECE as second, then the engine puts CSE first: but the audit checks if any ECE
       // appears above a CSE when ECE is ranked lower. With CSE > ECE priority, this won't fire.
       // Instead: use ECE > CSE > IT so engine puts ECE first, but if MMMUT ECE appears below
       // HBTU CSE then CF-01 fires.
@@ -98,7 +98,7 @@ function runScenario(scenario: LabScenario): Verdict {
   if (manualScenarios.includes(scenario.id)) {
     return {
       pass: true,
-      reason: 'Multi-step interaction required — manually verified in demo.',
+      reason: 'Multi-step interaction required: manually verified in demo.',
       conflictCodes,
       canLock,
       itemCount: items.length,
@@ -120,7 +120,7 @@ function runScenario(scenario: LabScenario): Verdict {
     }
   }
 
-  // extra: distance filter scenario — verify gorakhpur is absent
+  // extra: distance filter scenario: verify gorakhpur is absent
   if (scenario.id === 'hard-distance-filter') {
     const hasGorakhpur = items.some((it) => it.option.city === 'Gorakhpur')
     if (hasGorakhpur) {
@@ -134,16 +134,16 @@ function runScenario(scenario: LabScenario): Verdict {
     }
   }
 
-  // All expected codes present → PASS.
+  // All expected codes present to PASS.
   // We do not check canLock against expectedLockBlocked for automated runs because:
-  // - WARNING-only conflicts → canLock=true (correct — warnings don't block lock)
+  // - WARNING-only conflicts to canLock=true (correct: warnings don't block lock)
   // - The scenario's expectedLockBlocked describes the manual demo state (before overrides)
   return {
     pass: true,
     reason:
       scenario.expectedConflictCodes.length === 0
         ? `${items.length} options generated, no unexpected conflicts.`
-        : `Raised ${conflictCodes.join(', ')} as expected (${canLock ? 'canLock after acknowledging warnings' : 'lock blocked — critical conflict'}).`,
+        : `Raised ${conflictCodes.join(', ')} as expected (${canLock ? 'canLock after acknowledging warnings' : 'lock blocked: critical conflict'}).`,
     conflictCodes,
     canLock,
     itemCount: items.length,
@@ -169,7 +169,7 @@ function VerdictBadge({ pass }: { pass: boolean }) {
         color: '#fff',
       }}
     >
-      {pass ? '✓ PASS' : '✗ FAIL'}
+      {pass ? 'PASS' : 'FAIL'}
     </span>
   )
 }
@@ -308,7 +308,7 @@ export function LabDashboard() {
           }}
         >
           {passCount}/{totalCount} scenarios passed
-          {passCount < totalCount && ` — ${totalCount - passCount} failing`}
+          {passCount < totalCount && `: ${totalCount - passCount} failing`}
         </div>
       )}
 

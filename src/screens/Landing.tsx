@@ -1,33 +1,39 @@
 import { useAppActions } from '../state/store'
 
 const STEPS: Array<{ title: string; note: string }> = [
-  { title: 'Build my profile', note: 'Rank, category, budget, distance, branch order.' },
-  { title: 'Profile summary', note: 'See what counts as a hard limit before anything runs.' },
-  { title: 'My strategy', note: 'An ordered list, with the reason behind every position.' },
-  { title: 'Conflicts', note: 'Where your list argues with what you told us — and how to settle it.' },
-  { title: 'Lock', note: 'A snapshot of the order, the reasons, and the data version used.' },
+  { title: 'Build profile', note: 'Rank, category, domicile and declared limits.' },
+  { title: 'Review profile', note: 'Confirm what may filter an option and what only affects order.' },
+  { title: 'Read strategy', note: 'Inspect the ranked preference list and its evidence.' },
+  { title: 'Resolve conflicts', note: 'Fix contradictions or record a deliberate exception.' },
+  { title: 'Lock dossier', note: 'Save the final order with dataset and engine revisions.' },
 ]
+
+const SAMPLE_OPTIONS = [
+  ['01', 'HBTU Kanpur', 'CSE', '₹1,42,000', '75 km', 'Dream'],
+  ['02', 'BIET Jhansi', 'CSE', '₹1,24,000', '284 km', 'Target'],
+  ['03', 'IET Lucknow', 'IT', '₹1,38,000', '0 km', 'Target'],
+  ['04', 'REC Banda', 'CSE', 'Not recorded', '164 km', 'No data'],
+  ['05', 'HBTU Kanpur', 'EE', '₹1,18,000', '75 km', 'Safe'],
+  ['06', 'UIET Kanpur', 'EE', '₹1,20,000', '75 km', 'Safe'],
+  ['07', 'MMMUT Gorakhpur', 'ECE', '₹1,28,000', '241 km', 'Target'],
+] as const
 
 export function Landing() {
   const { goTo, loadDemoProfile } = useAppActions()
 
   return (
-    <>
+    <div className="landing-document">
       <section className="hero">
         <div className="hero__text">
-          <span className="eyebrow">
-            <span aria-hidden="true">◆</span>
-            AKTU / UPTAC counselling
-          </span>
-          <h1>
-            Know what to fill, in what order, and <em>why</em>.
-          </h1>
+          <span className="eyebrow">UPTAC / AKTU counselling strategy</span>
+          <p className="hero__folio mono">DOSSIER 01 · WORKING COPY</p>
+          <h1>A preference list you can defend under pressure.</h1>
           <p className="hero__lede">
-            Predictors tell you what you might get. CounselFlow builds an ordered choice list
-            from your own constraints, explains every position, and catches the contradictions
-            you would otherwise submit under pressure.
+            CounselFlow turns a candidate profile into an ordered college list, records the
+            evidence behind every position, and audits the list against the candidate&apos;s own
+            priorities before it can be locked.
           </p>
-          <div className="row" style={{ gap: 12 }}>
+          <div className="hero__actions">
             <button className="btn btn--primary btn--lg" onClick={() => goTo('profile')}>
               Build my profile
             </button>
@@ -38,18 +44,39 @@ export function Landing() {
                 goTo('profile')
               }}
             >
-              Load the sample candidate
+              Open sample candidate
             </button>
           </div>
+
+          <dl className="hero__facts">
+            <div>
+              <dt>Rank</dt>
+              <dd className="mono">12,500 CRL</dd>
+            </div>
+            <div>
+              <dt>Branch order</dt>
+              <dd className="mono">CSE / IT / ECE</dd>
+            </div>
+            <div>
+              <dt>Hard ceiling</dt>
+              <dd className="mono">₹1,50,000 yearly</dd>
+            </div>
+            <div>
+              <dt>Distance</dt>
+              <dd className="mono">300 km from Lucknow</dd>
+            </div>
+          </dl>
         </div>
 
-        <div className="hero__aside">
-          <span className="section-label" style={{ marginBottom: 14, display: 'block' }}>
-            Five steps, start to locked
-          </span>
+        <aside className="hero__aside" aria-label="CounselFlow document index">
+          <div className="index-heading">
+            <span>Document index</span>
+            <span className="mono">05 sections</span>
+          </div>
           <ol className="steps">
-            {STEPS.map((step) => (
+            {STEPS.map((step, index) => (
               <li key={step.title}>
+                <span className="steps__number mono">{String(index + 1).padStart(2, '0')}</span>
                 <span>
                   <b>{step.title}</b>
                   <small>{step.note}</small>
@@ -57,39 +84,110 @@ export function Landing() {
               </li>
             ))}
           </ol>
+          <p className="marginal-note">
+            The ordering and audit remain deterministic. Generated prose may clarify stored
+            evidence, but it cannot change a score, a row, or the lock decision.
+          </p>
+        </aside>
+      </section>
+
+      <section className="sample-dossier" aria-labelledby="sample-title">
+        <header className="sample-dossier__head">
+          <div>
+            <span className="section-label">Live product specimen</span>
+            <h2 id="sample-title">Seven-option preference register</h2>
+          </div>
+          <p>
+            Sample profile: General category, UP domicile, placements weighted highest. Every
+            number below is carried into the explanation and audit.
+          </p>
+        </header>
+
+        <div className="sample-dossier__body">
+          <div className="table-scroll">
+            <table className="preview-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Institute</th>
+                  <th>Branch</th>
+                  <th>Annual fee</th>
+                  <th>Distance</th>
+                  <th>Band</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SAMPLE_OPTIONS.map((option) => (
+                  <tr key={`${option[0]}-${option[1]}`}>
+                    {option.map((value, index) => (
+                      <td key={value} className={index === 0 || index > 2 ? 'mono' : undefined}>
+                        {value}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <aside className="audit-margin" aria-label="Sample audit notes">
+            <span className="section-label">Margin audit</span>
+            <article>
+              <span className="audit-margin__code mono">CF-01 / WARNING</span>
+              <h3>Branch priority conflict</h3>
+              <p>IET IT appears above REC CSE, while the candidate declared CSE above IT.</p>
+            </article>
+            <article>
+              <span className="audit-margin__code mono">CF-08 / WARNING</span>
+              <h3>Evidence gap</h3>
+              <p>Annual fee, closing rank and placement evidence are missing for REC Banda.</p>
+            </article>
+            <button
+              className="text-link"
+              type="button"
+              onClick={() => {
+                loadDemoProfile()
+                goTo('profile')
+              }}
+            >
+              Run this candidate through all five steps
+            </button>
+          </aside>
         </div>
       </section>
 
-      <section className="pitch">
-        <article>
-          <h3>Hard limits actually block</h3>
-          <p>
-            A ₹1.5 lakh hard ceiling removes a ₹2 lakh option and refuses to lock until you fix
-            it. A soft budget only ranks it lower. You choose which one you meant.
-          </p>
-        </article>
-        <article>
-          <h3>Your order stays yours</h3>
-          <p>
-            CounselFlow never silently reorders your list. When it wants to swap two rows it
-            shows you the before and after first, and you decide.
-          </p>
-        </article>
-        <article>
-          <h3>Every position is explained</h3>
-          <p>
-            Select any row and you get the reasons that put it there, how much room it leaves
-            under your limits, and the dataset line each fact came from.
-          </p>
-        </article>
+      <section className="method-sheet" aria-labelledby="method-title">
+        <header>
+          <span className="section-label">Operating method</span>
+          <h2 id="method-title">What the candidate controls</h2>
+        </header>
+        <div className="method-sheet__rows">
+          <article>
+            <span className="mono">A</span>
+            <h3>Hard limits</h3>
+            <p>Budget, distance, and exclusions can remove an option and prevent locking.</p>
+          </article>
+          <article>
+            <span className="mono">B</span>
+            <h3>Soft preferences</h3>
+            <p>Placements, fees, distance, campus and hostel alter ranking weight only.</p>
+          </article>
+          <article>
+            <span className="mono">C</span>
+            <h3>Final judgement</h3>
+            <p>Every proposed swap is visible. A kept warning requires a written reason.</p>
+          </article>
+        </div>
       </section>
 
-      <p className="band__note" style={{ marginTop: 46, maxWidth: '68ch' }}>
-        Demo build — the strategy and audit responses come from a local mock while the engine
-        and API are being finished. Every fact shown carries its source label. Nothing is
-        locked until every critical conflict is resolved; warnings can be overridden, but only
-        with a reason that stays attached to your final list.
-      </p>
-    </>
+      <footer className="document-foot">
+        <span>Reference dataset · verify final choices with official UPTAC notices</span>
+        <span className="document-foot__links">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms of use</a>
+        </span>
+        <span className="mono">CF-MVP / 2026</span>
+      </footer>
+    </div>
   )
 }

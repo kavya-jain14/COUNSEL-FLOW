@@ -117,7 +117,7 @@ export function BuildProfile() {
             >
               {AUTHORITY_LIST.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.label} — {a.fullName}
+                  {a.label}: {a.fullName}
                 </option>
               ))}
             </select>
@@ -170,7 +170,7 @@ export function BuildProfile() {
         <fieldset className="quota-set">
           <legend className="field__label">Reservation quotas you can claim</legend>
           <span className="field__hint">
-            Optional, and you can claim more than one. These open extra seat pools — they never
+            Optional, and you can claim more than one. These open extra seat pools: they never
             remove an option from your list.
           </span>
           <div className="quota-grid">
@@ -203,7 +203,7 @@ export function BuildProfile() {
       <Band
         num="02 · Required"
         title="What you want"
-        note="Branch order is a preference, not a filter — a lower-ranked branch can still appear, it just has to earn its place."
+        note="Branch order is a preference, not a filter: a lower-ranked branch can still appear, it just has to earn its place."
       >
         <BranchPriority
           value={profile.branchPriority}
@@ -283,7 +283,7 @@ export function BuildProfile() {
       <Band
         num="04 · Has defaults"
         title="Your preferences"
-        note="Soft only. These decide which of two acceptable options sits higher — they never remove anything."
+        note="Soft only. These decide which of two acceptable options sits higher: they never remove anything."
       >
         <div className="band__head">
           <span className="section-label">These only change the order</span>
@@ -300,7 +300,7 @@ export function BuildProfile() {
         <NextStep
           tone="blocked"
           what={`Fill in ${errorCount} more field${errorCount > 1 ? 's' : ''}`}
-          why="We will not guess a missing input — a wrong rank or category changes every position on your list."
+          why="We will not guess a missing input: a wrong rank or category changes every position on your list."
         >
           <button type="submit" className="btn btn--primary">
             Check again
@@ -316,7 +316,7 @@ export function BuildProfile() {
             Back
           </button>
           <button type="submit" className="btn btn--primary">
-            Review my profile →
+            Review my profile
           </button>
         </NextStep>
       )}

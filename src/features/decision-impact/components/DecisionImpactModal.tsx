@@ -46,7 +46,7 @@ function FindingCard({ finding }: { finding: NarratedFinding }) {
       <p className="di-card__detail">{finding.detail}</p>
       {finding.yourWords && (
         <p className="di-card__ref">
-          <span aria-hidden="true">↳</span> Your profile: {finding.yourWords}
+          Profile basis: {finding.yourWords}
         </p>
       )}
     </article>
@@ -96,7 +96,7 @@ function FitPanel({ narrated }: { narrated: NarratedImpact }) {
         <span className="di-fit__note">{band.note}</span>
         {fit.coverage < 1 && (
           <span className="di-fit__partial">
-            Measured on {Math.round(fit.coverage * 100)}% of what you weighted —{' '}
+            Measured on {Math.round(fit.coverage * 100)}% of what you weighted -{' '}
             {fit.unmeasured.join(' and ').toLowerCase()}{' '}
             {fit.unmeasured.length === 1 ? 'is' : 'are'} not on record for this option, so
             the number above is built from the rest.
@@ -119,8 +119,8 @@ function FitBreakdown({ narrated }: { narrated: NarratedImpact }) {
       <summary>How that number was reached</summary>
       <p className="di-breakdown__note">
         Each row is one thing you declared, weighted the way you weighted it, scored against
-        this option alone. Fit measures how well the option matches your profile — it is not
-        a chance of getting a seat.
+        this option alone. Fit measures profile alignment. It does not estimate the chance
+        of getting a seat.
       </p>
       <ul className="di-breakdown__list">
         {active.map((entry) => (
@@ -267,14 +267,13 @@ export function DecisionImpactModal({
             onClick={onClose}
             aria-label="Close decision impact"
           >
-            <span aria-hidden="true">✕</span>
+            Close
           </button>
         </header>
 
         <p className="di__frame">
-          Everything below is measured against <b>your</b> profile, not against this
-          college's reputation. Nothing here is a review — it is what this choice costs and
-          gains <b>you</b>.
+          Everything below is measured against <b>your</b> profile. This record explains the
+          candidate-specific costs and benefits attached to this choice.
         </p>
 
         <div className="di__declared">
@@ -290,22 +289,20 @@ export function DecisionImpactModal({
 
         {narrated.blocking.length > 0 && (
           <section className="di-alarm" role="alert">
-            <h3 className="di-alarm__title">
-              <span aria-hidden="true">⛔</span>
-              {narrated.blocking.length} hard{' '}
+            <h3 className="di-alarm__title"> {narrated.blocking.length} hard{' '}
               {narrated.blocking.length === 1 ? 'constraint' : 'constraints'} you set are
               broken by this option
             </h3>
             <p className="di-alarm__note">
               These are not preferences that ranked it lower. You declared them absolute, so
-              choosing this option means changing your profile — or dropping the option.
+              choosing this option means changing your profile: or dropping the option.
             </p>
             {narrated.blocking.map((finding) => (
               <FindingCard key={finding.id} finding={finding} />
             ))}
             {onOpenConflicts && (
               <button type="button" className="btn--link" onClick={onOpenConflicts}>
-                Resolve this in the conflict inspector →
+                Resolve this in the conflict inspector
               </button>
             )}
           </section>
@@ -388,7 +385,7 @@ export function DecisionImpactModal({
                 disabled={disabled || impact.position === 1}
                 onClick={() => onMove(item.itemId, -1)}
               >
-                ↑ Move up
+                Move up
               </button>
             )}
             {onMove && (
@@ -398,7 +395,7 @@ export function DecisionImpactModal({
                 disabled={disabled || impact.position === impact.total}
                 onClick={() => onMove(item.itemId, 1)}
               >
-                ↓ Move down
+                Move down
               </button>
             )}
             {onRemove && (

@@ -205,7 +205,7 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
       const constraint = action.target?.constraint
       if (constraint) {
         profile = { ...profile, [constraint]: { ...profile[constraint], mode: 'soft' } }
-        detail = `${constraint === 'budget' ? 'Budget' : 'Distance'} is now a soft preference — it ranks options instead of blocking them.`
+        detail = `${constraint === 'budget' ? 'Budget' : 'Distance'} is now a soft preference: it ranks options instead of blocking them.`
       }
       break
     }
@@ -313,7 +313,7 @@ function reducer(state: AppState, action: Action): AppState {
           ...state.activity,
         ],
         announcement: action.audit.canLock
-          ? 'Re-audit complete. No unresolved blocking conflicts — you can lock the list.'
+          ? 'Re-audit complete. No unresolved blocking conflicts: you can lock the list.'
           : `Re-audit complete. ${action.audit.counts.CRITICAL} critical and ${action.audit.counts.WARNING} warning conflicts still need a decision.`,
       }
 
@@ -379,7 +379,7 @@ function reducer(state: AppState, action: Action): AppState {
             id: activityId(),
             tone: 'locked',
             label: 'Strategy locked',
-            detail: `Snapshot ${action.lock.snapshotId} — ${action.lock.itemOrder.length} options.`,
+            detail: `Snapshot ${action.lock.snapshotId}: ${action.lock.itemOrder.length} options.`,
           },
           ...state.activity,
         ],

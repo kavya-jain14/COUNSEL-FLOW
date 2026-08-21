@@ -71,7 +71,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `${str(facts, 'branch')} is your first-choice branch`,
     detail: `You ranked ${str(facts, 'order')}. This option gives you the branch at the top of that list, so nothing about the branch is being traded away here.`,
     clause: `your first-choice branch`,
-    yourWords: `Branch order — ${str(facts, 'order')}`,
+    yourWords: `Branch order: ${str(facts, 'order')}`,
   }),
 
   BRANCH_DOWNGRADE: ({ facts }) => {
@@ -79,9 +79,9 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     const steps = num(facts, 'stepsDown')
     return {
       headline: `${str(facts, 'branch')} is your #${choice} branch, not your first choice`,
-      detail: `You ranked ${str(facts, 'order')}. Taking this means accepting ${str(facts, 'branch')} over ${str(facts, 'passedOver')} — ${steps === 1 ? 'a one-step' : `a ${steps}-step`} move down your own order, ${steps === 1 ? 'which is the smallest branch compromise on offer' : 'which is a real branch compromise'}.`,
+      detail: `You ranked ${str(facts, 'order')}. Taking this means accepting ${str(facts, 'branch')} over ${str(facts, 'passedOver')}: ${steps === 1 ? 'a one-step' : `a ${steps}-step`} move down your own order, ${steps === 1 ? 'which is the smallest branch compromise on offer' : 'which is a real branch compromise'}.`,
       clause: `${str(facts, 'branch')} instead of your first-choice ${str(facts, 'firstChoice')}`,
-      yourWords: `Branch order — ${str(facts, 'order')}`,
+      yourWords: `Branch order: ${str(facts, 'order')}`,
     }
   },
 
@@ -89,12 +89,12 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `${str(facts, 'branch')} is not in your branch order at all`,
     detail: `You ranked ${str(facts, 'order')} and never placed ${str(facts, 'branch')} among them. Choosing this is a branch you did not ask for, not a lower-ranked one you did.`,
     clause: `a branch you never ranked`,
-    yourWords: `Branch order — ${str(facts, 'order')}`,
+    yourWords: `Branch order: ${str(facts, 'order')}`,
   }),
 
   BRANCH_EXCLUDED: ({ facts }) => ({
     headline: `You marked ${str(facts, 'branch')} as never-accept`,
-    detail: `Your profile carries the exclusion "${str(facts, 'exclusionLabel')}". This option is in exactly that branch, so keeping it contradicts a limit you set as absolute — not one you weighted.`,
+    detail: `Your profile carries the exclusion "${str(facts, 'exclusionLabel')}". This option is in exactly that branch, so keeping it contradicts a limit you set as absolute: not one you weighted.`,
     clause: `a branch you excluded outright`,
     yourWords: str(facts, 'exclusionLabel'),
   }),
@@ -113,35 +113,35 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `${formatINRExact(num(facts, 'fee'))}/yr leaves ${formatINRExact(num(facts, 'spare'))} under your ceiling`,
     detail: `You set ${formatINR(num(facts, 'limit'))} a year as a ${limitWord(str(facts, 'mode'))} and rated lower fees "${str(facts, 'weightWord')}". Across four years that spare adds up to about ${formatINR(num(facts, 'spareFourYears'))}.`,
     clause: `real room under your budget`,
-    yourWords: `Annual budget — ${formatINR(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
+    yourWords: `Annual budget: ${formatINR(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
   }),
 
   FEE_TIGHT: ({ facts }) => ({
     headline: `Uses ${num(facts, 'usedPct')}% of your annual budget`,
     detail: `${formatINRExact(num(facts, 'fee'))}/yr against your ${formatINR(num(facts, 'limit'))} ceiling leaves only ${formatINRExact(num(facts, 'spare'))} of room. ${str(facts, 'mode') === 'hard' ? 'A fee revision would push this past a limit you marked non-negotiable.' : 'A fee revision would push this past the budget you named.'}`,
     clause: `almost no budget headroom`,
-    yourWords: `Annual budget — ${formatINR(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
+    yourWords: `Annual budget: ${formatINR(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
   }),
 
   FEE_HARD_BREACH: ({ facts }) => ({
     headline: `${formatINRExact(num(facts, 'over'))}/yr above the ceiling you called non-negotiable`,
-    detail: `${formatINRExact(num(facts, 'fee'))}/yr against the ${formatINR(num(facts, 'limit'))} you set as a hard limit — about ${formatINR(num(facts, 'overFourYears'))} extra across four years. Keeping this means raising the ceiling or softening it, not ignoring it.`,
+    detail: `${formatINRExact(num(facts, 'fee'))}/yr against the ${formatINR(num(facts, 'limit'))} you set as a hard limit: about ${formatINR(num(facts, 'overFourYears'))} extra across four years. Keeping this means raising the ceiling or softening it, not ignoring it.`,
     clause: `a budget you declared as absolute`,
-    yourWords: `Annual budget — ${formatINR(num(facts, 'limit'))}, hard limit`,
+    yourWords: `Annual budget: ${formatINR(num(facts, 'limit'))}, hard limit`,
   }),
 
   FEE_SOFT_BREACH: ({ facts }) => ({
     headline: `${formatINRExact(num(facts, 'over'))}/yr above your preferred budget`,
-    detail: `${formatINRExact(num(facts, 'fee'))}/yr against the ${formatINR(num(facts, 'limit'))} you named. You marked budget a soft preference, so this stays eligible — it costs you about ${formatINR(num(facts, 'overFourYears'))} more across four years than you planned for.`,
+    detail: `${formatINRExact(num(facts, 'fee'))}/yr against the ${formatINR(num(facts, 'limit'))} you named. You marked budget a soft preference, so this stays eligible: it costs you about ${formatINR(num(facts, 'overFourYears'))} more across four years than you planned for.`,
     clause: `${formatINR(num(facts, 'over'))}/yr more than you planned to pay`,
-    yourWords: `Annual budget — ${formatINR(num(facts, 'limit'))}, soft preference`,
+    yourWords: `Annual budget: ${formatINR(num(facts, 'limit'))}, soft preference`,
   }),
 
   FEE_ABOVE_LIST: ({ facts }) => {
     const cheaper = num(facts, 'cheaperCount')
     return {
       headline: `Costs more than ${cheaper} of the ${num(facts, 'comparedCount')} priced options on your list`,
-      detail: `${str(facts, 'cheapestName')} at #${num(facts, 'cheapestPosition')} is ${formatINRExact(num(facts, 'delta'))}/yr cheaper — about ${formatINR(num(facts, 'deltaFourYears'))} over the degree. You rated lower fees "${str(facts, 'weightWord')}", so this is a cost you are choosing to carry.`,
+      detail: `${str(facts, 'cheapestName')} at #${num(facts, 'cheapestPosition')} is ${formatINRExact(num(facts, 'delta'))}/yr cheaper: about ${formatINR(num(facts, 'deltaFourYears'))} over the degree. You rated lower fees "${str(facts, 'weightWord')}", so this is a cost you are choosing to carry.`,
       clause: `a higher fee than most of your own list`,
     }
   },
@@ -155,32 +155,32 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
   DISTANCE_WITHIN: ({ facts }) => ({
     headline:
       num(facts, 'km') === 0
-        ? `In ${str(facts, 'homeCity', 'your home city')} itself — no travel against a ${formatKm(num(facts, 'limit'))} limit`
-        : `${formatKm(num(facts, 'km'))} from ${str(facts, 'homeCity', 'home')} — ${formatKm(num(facts, 'spare'))} inside your limit`,
+        ? `In ${str(facts, 'homeCity', 'your home city')} itself: no travel against a ${formatKm(num(facts, 'limit'))} limit`
+        : `${formatKm(num(facts, 'km'))} from ${str(facts, 'homeCity', 'home')}: ${formatKm(num(facts, 'spare'))} inside your limit`,
     detail: `You set ${formatKm(num(facts, 'limit'))} as a ${limitWord(str(facts, 'mode'))} and rated staying close to home "${str(facts, 'weightWord')}". ${num(facts, 'nearerCount') === 0 ? 'Nothing else on your list is closer.' : `${num(facts, 'nearerCount')} ${plural(num(facts, 'nearerCount'), 'option is', 'options are')} closer and ${num(facts, 'fartherCount')} ${plural(num(facts, 'fartherCount'), 'is', 'are')} further.`}${bool(facts, 'commutable') ? ' Close enough to consider living at home.' : ''}`,
     clause: `a location that matches your distance preference`,
-    yourWords: `Distance from home — ${formatKm(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
+    yourWords: `Distance from home: ${formatKm(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
   }),
 
   DISTANCE_TIGHT: ({ facts }) => ({
-    headline: `${formatKm(num(facts, 'km'))} — ${num(facts, 'usedPct')}% of the distance you said you would travel`,
+    headline: `${formatKm(num(facts, 'km'))}: ${num(facts, 'usedPct')}% of the distance you said you would travel`,
     detail: `Only ${formatKm(num(facts, 'spare'))} of margin against your ${formatKm(num(facts, 'limit'))} ${limitWord(str(facts, 'mode'))} from ${str(facts, 'homeCity', 'home')}. Distances are straight-line between city centres, so real travel is typically 20-30% longer than this figure.`,
     clause: `a distance sitting at the edge of your limit`,
-    yourWords: `Distance from home — ${formatKm(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
+    yourWords: `Distance from home: ${formatKm(num(facts, 'limit'))}, ${limitWord(str(facts, 'mode'))}`,
   }),
 
   DISTANCE_HARD_BREACH: ({ facts }) => ({
     headline: `${formatKm(num(facts, 'over'))} beyond the travel limit you called non-negotiable`,
     detail: `${str(facts, 'city')} is ${formatKm(num(facts, 'km'))} from ${str(facts, 'homeCity', 'your home city')}, against the ${formatKm(num(facts, 'limit'))} you set as a hard limit. Keeping this means extending that radius for every option, not just this one.`,
     clause: `a distance you declared as absolute`,
-    yourWords: `Distance from home — ${formatKm(num(facts, 'limit'))}, hard limit`,
+    yourWords: `Distance from home: ${formatKm(num(facts, 'limit'))}, hard limit`,
   }),
 
   DISTANCE_SOFT_BREACH: ({ facts }) => ({
     headline: `${formatKm(num(facts, 'over'))} further than you wanted to travel`,
     detail: `${str(facts, 'city')} is ${formatKm(num(facts, 'km'))} from ${str(facts, 'homeCity', 'your home city')} against the ${formatKm(num(facts, 'limit'))} you named. You marked distance a soft preference and rated staying close "${str(facts, 'weightWord')}", so this ranks lower rather than being removed.`,
     clause: `${formatKm(num(facts, 'over'))} more travel than you asked for`,
-    yourWords: `Distance from home — ${formatKm(num(facts, 'limit'))}, soft preference`,
+    yourWords: `Distance from home: ${formatKm(num(facts, 'limit'))}, soft preference`,
   }),
 
   DISTANCE_UNKNOWN: ({ facts }) => ({
@@ -190,24 +190,24 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
   }),
 
   PLACEMENT_STRONG: ({ facts }) => ({
-    headline: `Placement index ${num(facts, 'score')}/100 — you rated placements "${str(facts, 'weightWord')}"`,
+    headline: `Placement index ${num(facts, 'score')}/100: you rated placements "${str(facts, 'weightWord')}"`,
     detail: `${num(facts, 'betterCount') === 0 ? 'No option on your list records a stronger placement figure.' : `${num(facts, 'betterCount')} of ${num(facts, 'comparedCount')} other options record higher, led by ${str(facts, 'bestName')} at #${maybeNum(facts, 'bestPosition') ?? 0} on ${maybeNum(facts, 'bestScore') ?? 0}/100.`} This is the factor you weighted most of your ordering on.`,
     clause: `the placement record you weighted "${str(facts, 'weightWord')}"`,
-    yourWords: `Placement record — ${str(facts, 'weightWord')}`,
+    yourWords: `Placement record: ${str(facts, 'weightWord')}`,
   }),
 
   PLACEMENT_MID: ({ facts }) => ({
     headline: `Placement index ${num(facts, 'score')}/100 is mid-table for a factor you rated "${str(facts, 'weightWord')}"`,
     detail: `${num(facts, 'betterCount')} of ${num(facts, 'comparedCount')} other options on your list record higher, and ${num(facts, 'betterBelowCount')} of those sit below this one. You are ranking a weaker placement record above stronger ones.`,
     clause: `a mid-table placement record`,
-    yourWords: `Placement record — ${str(facts, 'weightWord')}`,
+    yourWords: `Placement record: ${str(facts, 'weightWord')}`,
   }),
 
   PLACEMENT_WEAK: ({ facts }) => ({
     headline: `Placement index ${num(facts, 'score')}/100 against a factor you rated "${str(facts, 'weightWord')}"`,
     detail: `${str(facts, 'bestName')} at #${maybeNum(facts, 'bestPosition') ?? 0} records ${maybeNum(facts, 'bestScore') ?? 0}/100. Choosing this one means accepting the weaker record on the single factor you said should tip the balance.`,
     clause: `a weak placement record on the factor you weighted "${str(facts, 'weightWord')}"`,
-    yourWords: `Placement record — ${str(facts, 'weightWord')}`,
+    yourWords: `Placement record: ${str(facts, 'weightWord')}`,
   }),
 
   PLACEMENT_UNKNOWN: ({ facts }) => ({
@@ -217,31 +217,31 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
   }),
 
   CAMPUS_STRONG: ({ facts }) => ({
-    headline: `Campus index ${num(facts, 'score')}/100 — you rated facilities "${str(facts, 'weightWord')}"`,
+    headline: `Campus index ${num(facts, 'score')}/100: you rated facilities "${str(facts, 'weightWord')}"`,
     detail: `${num(facts, 'betterCount')} of ${num(facts, 'comparedCount')} other options record higher on the campus factor you weighted.`,
     clause: `the campus quality you asked for`,
-    yourWords: `Campus & facilities — ${str(facts, 'weightWord')}`,
+    yourWords: `Campus & facilities: ${str(facts, 'weightWord')}`,
   }),
 
   CAMPUS_WEAK: ({ facts }) => ({
     headline: `Campus index ${num(facts, 'score')}/100 against a factor you rated "${str(facts, 'weightWord')}"`,
     detail: `${str(facts, 'bestName')} at #${maybeNum(facts, 'bestPosition') ?? 0} records ${maybeNum(facts, 'bestScore') ?? 0}/100. Campus quality is something you said should move options, and this one is on the wrong side of it.`,
     clause: `weaker campus facilities than you weighted for`,
-    yourWords: `Campus & facilities — ${str(facts, 'weightWord')}`,
+    yourWords: `Campus & facilities: ${str(facts, 'weightWord')}`,
   }),
 
   HOSTEL_AVAILABLE: ({ facts }) => ({
-    headline: `Hostel is listed — you rated hostel availability "${str(facts, 'weightWord')}"`,
+    headline: `Hostel is listed: you rated hostel availability "${str(facts, 'weightWord')}"`,
     detail: `${maybeNum(facts, 'km') == null ? 'Accommodation on campus is on record for this college.' : `At ${formatKm(num(facts, 'km'))} from ${str(facts, 'homeCity', 'home')}, on-campus accommodation is what makes this option practical day to day.`}`,
     clause: `hostel accommodation you said you needed`,
-    yourWords: `Hostel availability — ${str(facts, 'weightWord')}`,
+    yourWords: `Hostel availability: ${str(facts, 'weightWord')}`,
   }),
 
   HOSTEL_MISSING: ({ facts }) => ({
-    headline: `No hostel on record — you rated hostel availability "${str(facts, 'weightWord')}"`,
+    headline: `No hostel on record: you rated hostel availability "${str(facts, 'weightWord')}"`,
     detail: `${str(facts, 'college')} lists no hostel in the dataset. You weighted this factor, so accepting the option means solving accommodation yourself.`,
     clause: `no hostel, on a factor you weighted "${str(facts, 'weightWord')}"`,
-    yourWords: `Hostel availability — ${str(facts, 'weightWord')}`,
+    yourWords: `Hostel availability: ${str(facts, 'weightWord')}`,
   }),
 
   HOSTEL_EXCLUDED: ({ facts }) => ({
@@ -273,23 +273,23 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
 
   REACH_DREAM: ({ facts }) => ({
     headline: `Closed ${num(facts, 'gapPct')}% above your rank last cycle`,
-    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')}; your rank is ${formatRank(num(facts, 'rank'))}. It is a stretch, not a plan — worth holding high because a favourable cycle costs you nothing, but the list still needs something below it that closes for you.`,
+    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')}; your rank is ${formatRank(num(facts, 'rank'))}. It is a stretch, not a plan: worth holding high because a favourable cycle costs you nothing, but the list still needs something below it that closes for you.`,
     clause: `a seat that closed above your rank last cycle`,
-    yourWords: `Your rank — ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
+    yourWords: `Your rank: ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
   }),
 
   REACH_TARGET: ({ facts }) => ({
     headline: `Closed within reach of your rank last cycle`,
-    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')} against your ${formatRank(num(facts, 'rank'))}. Realistic in a normal cycle — this is the band where your list does most of its work.`,
+    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')} against your ${formatRank(num(facts, 'rank'))}. Realistic in a normal cycle: this is the band where your list does most of its work.`,
     clause: `a realistic shot at your rank`,
-    yourWords: `Your rank — ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
+    yourWords: `Your rank: ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
   }),
 
   REACH_SAFE: ({ facts }) => ({
     headline: `Closed ${num(facts, 'gapPct')}% below your rank last cycle`,
-    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')} against your ${formatRank(num(facts, 'rank'))}. ${num(facts, 'safeCount') <= 1 ? 'It is the only fallback of its kind on your list — if it goes, the list has no floor.' : `It is one of ${num(facts, 'safeCount')} options likely to still be open when your turn comes.`}`,
+    detail: `In the ${str(facts, 'pool')} pool this closed at ${formatRank(num(facts, 'closingRank'))} in ${num(facts, 'year')} against your ${formatRank(num(facts, 'rank'))}. ${num(facts, 'safeCount') <= 1 ? 'It is the only fallback of its kind on your list: if it goes, the list has no floor.' : `It is one of ${num(facts, 'safeCount')} options likely to still be open when your turn comes.`}`,
     clause: `a fallback that is likely to still be open`,
-    yourWords: `Your rank — ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
+    yourWords: `Your rank: ${formatRank(num(facts, 'rank'))} in ${str(facts, 'pool')}`,
   }),
 
   REACH_UNKNOWN: ({ facts }) => ({
@@ -300,9 +300,9 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
 
   QUOTA_NOT_MODELLED: ({ facts }) => ({
     headline: `Your ${str(facts, 'quotas')} claim is not in this estimate`,
-    detail: `Reachability here is measured in the ${str(facts, 'pool')} pool only. The loaded cutoffs do not carry sub-quota rows, so any extra pool you qualify for is excluded — the estimate is pessimistic rather than optimistic on that account.`,
+    detail: `Reachability here is measured in the ${str(facts, 'pool')} pool only. The loaded cutoffs do not carry sub-quota rows, so any extra pool you qualify for is excluded: the estimate is pessimistic rather than optimistic on that account.`,
     clause: `a quota pool this estimate cannot see`,
-    yourWords: `Quotas claimed — ${str(facts, 'quotas')}`,
+    yourWords: `Quotas claimed: ${str(facts, 'quotas')}`,
   }),
 
   ORDER_FORFEIT: ({ facts }) => {
@@ -320,7 +320,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     const dream = num(facts, 'dreamAbove')
     if (above === 0) {
       return {
-        headline: 'This is your first choice — nothing is tried before it',
+        headline: 'This is your first choice: nothing is tried before it',
         detail: `At #1 of ${num(facts, 'total')}, this is the option the system attempts first. Everything else on your list only comes into play if this one closes above your rank.`,
         clause: `first refusal on the whole list`,
       }
@@ -336,14 +336,14 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `You rated ${str(facts, 'factorLabel').toLowerCase()} "${str(facts, 'weightWord')}", yet this is the worst on your list for it`,
     detail: `This option records ${str(facts, 'thisValue')} against ${str(facts, 'bestName')}'s ${str(facts, 'bestValue')} at #${num(facts, 'bestPosition')}, and it still sits at #${num(facts, 'position')}. Either the weight or the position is not what you meant.`,
     clause: `a position that contradicts your "${str(facts, 'weightWord')}" rating on ${str(facts, 'factorLabel').toLowerCase()}`,
-    yourWords: `${str(facts, 'factorLabel')} — ${str(facts, 'weightWord')}`,
+    yourWords: `${str(facts, 'factorLabel')}: ${str(facts, 'weightWord')}`,
   }),
 
   CONTRADICTS_BRANCH_ORDER: ({ facts }) => ({
     headline: `Sits above ${str(facts, 'counterpartBranch')}, which you ranked higher than ${str(facts, 'thisBranch')}`,
-    detail: `Your order is ${str(facts, 'order')}, but ${str(facts, 'thisBranch')} is at #${num(facts, 'position')} and ${str(facts, 'counterpartName')} is at #${maybeNum(facts, 'counterpartPosition') ?? 0}. The audit raised this as a ${str(facts, 'severity').toLowerCase()} — resolve it there if the order was not deliberate.`,
+    detail: `Your order is ${str(facts, 'order')}, but ${str(facts, 'thisBranch')} is at #${num(facts, 'position')} and ${str(facts, 'counterpartName')} is at #${maybeNum(facts, 'counterpartPosition') ?? 0}. The audit raised this as a ${str(facts, 'severity').toLowerCase()}: resolve it there if the order was not deliberate.`,
     clause: `an order that inverts your own branch ranking`,
-    yourWords: `Branch order — ${str(facts, 'order')}`,
+    yourWords: `Branch order: ${str(facts, 'order')}`,
   }),
 
   DOMINATED_BY_NEIGHBOUR: ({ facts }) => ({
@@ -354,13 +354,13 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
 
   NO_SAFE_FALLBACK: ({ facts }) => ({
     headline: 'Your list has no safe fallback under this choice',
-    detail: `All ${num(facts, 'total')} options are dream or target reach, this one included (${str(facts, 'tier').toLowerCase()}). If cut-offs move against you, the list produces no seat at all — that is a list-level risk this option inherits.`,
+    detail: `All ${num(facts, 'total')} options are dream or target reach, this one included (${str(facts, 'tier').toLowerCase()}). If cut-offs move against you, the list produces no seat at all: that is a list-level risk this option inherits.`,
     clause: `a list with no floor under it`,
   }),
 
   DUPLICATE_SLOT: ({ facts }) => ({
     headline: 'This option appears twice on your list',
-    detail: `The same canonical option is at #${num(facts, 'position')} and #${maybeNum(facts, 'counterpartPosition') ?? 0}. The second slot is wasted — a repeated choice does not improve your chances of getting it.`,
+    detail: `The same canonical option is at #${num(facts, 'position')} and #${maybeNum(facts, 'counterpartPosition') ?? 0}. The second slot is wasted: a repeated choice does not improve your chances of getting it.`,
     clause: `a wasted duplicate slot`,
   }),
 
@@ -401,7 +401,7 @@ function buildBottomLine(
 
   if (blocking.length > 0) {
     lines.push(
-      `Choosing ${impact.name} means overriding ${blocking.length} ${plural(blocking.length, 'limit', 'limits')} you set as absolute: ${joinClauses(blocking, 3)}. That is a change to your profile, not a detail to wave through — the list will not lock while it stands.`,
+      `Choosing ${impact.name} means overriding ${blocking.length} ${plural(blocking.length, 'limit', 'limits')} you set as absolute: ${joinClauses(blocking, 3)}. That is a change to your profile, not a detail to wave through: the list will not lock while it stands.`,
     )
   } else if (works.length > 0 && compromises.length > 0) {
     lines.push(
@@ -417,7 +417,7 @@ function buildBottomLine(
     )
   } else {
     lines.push(
-      `Nothing in your profile separates ${impact.name} from the rest of your list — it neither matches nor contradicts what you declared.`,
+      `Nothing in your profile separates ${impact.name} from the rest of your list: it neither matches nor contradicts what you declared.`,
     )
   }
 

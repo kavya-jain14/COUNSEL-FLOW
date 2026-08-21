@@ -85,13 +85,13 @@ export function ConstraintControl({
         </div>
 
         <p className="constraint__behaviour" id={`${id}-behaviour`}>
-          <span aria-hidden="true">{setting.mode === 'hard' ? '⛔' : '◇'}</span>
+          <span className="mono" aria-hidden="true">{setting.mode === 'hard' ? 'H' : 'S'}</span>
           {setting.mode === 'hard' ? hardBehaviour : softBehaviour}
         </p>
 
         {error && (
           <span className="field__error" role="alert">
-            <span aria-hidden="true">✕</span>
+            <span aria-hidden="true">Field</span>
             {error}
           </span>
         )}

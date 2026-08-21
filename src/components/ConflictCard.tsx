@@ -75,7 +75,7 @@ export function ConflictCard({
         <h3 className="conflict__title">{conflict.title}</h3>
         <p className="conflict__summary">{conflict.summary}</p>
         <p className="conflict__caused">
-          <span aria-hidden="true">↳</span>
+          <span className="mono" aria-hidden="true">Basis</span>
           {conflict.causedBy}
         </p>
       </header>
@@ -93,14 +93,13 @@ export function ConflictCard({
         <div className="resolved-note">
           <span>
             <strong>
-              <span aria-hidden="true">✓ </span>
               {resolution.kind === 'FIXED'
                 ? 'Fixed'
                 : resolution.kind === 'OVERRIDDEN'
                   ? 'Overridden'
                   : 'Acknowledged'}
-            </strong>{' '}
-            — {resolution.actionLabel}
+            </strong>
+            {`: ${resolution.actionLabel}`}
           </span>
           {resolution.reason && <q>{resolution.reason}</q>}
           <div>
@@ -117,7 +116,7 @@ export function ConflictCard({
       ) : (
         <div className="conflict__actions">
           <span className="section-label">
-            Pick one — {conflict.actions.length} way
+            Pick one: {conflict.actions.length} way
             {conflict.actions.length > 1 ? 's' : ''} to settle this
           </span>
           {ordered.map((action) => (
@@ -141,9 +140,6 @@ export function ConflictCard({
                 </span>
                 <span className="choice__effect">{action.effect}</span>
               </span>
-              <span className="choice__go" aria-hidden="true">
-                →
-              </span>
             </button>
           ))}
         </div>
@@ -152,7 +148,7 @@ export function ConflictCard({
       {pending && (
         <Dialog
           title={
-            pending.kind === 'SWAP' ? 'Preview this swap' : `${pending.label} — tell us why`
+            pending.kind === 'SWAP' ? 'Preview this swap' : `${pending.label}: tell us why`
           }
           onClose={() => setPending(null)}
           footer={
@@ -161,7 +157,7 @@ export function ConflictCard({
                 Cancel
               </button>
               <button type="button" className="btn btn--primary" onClick={commit}>
-                {pending.kind === 'SWAP' ? 'Apply swap' : `Confirm — ${pending.label}`}
+                {pending.kind === 'SWAP' ? 'Apply swap' : `Confirm: ${pending.label}`}
               </button>
             </>
           }
@@ -188,10 +184,7 @@ export function ConflictCard({
                   {swapPreview.lower.option.collegeShort} · {swapPreview.lower.option.branch}
                 </span>
               </div>
-              <div className="preview-swap__arrow" aria-hidden="true">
-                ↓
-              </div>
-              <span className="section-label">After the swap</span>
+              <span className="section-label">Reordered result</span>
               <div className="preview-swap__line">
                 <span className="preview-swap__pos">#{swapPreview.upper.position}</span>
                 <span>
@@ -230,7 +223,7 @@ export function ConflictCard({
               />
               {reasonInvalid && (
                 <span className="field__error" role="alert">
-                  <span aria-hidden="true">✕</span>
+                  <span aria-hidden="true">Field</span>
                   Write at least {MIN_REASON} characters so the override is understandable later.
                 </span>
               )}

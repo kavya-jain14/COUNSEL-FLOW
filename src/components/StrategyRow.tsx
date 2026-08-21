@@ -76,7 +76,7 @@ export function StrategyRow({
                   {fit.coverage < 1 && <span aria-hidden="true">~</span>}
                   {fit.score}/100 fit for you
                   <span className="sr-only">
-                    {' '}— {FIT_WORD[fit.band]} against your profile
+                    {' '}- {FIT_WORD[fit.band]} against your profile
                     {fit.coverage < 1
                       ? `, measured on ${Math.round(fit.coverage * 100)}% of what you weighted`
                       : ''}
@@ -103,7 +103,7 @@ export function StrategyRow({
             </span>
           ) : (
             <span className="lrow__clear">
-              <span aria-hidden="true">✓</span> Clear
+              Clear
             </span>
           )}
         </span>
@@ -121,7 +121,7 @@ export function StrategyRow({
               : `Move ${name} up to position ${item.position - 1}`
           }
         >
-          <span aria-hidden="true">↑</span>
+          <span aria-hidden="true">Up</span>
         </button>
         <button
           type="button"
@@ -134,7 +134,7 @@ export function StrategyRow({
               : `Move ${name} down to position ${item.position + 1}`
           }
         >
-          <span aria-hidden="true">↓</span>
+          <span aria-hidden="true">Down</span>
         </button>
         <button
           type="button"
@@ -143,7 +143,7 @@ export function StrategyRow({
           onClick={() => onRemove(item.itemId)}
           aria-label={`Remove ${name} from the list`}
         >
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">Remove</span>
         </button>
       </span>
     </li>

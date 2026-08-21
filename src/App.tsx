@@ -1,21 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
 import { Banner, LiveRegion } from './components/ui'
-import { IconMoon, IconSun } from './components/icons'
-import { useTheme } from './lib/theme'
 import { Landing } from './screens/Landing'
 import { BuildProfile } from './screens/BuildProfile'
 import { ProfileSummary } from './screens/ProfileSummary'
 import { Strategy } from './screens/Strategy'
 import { ConflictInspector } from './screens/ConflictInspector'
 import { Locked } from './screens/Locked'
-import { LabDashboard } from './screens/LabDashboard'
 import { isProfileValid } from './lib/validation'
 import { ENGINE_VERSION } from './data/reference'
 
-function Screen({ step }: { step: Step | 'lab' }) {
+function Screen({ step }: { step: Step }) {
   switch (step) {
     case 'landing':
       return <Landing />
@@ -29,17 +26,13 @@ function Screen({ step }: { step: Step | 'lab' }) {
       return <ConflictInspector />
     case 'locked':
       return <Locked />
-    case 'lab':
-      return <LabDashboard />
   }
 }
 
 function Shell() {
   const state = useAppState()
   const { goTo, lock } = useAppActions()
-  const { theme, toggleTheme } = useTheme()
   const mainRef = useRef<HTMLDivElement>(null)
-  const [showLab, setShowLab] = useState(false)
 
   useEffect(() => {
     mainRef.current?.focus()
@@ -59,7 +52,7 @@ function Shell() {
 
   const meta: Record<Step, string> = {
     landing: '',
-    profile: profileReady ? 'Rank, limits, priorities' : 'Start here — rank and limits',
+    profile: profileReady ? 'Rank, limits, priorities' : 'Start with rank and limits',
     summary: profileReady ? 'Check before generating' : 'Finish your profile first',
     strategy:
       state.items.length > 0
@@ -86,19 +79,18 @@ function Shell() {
       </a>
 
       <aside className="sidebar">
-        <button className="brand" onClick={() => goTo('landing')} aria-label="CounselFlow home">
-          <span className="brand__mark" aria-hidden="true">
-            <img
-              src={
-                theme === 'light'
-                  ? '/brand/counselflow-mark-light.svg'
-                  : '/brand/counselflow-mark.svg'
-              }
-              alt=""
-            />
-          </span>
-          <span>CounselFlow</span>
-        </button>
+        <div className="sidebar__masthead">
+          <button className="brand" onClick={() => goTo('landing')} aria-label="CounselFlow home">
+            <span className="brand__mark" aria-hidden="true">
+              <img src="/brand/counselflow-mark-light.svg" alt="" />
+            </span>
+            <span>
+              CounselFlow
+              <small>Candidate preference dossier</small>
+            </span>
+          </button>
+          <span className="document-ref mono">CF / UPTAC / 2026</span>
+        </div>
 
         <span className="sidebar__title" aria-hidden="true">
           Your five steps
@@ -120,42 +112,39 @@ function Shell() {
                 onClick={() => goTo(entry.step)}
               >
                 <span className="navitem__step" aria-hidden="true">
-                  {isDone ? '✓' : String(i + 1).padStart(2, '0')}
+                  {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="navitem__text">
                   <span className="navitem__label">{entry.short}</span>
                   <span className="navitem__meta">{meta[entry.step]}</span>
                 </span>
-                {!enabled && !isCurrent && (
-                  <span className="navitem__lockicon" aria-hidden="true">
-                    ⌁
-                  </span>
-                )}
+                <span className="navitem__state" aria-hidden="true">
+                  {isCurrent ? 'Open' : isDone ? 'Filed' : enabled ? 'Ready' : 'Pending'}
+                </span>
               </button>
             )
           })}
         </nav>
 
         <div className="sidebar__foot">
-          <span>{ENGINE_VERSION}</span>
-          <button
-            type="button"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'inherit', opacity: 0.5, padding: '2px 4px' }}
-            title="Integration lab"
-            onClick={() => setShowLab((v) => !v)}
-          >
-            {showLab ? '← app' : 'lab'}
-          </button>
+          <span>
+            <b>Method</b>
+            Deterministic ordering
+          </span>
+          <span className="mono">{ENGINE_VERSION}</span>
         </div>
       </aside>
 
       <div className="shell__body">
         <header className="topbar">
-          <nav className="crumb" aria-label="Breadcrumb">
-            <span>CounselFlow</span>
-            <span aria-hidden="true">/</span>
-            <strong>{activeLabel}</strong>
-          </nav>
+          <div className="topbar__document">
+            <span className="topbar__section mono">ADMISSIONS STRATEGY FILE</span>
+            <nav className="crumb" aria-label="Breadcrumb">
+              <span>CounselFlow</span>
+              <span aria-hidden="true">/</span>
+              <strong>{activeLabel}</strong>
+            </nav>
+          </div>
           <div className="row" style={{ gap: 12, flexWrap: 'nowrap' }}>
             <button
               type="button"
@@ -165,19 +154,8 @@ function Shell() {
             >
               {state.lock ? 'Locked' : 'Lock strategy'}
             </button>
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label={
-                theme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'
-              }
-              title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
-            >
-              {theme === 'dark' ? <IconSun /> : <IconMoon />}
-            </button>
-            <span className="avatar" aria-hidden="true">
-              GB
+            <span className="topbar__status mono" aria-label="Current strategy status">
+              {state.lock ? 'FILED' : state.auditStale ? 'REVIEW DUE' : 'WORKING COPY'}
             </span>
           </div>
         </header>
@@ -191,7 +169,7 @@ function Shell() {
               </span>
             </Banner>
           )}
-          <Screen step={showLab ? 'lab' : state.step} />
+          <Screen step={state.step} />
         </main>
       </div>
 

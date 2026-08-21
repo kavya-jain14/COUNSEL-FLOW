@@ -30,18 +30,18 @@ const MOCK_ORDER: string[] = [
  * candidate's own rank using a ratio: closingRank / candidateRank.
  *
  * A ratio < 1 means the option historically closed before (above) the candidate's
- * rank — harder to get. A ratio > 1 means it closed after (below) — more accessible.
+ * rank: harder to get. A ratio > 1 means it closed after (below): more accessible.
  *
- * DREAM  — closing rank was meaningfully tighter than the candidate's rank last cycle.
+ * DREAM : closing rank was meaningfully tighter than the candidate's rank last cycle.
  *           The option is a stretch: the candidate may get it if cut-offs move
  *           favourably, but should not rely on it.
  *           Buffer boundary: closingRank / candidateRank < TIER_DREAM_RATIO_MAX (0.90)
  *
- * TARGET — closing rank was in the realistic band around the candidate's rank.
+ * TARGET: closing rank was in the realistic band around the candidate's rank.
  *           These are the core of the list: reachable in a normal cycle.
  *           Buffer boundary: TIER_DREAM_RATIO_MAX (0.90) ≤ ratio < TIER_TARGET_RATIO_MAX (1.40)
  *
- * SAFE   — closing rank was substantially below the candidate's rank last cycle.
+ * SAFE  : closing rank was substantially below the candidate's rank last cycle.
  *           These are fallback options: very likely accessible, included to ensure
  *           coverage in the event of poor cut-off movement at target/dream options.
  *           Buffer boundary: closingRank / candidateRank ≥ TIER_TARGET_RATIO_MAX (1.40)
@@ -140,7 +140,7 @@ export function reasonsFor(
     reasons.push({
       code: 'R-PLACEMENT',
       label: 'Placement record',
-      detail: `Recorded placement index ${option.placementScore}/100 — you weighted placements highly.`,
+      detail: `Recorded placement index ${option.placementScore}/100: you weighted placements highly.`,
       polarity: option.placementScore >= 75 ? 'positive' : 'neutral',
     })
   }

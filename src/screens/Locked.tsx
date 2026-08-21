@@ -186,7 +186,7 @@ export function Locked() {
         <Band
           num={`Round ${currentRound} of ${authority.rounds}`}
           title="What did you actually get?"
-          note="Allotment decides the next round. We only offer options you would genuinely rather have than the seat in your hand — anything at or below it is not worth floating for."
+          note="Allotment decides the next round. We only offer options you would genuinely rather have than the seat in your hand: anything at or below it is not worth floating for."
         >
           <div className="field">
             <label className="field__label" htmlFor="allotment">
@@ -201,7 +201,7 @@ export function Locked() {
               <option value="">Not allotted anything yet</option>
               {items.map((item) => (
                 <option key={item.itemId} value={item.option.id}>
-                  #{String(item.position).padStart(2, '0')} — {labelFor(item)}
+                  #{String(item.position).padStart(2, '0')}: {labelFor(item)}
                 </option>
               ))}
             </select>
@@ -212,7 +212,7 @@ export function Locked() {
               tone={preview.exhausted ? 'success' : 'info'}
               title={
                 preview.exhausted
-                  ? `You hold your #${preview.heldPosition} choice — nothing on this list beats it`
+                  ? `You hold your #${preview.heldPosition} choice: nothing on this list beats it`
                   : `${preview.items.length} option${preview.items.length > 1 ? 's' : ''} beat what you hold`
               }
             >
@@ -254,7 +254,7 @@ export function Locked() {
           tone="ready"
           what={
             preview.exhausted
-              ? 'Freeze — you already hold your best available option'
+              ? 'Freeze: you already hold your best available option'
               : `Round ${authority.rounds} is the last round for ${authority.label}`
           }
           why="Keep the snapshot ID. If the dataset or your circumstances change, start a new profile rather than editing this one."
@@ -273,14 +273,14 @@ export function Locked() {
           why={
             allottedOptionId
               ? 'We carry forward only the options you rank above the seat you hold, then re-audit them against your constraints.'
-              : 'Record your allotment first if you got one — otherwise the next round carries the full list forward.'
+              : 'Record your allotment first if you got one: otherwise the next round carries the full list forward.'
           }
         >
           <button type="button" className="btn" onClick={() => goTo('conflicts')}>
             Back to inspector
           </button>
           <button type="button" className="btn btn--primary" onClick={startNextRound}>
-            Start round {currentRound + 1} →
+            Start round {currentRound + 1}
           </button>
         </NextStep>
       )}

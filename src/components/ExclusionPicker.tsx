@@ -18,7 +18,7 @@ const KINDS: Array<{ kind: HardExclusionKind; label: string }> = [
 function optionsFor(kind: HardExclusionKind): Array<{ value: string; label: string }> {
   switch (kind) {
     case 'branch':
-      return BRANCHES.map((b) => ({ value: b, label: `${b} — ${BRANCH_LABELS[b]}` }))
+      return BRANCHES.map((b) => ({ value: b, label: `${b}: ${BRANCH_LABELS[b]}` }))
     case 'instituteType':
       return Object.entries(INSTITUTE_TYPE_LABELS).map(([value, label]) => ({ value, label }))
     case 'location':
@@ -75,14 +75,14 @@ export function ExclusionPicker({
   return (
     <Field
       label="Never accept"
-      hint="Hard exclusions. Anything matching these is removed from your list and flagged as critical — it is not just ranked lower."
+      hint="Hard exclusions remove every matching option and mark the breach critical. They never act as ranking weights."
       error={error}
     >
       {value.length > 0 && (
         <div className="chips">
           {value.map((ex) => (
             <span className="chip chip--hard" key={ex.id}>
-              <span aria-hidden="true">⛔</span>
+              <span className="mono" aria-hidden="true">H</span>
               {ex.label}
               <button
                 type="button"
@@ -90,7 +90,7 @@ export function ExclusionPicker({
                 aria-label={`Remove exclusion: ${ex.label}`}
                 onClick={() => onChange(value.filter((e) => e.id !== ex.id))}
               >
-                ✕
+                Remove
               </button>
             </span>
           ))}
