@@ -59,7 +59,6 @@ export function FactorWeightSliders({
 
       {error && (
         <span className="field__error" role="alert">
-          <span aria-hidden="true">Remove</span>
           {error}
         </span>
       )}

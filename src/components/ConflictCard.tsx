@@ -9,12 +9,14 @@ export function ConflictCard({
   resolution,
   items,
   disabled,
+  priority = false,
   onApply,
 }: {
   conflict: Conflict
   resolution?: Resolution
   items: StrategyItem[]
   disabled?: boolean
+  priority?: boolean
   onApply: (conflict: Conflict, action: ConflictAction, reason?: string) => void
 }) {
   const [pending, setPending] = useState<ConflictAction | null>(null)
@@ -61,9 +63,12 @@ export function ConflictCard({
 
   return (
     <article
+      id={`conflict-${conflict.id}`}
       className="conflict"
       data-severity={conflict.severity}
       data-resolved={resolved}
+      data-priority={priority}
+      tabIndex={priority ? -1 : undefined}
       aria-label={`${meta.label} conflict ${conflict.code}: ${conflict.title}`}
     >
       <header className="conflict__head">

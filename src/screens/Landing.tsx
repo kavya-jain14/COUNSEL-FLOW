@@ -25,13 +25,14 @@ export function Landing() {
     <div className="landing-document">
       <section className="hero">
         <div className="hero__text">
-          <span className="eyebrow">UPTAC / AKTU counselling strategy</span>
-          <p className="hero__folio mono">DOSSIER 01 · WORKING COPY</p>
+          <span className="eyebrow">UPTAC · JoSAA · IPU preference strategy</span>
+          <p className="hero__folio mono">SAMPLE DOSSIER 01 · UPTAC · WORKING COPY</p>
           <h1>A preference list you can defend under pressure.</h1>
           <p className="hero__lede">
             CounselFlow turns a candidate profile into an ordered college list, records the
             evidence behind every position, and audits the list against the candidate&apos;s own
-            priorities before it can be locked.
+            priorities before it can be locked. The result is a fill-ready order with visible
+            evidence and required decisions.
           </p>
           <div className="hero__actions">
             <button className="btn btn--primary btn--lg" onClick={() => goTo('profile')}>
@@ -94,12 +95,12 @@ export function Landing() {
       <section className="sample-dossier" aria-labelledby="sample-title">
         <header className="sample-dossier__head">
           <div>
-            <span className="section-label">Live product specimen</span>
+            <span className="section-label">Live product specimen · UPTAC</span>
             <h2 id="sample-title">Seven-option preference register</h2>
           </div>
           <p>
-            Sample profile: General category, UP domicile, placements weighted highest. Every
-            number below is carried into the explanation and audit.
+            UPTAC sample profile: General category, UP domicile, placements weighted highest.
+            Every number below is carried into the explanation and audit.
           </p>
         </header>
 
@@ -181,7 +182,7 @@ export function Landing() {
       </section>
 
       <footer className="document-foot">
-        <span>Reference dataset · verify final choices with official UPTAC notices</span>
+        <span>Reference datasets · verify final choices with the selected authority&apos;s official notices</span>
         <span className="document-foot__links">
           <a href="/privacy.html">Privacy</a>
           <a href="/terms.html">Terms of use</a>

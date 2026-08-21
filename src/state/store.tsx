@@ -270,7 +270,23 @@ function reducer(state: AppState, action: Action): AppState {
 
     case 'LOAD_DEMO_PROFILE':
       if (state.lock) return state
-      return { ...state, profile: DEMO_PROFILE, announcement: 'Sample candidate loaded.' }
+      return {
+        ...state,
+        authorityId: DEFAULT_AUTHORITY,
+        currentRound: 1,
+        history: [],
+        allottedOptionId: null,
+        profile: DEMO_PROFILE,
+        items: [],
+        audit: null,
+        resolutions: [],
+        activity: [],
+        lock: null,
+        busy: null,
+        auditStale: false,
+        error: null,
+        announcement: 'UPTAC sample candidate loaded.',
+      }
 
     case 'BUSY':
       return { ...state, busy: action.busy, error: null }
@@ -394,10 +410,24 @@ function reducer(state: AppState, action: Action): AppState {
         announcement: action.error.error.message,
       }
 
-    case 'SET_AUTHORITY':
+    case 'SET_AUTHORITY': {
+      const authority = AUTHORITIES[action.authorityId]
+      const category =
+        state.profile.category && authority.categories.includes(state.profile.category)
+          ? state.profile.category
+          : null
+      const subQuotas = state.profile.subQuotas.filter((quota) =>
+        authority.subQuotas.includes(quota),
+      )
+
       return {
         ...state,
         authorityId: action.authorityId,
+        profile: {
+          ...state.profile,
+          category,
+          subQuotas,
+        },
         currentRound: 1,
         history: [],
         allottedOptionId: null,
@@ -408,6 +438,7 @@ function reducer(state: AppState, action: Action): AppState {
         auditStale: false,
         announcement: `Switched to ${AUTHORITIES[action.authorityId].label}.`,
       }
+    }
 
     case 'RECORD_ALLOTMENT': {
       const held = state.items.find((it) => it.option.id === action.optionId)

@@ -35,7 +35,8 @@ function Shell() {
   const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    mainRef.current?.focus()
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    mainRef.current?.focus({ preventScroll: true })
   }, [state.step])
 
   const profileReady = isProfileValid(state.profile)
@@ -63,13 +64,32 @@ function Shell() {
         ? `${counts.CRITICAL} must be fixed`
         : state.auditStale
           ? 'Re-audit pending'
-          : 'Nothing blocking'
+          : counts.WARNING > 0
+            ? `${counts.WARNING} decision${counts.WARNING > 1 ? 's' : ''} pending`
+            : 'Review complete'
       : 'Opens after the first audit',
-    locked: state.lock ? 'Snapshot saved' : 'Clear all critical conflicts',
+    locked: state.lock
+      ? 'Snapshot saved'
+      : counts.CRITICAL + counts.WARNING > 0
+        ? 'Resolve required decisions'
+        : 'Ready after review',
   }
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)
   const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
+  const showLockAction =
+    Boolean(state.audit) && (state.step === 'strategy' || state.step === 'conflicts')
+  const status = state.lock
+    ? 'FILED'
+    : state.auditStale
+      ? 'REVIEW DUE'
+      : counts.CRITICAL + counts.WARNING > 0
+        ? 'ACTION NEEDED'
+        : state.audit
+          ? 'AUDIT CLEAR'
+          : profileReady
+            ? 'PROFILE READY'
+            : 'WORKING COPY'
   const activeLabel = FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
 
   return (
@@ -89,7 +109,10 @@ function Shell() {
               <small>Candidate preference dossier</small>
             </span>
           </button>
-          <span className="document-ref mono">CF / UPTAC / 2026</span>
+          <span className="document-ref mono">
+            <span>CF / MULTI-COUNSELLING / 2026</span>
+            <small>UPTAC · JoSAA · IPU</small>
+          </span>
         </div>
 
         <span className="sidebar__title" aria-hidden="true">
@@ -146,16 +169,18 @@ function Shell() {
             </nav>
           </div>
           <div className="row" style={{ gap: 12, flexWrap: 'nowrap' }}>
-            <button
-              type="button"
-              className="btn btn--sm"
-              disabled={!canLock || state.busy === 'lock'}
-              onClick={lock}
-            >
-              {state.lock ? 'Locked' : 'Lock strategy'}
-            </button>
+            {showLockAction && (
+              <button
+                type="button"
+                className="btn btn--sm"
+                disabled={!canLock || state.busy === 'lock'}
+                onClick={lock}
+              >
+                {canLock ? 'Lock strategy' : 'Resolve before locking'}
+              </button>
+            )}
             <span className="topbar__status mono" aria-label="Current strategy status">
-              {state.lock ? 'FILED' : state.auditStale ? 'REVIEW DUE' : 'WORKING COPY'}
+              {status}
             </span>
           </div>
         </header>

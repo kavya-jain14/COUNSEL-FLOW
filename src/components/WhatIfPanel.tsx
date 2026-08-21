@@ -93,7 +93,7 @@ export function WhatIfPanel({
       <div className="whatif__control">
         {lever === 'distance' && (
           <label className="field">
-            <span className="field__label">Distance limit — {formatKm(Number(value))}</span>
+            <span className="field__label">Distance limit: {formatKm(Number(value))}</span>
             <input
               type="range"
               min={MIN_DISTANCE}
@@ -106,7 +106,7 @@ export function WhatIfPanel({
         )}
         {lever === 'budget' && (
           <label className="field">
-            <span className="field__label">Annual budget — {formatINR(Number(value))}</span>
+            <span className="field__label">Annual budget: {formatINR(Number(value))}</span>
             <input
               type="range"
               min={MIN_BUDGET}
@@ -119,7 +119,7 @@ export function WhatIfPanel({
         )}
         {lever === 'placements' && (
           <label className="field">
-            <span className="field__label">Placement weight — {value} of 5</span>
+            <span className="field__label">Placement weight: {value} of 5</span>
             <input
               type="range"
               min={0}
@@ -140,7 +140,7 @@ export function WhatIfPanel({
             >
               {BRANCHES.map((b) => (
                 <option key={b} value={b}>
-                  {b} — {BRANCH_LABELS[b]}
+                  {b}: {BRANCH_LABELS[b]}
                 </option>
               ))}
             </select>
