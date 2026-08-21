@@ -111,7 +111,7 @@ The central UX rule is the hard/soft split, and it is enforced in three places:
 | | Hard constraint | Soft preference |
 |---|---|---|
 | Controls | budget, distance (candidate's choice), "never accept" list | factor weight sliders |
-| Visual | purple left border, ⛔ glyph, "Hard limit" badge | dashed border, ◇ glyph, "Soft preference" badge |
+| Visual | double navy rule, `H` code, "Hard limit" label | single rule, `S` code, "Soft preference" label |
 | Behaviour | removes/blocks an option, flags **Critical**, blocks lock | only changes order and wording |
 
 Budget and distance each carry an explicit **Treat as: Hard limit / Soft preference**
@@ -120,7 +120,7 @@ soft is also offered as a *fix* inside the Conflict Inspector.
 
 **2. Conflict Inspector** (`src/screens/ConflictInspector.tsx`)
 
-All eight blueprint rules, grouped Critical → Warning → Info. Each card shows the
+All eight blueprint rules, grouped Critical, Warning and Info. Each audit record shows the
 severity, the code, the contradiction in one line, the stored facts that triggered it,
 which declared constraint caused it, and the available actions with their consequences.
 
@@ -193,40 +193,23 @@ demo fix sequence converges to 0 critical / 0 warning / 1 info, then locks.
 
 ## Design system
 
-The UI implements **CounselFlow Editorial Dark** from the Stitch export — the scheme all
-three mockup screens were built in. The full spec is in
-[`design/EDITORIAL_DARK.md`](design/EDITORIAL_DARK.md); the unused alternative is kept in
-[`design/MIDNIGHT_TECH_FORWARD.md`](design/MIDNIGHT_TECH_FORWARD.md) in case the team
-prefers it.
+The active UI implements **CounselFlow Calm Scholar**, an admissions-dossier system built
+from deep navy, soft sky blue, warm paper and beige. It uses Libre Baskerville for display,
+IBM Plex Sans for body copy and IBM Plex Mono for ranks, fees, distance and revision data.
 
-It is implemented as CSS custom properties in
-[`src/styles/global.css`](src/styles/global.css) — no Tailwind, so there is no CDN
-dependency and the tokens are the single source of truth.
+The complete specification is in [`design/CALM_SCHOLAR.md`](design/CALM_SCHOLAR.md). The
+active layer lives in [`src/styles/calm-scholar.css`](src/styles/calm-scholar.css) and is
+loaded after the legacy stylesheet, keeping the redesign isolated and reversible.
 
-| Token | Value | Role |
-|---|---|---|
-| `--bg` | `#0C0C0B` | deep charcoal canvas |
-| `--surface-2` | `#1c1b1a` | cards, conflict rows |
-| `--text` | `#DDD7CA` | warm parchment |
-| `--accent` | `#B86A45` | terracotta — the only action colour |
-| `--hard` | `#d6b583` | sand — hard constraints |
-
-Type is **Geist** for headings and UI, **Inter** for body copy, **Space Mono** for the
-"ledger" details (option IDs, positions, conflict provenance). Depth comes from tonal
-layering and 1px outlines rather than shadows, per the spec.
-
-Two deliberate departures from `DESIGN.md`, both following the actual mockups rather than
-the prose: corners are rounded (8/12px) where the doc says 0px, and cards sit on a
-slightly raised surface where the doc says to match the canvas.
-
-Layout follows the mockups: a fixed 248px left rail carrying the flow steps, and a sticky
-top bar with a breadcrumb and a Lock Strategy action that stays disabled until the audit
-says the list can lock. Below 900px the rail collapses into a horizontal pill bar.
+The shell is a numbered five-section document index. Profile inputs sit in ruled sections,
+the strategy and locked list are registers, explanations appear as marginalia, and conflict
+decisions read as an audit record. The interface uses no gradients, shadows, glass, emoji,
+decorative icon library, soft cards, purple-black palette or decorative checkmark lists.
 
 ## Accessibility
 
-Colour is never the only signal — every severity, tier, and hard/soft state also carries
-a glyph, a word, and a distinct border treatment. Reorder is button-driven so it works
+Colour is never the only signal. Every severity, tier, and hard/soft state also carries
+a code, a word, and a distinct border treatment. Reorder is button-driven so it works
 with a keyboard and on touch. The modal traps focus and closes on Escape; step changes
 move focus to the top of the content; state changes are announced through a live region.
 Verified with no horizontal overflow at 375 px.

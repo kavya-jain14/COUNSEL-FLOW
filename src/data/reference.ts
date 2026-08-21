@@ -49,12 +49,12 @@ export const FACTORS: Array<{
   {
     key: 'fees',
     label: 'Lower fees',
-    hint: 'Prefers cheaper options — separate from your hard budget ceiling.',
+    hint: 'Prefers cheaper options: separate from your hard budget ceiling.',
   },
   {
     key: 'location',
     label: 'Closer to home',
-    hint: 'Prefers nearer colleges — separate from your hard distance limit.',
+    hint: 'Prefers nearer colleges: separate from your hard distance limit.',
   },
   {
     key: 'campus',

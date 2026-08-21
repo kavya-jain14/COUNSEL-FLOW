@@ -13,7 +13,7 @@ const GROUP_TITLE: Record<Severity, string> = {
 
 const GROUP_COPY: Record<Severity, string> = {
   CRITICAL:
-    'Each of these breaks a hard limit you set. Remove the option, raise the limit, or turn the limit into a soft preference — your call, but one of them has to happen.',
+    'Each of these breaks a hard limit you set. Remove the option, raise the limit, or turn the limit into a soft preference: your call, but one of them has to happen.',
   WARNING:
     'These contradict your stated priorities without breaking any rule. Keep your order if you meant it; we only record why.',
   INFO: 'Tradeoffs worth knowing about. Nothing here is wrong and nothing needs an answer.',
@@ -79,7 +79,7 @@ export function ConflictInspector() {
         lede={
           total === 0
             ? `Audit run #${audit.runId} over ${items.length} options found nothing that conflicts with anything you declared.`
-            : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom — only the red group can stop you from locking.`
+            : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom. Only the critical group can stop locking.`
         }
         actions={
           <button
@@ -111,7 +111,7 @@ export function ConflictInspector() {
       {auditStale ? (
         <Banner
           tone="stale"
-          title="Changes applied — not yet re-audited"
+          title="Changes applied: not yet re-audited"
           live
           action={
             <button className="btn btn--sm btn--primary" onClick={reaudit} disabled={busy === 'audit'}>
@@ -136,7 +136,7 @@ export function ConflictInspector() {
           title={`${counts.CRITICAL} hard limit${counts.CRITICAL > 1 ? 's are' : ' is'} being broken`}
         >
           <span>
-            These cannot be acknowledged away — either the option goes, or the limit changes.
+            These cannot be acknowledged away: either the option goes, or the limit changes.
             Everything else on this page is optional.
           </span>
         </Banner>
@@ -242,8 +242,8 @@ export function ConflictInspector() {
       ) : counts.CRITICAL > 0 ? (
         <NextStep
           tone="blocked"
-          what={`${counts.CRITICAL} still blocking — pick a fix above`}
-          why="Every red item offers you the ways out. Choosing one either drops the option or relaxes the limit you set."
+          what={`${counts.CRITICAL} still blocking: pick a fix above`}
+          why="Every critical item lists the available decisions. Choosing one either drops the option or relaxes the limit you set."
         >
           <button className="btn" onClick={() => goTo('strategy')}>
             Back to list
@@ -253,7 +253,7 @@ export function ConflictInspector() {
         <NextStep
           tone="ready"
           what="Lock your list"
-          why="This saves a snapshot with your order, your reasons, and the dataset version used — so the decision stays explainable later."
+          why="This saves a snapshot with your order, your reasons, and the dataset version used: so the decision stays explainable later."
         >
           <button className="btn" onClick={() => goTo('strategy')}>
             Back to list

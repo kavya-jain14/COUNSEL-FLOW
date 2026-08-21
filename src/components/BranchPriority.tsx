@@ -26,7 +26,7 @@ export function BranchPriority({
   return (
     <Field
       label="Branch priority"
-      hint="Rank the branches in your real order of preference. Position 1 is what you want most — the audit checks your list against this order."
+      hint="Rank the branches in your real order of preference. Position 1 is what you want most: the audit checks your list against this order."
       error={error}
     >
       {value.length === 0 ? (
@@ -77,7 +77,7 @@ export function BranchPriority({
                   onClick={() => onChange(value.filter((b) => b !== branch))}
                   aria-label={`Remove ${branch} from your branch order`}
                 >
-                  <span aria-hidden="true">✕</span>
+                  <span aria-hidden="true">Del</span>
                 </button>
               </span>
               <span className="sr-only">
@@ -103,7 +103,7 @@ export function BranchPriority({
             <option value="">Add a branch…</option>
             {available.map((b) => (
               <option key={b} value={b}>
-                {b} — {BRANCH_LABELS[b]}
+                {b}: {BRANCH_LABELS[b]}
               </option>
             ))}
           </select>

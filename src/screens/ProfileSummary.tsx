@@ -34,7 +34,7 @@ export function ProfileSummary() {
         title="What we are about to run"
         lede={
           hardCount === 0
-            ? 'You have set no hard limits, so nothing will be removed outright — every option will be ranked instead.'
+            ? 'You have set no hard limits, so nothing will be removed outright: every option will be ranked instead.'
             : `${hardCount} hard limit${hardCount > 1 ? 's' : ''} can remove options and block your final list. Everything else only changes the order.`
         }
         actions={
@@ -47,7 +47,7 @@ export function ProfileSummary() {
       {!valid && (
         <div style={{ marginBottom: 30 }}>
           <Banner tone="critical" title="Your profile is incomplete" live>
-            <span>Go back and fix the highlighted fields — we will not guess missing inputs.</span>
+            <span>Go back and fix the highlighted fields: we will not guess missing inputs.</span>
           </Banner>
         </div>
       )}
@@ -61,7 +61,7 @@ export function ProfileSummary() {
           <div className="summary-cell">
             <dt>Rank</dt>
             <dd>
-              {profile.rank == null ? '—' : formatRank(profile.rank)}
+              {profile.rank == null ? ' - ' : formatRank(profile.rank)}
               <small>{profile.rankType === 'CRL' ? 'Common rank' : 'Category rank'}</small>
             </dd>
           </div>
@@ -78,9 +78,9 @@ export function ProfileSummary() {
               {domicileLabel}
               <small>
                 {profile.domicile === 'UP'
-                  ? 'Home-state pool — the larger share of UPTAC seats'
+                  ? 'Home-state pool: the larger share of UPTAC seats'
                   : profile.domicile === 'OTHER'
-                    ? 'Other-state pool — smaller, so cutoffs run tighter'
+                    ? 'Other-state pool: smaller, so cutoffs run tighter'
                     : 'Needed before we can pick the right seat pool'}
               </small>
             </dd>
@@ -92,14 +92,14 @@ export function ProfileSummary() {
               <small>
                 {quotaLabels.length === 0
                   ? 'Only the open and category pools apply'
-                  : `${quotaLabels.join(' · ')} — sample cutoffs are open-category only, so these are recorded but not yet scored`}
+                  : `${quotaLabels.join(' · ')}: sample cutoffs are open-category only, so these are recorded but not yet scored`}
               </small>
             </dd>
           </div>
           <div className="summary-cell">
             <dt>Branch order</dt>
             <dd>
-              {profile.branchPriority.join(' › ') || '—'}
+              {profile.branchPriority.join(' › ') || ' - '}
               <small>
                 {profile.branchPriority[0]
                   ? `Top choice: ${BRANCH_LABELS[profile.branchPriority[0]]}`
@@ -126,8 +126,8 @@ export function ProfileSummary() {
               {formatINRExact(profile.budget.value)}
               <small>
                 {profile.budget.mode === 'hard'
-                  ? 'Hard ceiling — over-budget options are flagged critical'
-                  : 'Soft preference — over-budget options only rank lower'}
+                  ? 'Hard ceiling: over-budget options are flagged critical'
+                  : 'Soft preference: over-budget options only rank lower'}
               </small>
             </dd>
           </div>
@@ -137,8 +137,8 @@ export function ProfileSummary() {
               {formatKm(profile.distance.value)}
               <small>
                 {profile.distance.mode === 'hard'
-                  ? 'Hard limit — further colleges are flagged critical'
-                  : 'Soft preference — further colleges only rank lower'}
+                  ? 'Hard limit: further colleges are flagged critical'
+                  : 'Soft preference: further colleges only rank lower'}
               </small>
             </dd>
           </div>
@@ -184,12 +184,12 @@ export function ProfileSummary() {
         <Band
           num="04"
           title="Under the hood"
-          note="Nothing hidden — this is the exact request your profile turns into."
+          note="Nothing hidden: this is the exact request your profile turns into."
         >
           <details>
             <summary>What we send to the strategy API</summary>
             <p className="field__hint" style={{ margin: '10px 0' }}>
-              <code className="mono">POST /api/strategy/generate</code> — weights are
+              <code className="mono">POST /api/strategy/generate</code>: weights are
               normalised to sum 1.0 before sending. Currently answered by a local mock.
             </p>
             <pre
@@ -230,7 +230,7 @@ export function ProfileSummary() {
                 Generating…
               </>
             ) : (
-              'Generate my strategy →'
+              'Generate my strategy'
             )}
           </button>
         </NextStep>

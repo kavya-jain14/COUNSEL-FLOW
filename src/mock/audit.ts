@@ -78,8 +78,8 @@ function budgetConflicts(profile: CandidateProfile, items: StrategyItem[]): Conf
           profile.budget.value,
         )} budget, but budget is a soft preference so it stays eligible.`,
       evidence: [
-        `${item.option.collegeShort} · ${item.option.branch} — annual fee ${formatINRExact(fee)}`,
-        `Your declared ceiling — ${formatINRExact(profile.budget.value)} per year (${hard ? 'hard constraint' : 'soft preference'
+        `${item.option.collegeShort} · ${item.option.branch}: annual fee ${formatINRExact(fee)}`,
+        `Your declared ceiling: ${formatINRExact(profile.budget.value)} per year (${hard ? 'hard constraint' : 'soft preference'
         })`,
         `Source: ${item.option.sourceLabel} ${item.option.sourceYear}`,
       ],
@@ -138,15 +138,15 @@ function distanceConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
       severity: hard ? 'CRITICAL' : 'INFO',
       title: 'Distance violation',
       summary: hard
-        ? `${item.option.collegeShort} is ${formatKm(km)} away — past your ${formatKm(
+        ? `${item.option.collegeShort} is ${formatKm(km)} away: past your ${formatKm(
           profile.distance.value,
         )} limit.`
         : `${item.option.collegeShort} is ${formatKm(
           km,
         )} away, further than you prefer, but distance is a soft preference.`,
       evidence: [
-        `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from ${profile.homeCity ?? 'your home city'}`,
-        `Your declared limit — ${formatKm(profile.distance.value)} (${
+        `${item.option.collegeShort}, ${item.option.city}: ${formatKm(km)} from ${profile.homeCity ?? 'your home city'}`,
+        `Your declared limit: ${formatKm(profile.distance.value)} (${
           hard ? 'hard constraint' : 'soft preference'
         })`,
         `Measured as ${DISTANCE_METHOD}. Road travel is typically 20-30% longer, so treat this as a floor.`,
@@ -203,8 +203,8 @@ function exclusionConflicts(profile: CandidateProfile, items: StrategyItem[]): C
       title: 'Unwanted fallback',
       summary: `${item.option.collegeShort} · ${item.option.branch} matches something you marked "never accept".`,
       evidence: [
-        `Your exclusion — ${ex.label}`,
-        `This option — ${item.option.college}, ${item.option.branch}`,
+        `Your exclusion: ${ex.label}`,
+        `This option: ${item.option.college}, ${item.option.branch}`,
       ],
       causedBy: `Hard constraint · Never accept: ${ex.label}`,
       itemIds: [item.itemId],
@@ -275,7 +275,7 @@ function branchPriorityConflicts(
         title: 'Branch priority conflict',
         summary: `You said ${lower.option.branch} > ${upper.option.branch}, but ${upper.option.branch} is ranked higher.`,
         evidence: [
-          `Your branch order — ${profile.branchPriority.join(' > ')}`,
+          `Your branch order: ${profile.branchPriority.join(' > ')}`,
           ...positions,
           'Both options satisfy every hard constraint.',
           lowerQuality != null && upperQuality != null
@@ -284,7 +284,7 @@ function branchPriorityConflicts(
             )} vs ${upperQuality.toFixed(0)} on placements and campus), so swapping costs you nothing.`
             : 'We have no college-quality evidence that would justify the current order.',
         ],
-        causedBy: `Soft preference · Branch order — you ranked ${lower.option.branch} above ${upper.option.branch}`,
+        causedBy: `Soft preference · Branch order: you ranked ${lower.option.branch} above ${upper.option.branch}`,
         itemIds: [upper.itemId, lower.itemId],
         actions: [
           {
@@ -300,7 +300,7 @@ function branchPriorityConflicts(
             kind: 'KEEP',
             label: 'Keep anyway',
             effect:
-              'Keeps your order. Tell us why — usually this means you prefer the college over the branch.',
+              'Keeps your order. Tell us why: usually this means you prefer the college over the branch.',
             intent: 'secondary',
             requiresReason: true,
           },
@@ -314,14 +314,14 @@ function branchPriorityConflicts(
         title: 'College chosen over branch',
         summary: `${upper.option.branch} sits above ${lower.option.branch} here, but the college above is the stronger one.`,
         evidence: [
-          `Your branch order — ${profile.branchPriority.join(' > ')}`,
+          `Your branch order: ${profile.branchPriority.join(' > ')}`,
           ...positions,
           `${upper.option.collegeShort} scores ${upperQuality!.toFixed(
             0,
           )} against ${lower.option.collegeShort}'s ${lowerQuality!.toFixed(
             0,
           )} on the placements and campus factors you weighted.`,
-          'This is a tradeoff, not a mistake — we are only making sure you meant it.',
+          'This is a tradeoff, not a mistake: we are only making sure you meant it.',
         ],
         causedBy: 'Soft preference · Branch order vs college quality',
         itemIds: [upper.itemId, lower.itemId],
@@ -432,7 +432,7 @@ function dominatedConflicts(profile: CandidateProfile, items: StrategyItem[]): C
       summary: `#${lower.position} ${lower.option.collegeShort} matches or beats #${upper.position} ${upper.option.collegeShort} on every factor you weighted.`,
       evidence: cmp.map(
         (c) =>
-          `${c.label} — ${c.detail} (${c.equal ? 'equal' : c.betterBelow ? 'better below' : 'better above'
+          `${c.label}: ${c.detail} (${c.equal ? 'equal' : c.betterBelow ? 'better below' : 'better above'
           })`,
       ),
       causedBy: 'Soft preferences · Your factor weights',
@@ -450,7 +450,7 @@ function dominatedConflicts(profile: CandidateProfile, items: StrategyItem[]): C
           id: `${upper.itemId}:keep-dominated`,
           kind: 'KEEP',
           label: 'Keep anyway',
-          effect: 'Keeps your order — record a reason we did not capture as a factor.',
+          effect: 'Keeps your order: record a reason we did not capture as a factor.',
           intent: 'secondary',
           requiresReason: true,
         },
@@ -473,8 +473,8 @@ function coverageConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
       title: 'Unsafe coverage',
       summary: 'Your list has no fallback you would actually accept.',
       evidence: [
-        `Acceptable options — ${acceptable.length}`,
-        `Reachability spread — ${acceptable
+        `Acceptable options: ${acceptable.length}`,
+        `Reachability spread: ${acceptable
           .map((it) => it.tier)
           .filter((t, i, arr) => arr.indexOf(t) === i)
           .join(', ')}`,
@@ -523,8 +523,8 @@ function duplicateConflicts(items: StrategyItem[]): Conflict[] {
       title: 'Duplicate option',
       summary: `${item.option.collegeShort} · ${item.option.branch} appears twice in your list.`,
       evidence: [
-        `#${first.position} — ${item.option.college}, ${item.option.branch}`,
-        `#${item.position} — same canonical option (${item.option.id})`,
+        `#${first.position}: ${item.option.college}, ${item.option.branch}`,
+        `#${item.position}: same canonical option (${item.option.id})`,
         'A repeated choice wastes a slot; it does not improve your chances.',
       ],
       causedBy: 'Data rule · Canonical option id appears more than once',
@@ -563,7 +563,7 @@ function evidenceConflicts(items: StrategyItem[]): Conflict[] {
         .map((f) => FACT_LABELS[f] ?? f)
         .join(', ')} for ${item.option.collegeShort}.`,
       evidence: [
-        `Missing facts — ${item.option.missingFacts.map((f) => FACT_LABELS[f] ?? f).join(', ')}`,
+        `Missing facts: ${item.option.missingFacts.map((f) => FACT_LABELS[f] ?? f).join(', ')}`,
         `Source: ${item.option.sourceLabel} ${item.option.sourceYear}`,
         'Confidence downgraded to low. These facts were excluded from scoring rather than guessed.',
       ],

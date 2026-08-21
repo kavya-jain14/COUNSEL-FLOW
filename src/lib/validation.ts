@@ -18,7 +18,7 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
   const errors: ProfileErrors = {}
 
   if (profile.rank == null) {
-    errors.rank = 'Enter your rank — the whole strategy is built from it.'
+    errors.rank = 'Enter your rank: the whole strategy is built from it.'
   } else if (!Number.isInteger(profile.rank) || profile.rank < 1) {
     errors.rank = 'Rank must be a whole number of 1 or more.'
   } else if (profile.rank > MAX_RANK) {
@@ -26,17 +26,17 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
   }
 
   if (!profile.domicile) {
-    errors.domicile = 'Select your domicile — home-state and other-state seats are filled from different pools.'
+    errors.domicile = 'Select your domicile: home-state and other-state seats are filled from different pools.'
   }
 
   if (!profile.homeCity) {
-    errors.homeCity = 'Choose your home city — the distance limit is measured from it.'
+    errors.homeCity = 'Choose your home city: the distance limit is measured from it.'
   } else if (!CITY_COORDS[profile.homeCity]) {
     errors.homeCity = 'We do not have coordinates for that city yet, so distance cannot be checked.'
   }
 
   if (!profile.category) {
-    errors.category = 'Select your category — eligibility and closing ranks depend on it.'
+    errors.category = 'Select your category: eligibility and closing ranks depend on it.'
   }
 
   if (profile.branchPriority.length === 0) {

@@ -4,7 +4,7 @@ import { formatINRExact, formatKm, formatRank } from '../lib/format'
 import { Meter, SeverityBadge } from './ui'
 
 const TIER_LEDE: Record<Tier, string> = {
-  DREAM: 'Closed ≥10% above your rank last cycle (closing rank < 90% of yours). A stretch — worth keeping near the top, because a good year costs you nothing to try.',
+  DREAM: 'Closed ≥10% above your rank last cycle (closing rank < 90% of yours). A stretch: worth keeping near the top, because a good year costs you nothing to try.',
   TARGET: 'Closed within the ±40% band around your rank last cycle. This is the realistic band where your list does most of its work.',
   SAFE: 'Closed ≥40% below your rank last cycle (closing rank ≥ 140% of yours). Likely to still be open when your turn comes.',
   UNKNOWN: 'No closing-rank evidence on record, so reachability was not estimated. Nothing was guessed in its place.',
@@ -87,7 +87,7 @@ export function StrategyInspector({
             </div>
           ))}
           <button type="button" className="btn--link" onClick={onOpenConflicts}>
-            Fix this in the inspector →
+            Fix this in the inspector  to 
           </button>
         </div>
       )}
@@ -178,7 +178,7 @@ export function StrategyInspector({
         </dl>
         {option.missingFacts.length > 0 && (
           <p className="band__note" style={{ marginTop: 10 }}>
-            Not scored: {option.missingFacts.join(', ')} — missing from the dataset, so it was
+            Not scored: {option.missingFacts.join(', ')}: missing from the dataset, so it was
             excluded rather than guessed.
           </p>
         )}
@@ -213,3 +213,4 @@ export function StrategyInspector({
     </aside>
   )
 }
+

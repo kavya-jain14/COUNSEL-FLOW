@@ -168,7 +168,7 @@ export function Locked() {
 
       <NextStep
         tone="ready"
-        what="You are done — fill this order on the portal"
+        what="You are done: fill this order on the portal"
         why="Keep the snapshot ID. If the dataset or your circumstances change, start a new profile rather than editing this one."
       >
         <button type="button" className="btn" onClick={() => goTo('conflicts')}>

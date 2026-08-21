@@ -19,7 +19,7 @@ export function FactorWeightSliders({
           <h3>What should tip the balance?</h3>
           <p className="field__hint">
             These are soft preferences. They move options up or down and shape the reason
-            shown next to each row — they never remove a college from your list.
+            shown next to each row: they never remove a college from your list.
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export function FactorWeightSliders({
 
       {error && (
         <span className="field__error" role="alert">
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">Field</span>
           {error}
         </span>
       )}

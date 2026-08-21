@@ -12,19 +12,19 @@ export const SEVERITY_META: Record<
 > = {
   CRITICAL: {
     label: 'Critical',
-    glyph: '✕',
+    glyph: 'CR',
     className: 'badge--critical',
     blocking: 'Blocks locking',
   },
   WARNING: {
     label: 'Warning',
-    glyph: '!',
+    glyph: 'WA',
     className: 'badge--warning',
     blocking: 'Can be overridden with a reason',
   },
   INFO: {
     label: 'Info',
-    glyph: 'i',
+    glyph: 'IN',
     className: 'badge--info',
     blocking: 'Explanation only',
   },
@@ -43,10 +43,10 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
 }
 
 const TIER_META: Record<Tier, { label: string; glyph: string; hint: string }> = {
-  DREAM: { label: 'Dream', glyph: '▲', hint: 'Closed ≥10% above your rank last cycle — a stretch worth keeping near the top' },
-  TARGET: { label: 'Target', glyph: '●', hint: 'Closed within the ±40% band around your rank last cycle — your core options' },
-  SAFE: { label: 'Safe', glyph: '■', hint: 'Closed ≥40% below your rank last cycle — a reliable fallback' },
-  UNKNOWN: { label: 'No data', glyph: '?', hint: 'No closing-rank evidence on record — confidence downgraded to low' },
+  DREAM: { label: 'Dream', glyph: 'D', hint: 'Closed at least 10% above your rank last cycle. A stretch worth retaining near the top.' },
+  TARGET: { label: 'Target', glyph: 'T', hint: 'Closed within the 40% band around your rank last cycle. These are core options.' },
+  SAFE: { label: 'Safe', glyph: 'S', hint: 'Closed at least 40% below your rank last cycle. A reliable fallback.' },
+  UNKNOWN: { label: 'No data', glyph: 'N', hint: 'No closing-rank evidence on record. Confidence is marked low.' },
 }
 
 export function TierBadge({ tier }: { tier: Tier }) {
@@ -55,7 +55,7 @@ export function TierBadge({ tier }: { tier: Tier }) {
     <span className={`tier tier--${tier}`} title={meta.hint}>
       <span aria-hidden="true">{meta.glyph}</span>
       {meta.label}
-      <span className="sr-only"> — {meta.hint}</span>
+      <span className="sr-only">. {meta.hint}</span>
     </span>
   )
 }
@@ -64,14 +64,14 @@ export function HardSoftBadge({ mode }: { mode: 'hard' | 'soft' }) {
   return mode === 'hard' ? (
     <span className="badge badge--hard">
       <span className="badge__glyph" aria-hidden="true">
-        ⛔
+        H
       </span>
       Hard limit
     </span>
   ) : (
     <span className="badge badge--soft">
       <span className="badge__glyph" aria-hidden="true">
-        ◇
+        S
       </span>
       Soft preference
     </span>
@@ -89,11 +89,11 @@ export function Pill({
 }
 
 const BANNER_GLYPH = {
-  critical: '✕',
-  warning: '!',
-  info: 'i',
-  success: '✓',
-  stale: '↻',
+  critical: 'CR',
+  warning: 'WA',
+  info: 'IN',
+  success: 'OK',
+  stale: 'RV',
 } as const
 
 export function Banner({
@@ -152,7 +152,7 @@ export function Field({
       {children}
       {error && (
         <span className="field__error" role="alert">
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">Field</span>
           {error}
         </span>
       )}
@@ -296,10 +296,10 @@ export function Band({
 }
 
 const NEXT_GLYPH = {
-  go: '→',
-  blocked: '!',
-  ready: '✓',
-  wait: '·',
+  go: 'NEXT',
+  blocked: 'HOLD',
+  ready: 'READY',
+  wait: 'REVIEW',
 } as const
 
 export function NextStep({

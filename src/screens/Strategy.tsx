@@ -32,7 +32,7 @@ export function Strategy() {
           total={5}
           kicker="My strategy"
           title="Nothing to rank yet"
-          lede="Your choice list is built from the profile you fill in — your rank, your limits, and the branches you actually want."
+          lede="Your choice list is built from the profile you fill in: your rank, your limits, and the branches you actually want."
         />
         <div className="empty">
           <p>Finish your profile and generate a strategy to see it here.</p>
@@ -56,7 +56,7 @@ export function Strategy() {
         title="Your list, in the order you would fill it"
         lede={
           <>
-            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '—'}{' '}
+            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : ' - '}{' '}
             and the limits you declared. Select any row to see exactly why it sits where it
             does.
           </>
@@ -131,7 +131,7 @@ export function Strategy() {
 
           <p className="band__note" style={{ marginTop: 18, maxWidth: '62ch' }}>
             Reach labels come from historical closing ranks and are not a guarantee. They tell
-            you how much coverage your list has — they never decide what you prefer. Source:{' '}
+            you how much coverage your list has: they never decide what you prefer. Source:{' '}
             {DATASET_LABEL}.
           </p>
 
@@ -167,7 +167,7 @@ export function Strategy() {
         <NextStep
           tone="blocked"
           what={`Fix ${counts.CRITICAL} thing${counts.CRITICAL > 1 ? 's' : ''} before you can lock`}
-          why="Each one breaks a hard limit you set yourself. The inspector shows you the options — you pick which one you meant."
+          why="Each one breaks a hard limit you set yourself. The inspector shows you the options: you pick which one you meant."
         >
           <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
             Show me what to fix
@@ -176,7 +176,7 @@ export function Strategy() {
       ) : total > 0 ? (
         <NextStep
           tone="go"
-          what={`Nothing blocks you — ${total} note${total > 1 ? 's' : ''} to skim`}
+          what={`Nothing blocks you: ${total} note${total > 1 ? 's' : ''} to skim`}
           why="These are tradeoffs, not errors. Keep your order if you want; we only ask you to say why."
         >
           <button className="btn" onClick={() => goTo('summary')}>

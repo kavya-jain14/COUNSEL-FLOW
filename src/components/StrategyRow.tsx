@@ -78,9 +78,7 @@ export function StrategyRow({
               {conflicts.length} {conflicts.length > 1 ? 'issues' : 'issue'}
             </span>
           ) : (
-            <span className="lrow__clear">
-              <span aria-hidden="true">✓</span> Clear
-            </span>
+            <span className="lrow__clear">Clear</span>
           )}
         </span>
       </button>
@@ -119,7 +117,7 @@ export function StrategyRow({
           onClick={() => onRemove(item.itemId)}
           aria-label={`Remove ${name} from the list`}
         >
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">Del</span>
         </button>
       </span>
     </li>

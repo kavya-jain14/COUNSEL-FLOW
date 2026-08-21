@@ -18,7 +18,7 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
   {
     id: 'golden-fix-and-lock',
     title: 'Critical conflicts are fixed before lock',
-    proves: 'The complete profile → audit → fix → re-audit → lock loop converges.',
+    proves: 'The complete profile to audit to fix to re-audit to lock loop converges.',
     setup: [
       'Use the default sample profile and generated list.',
       'Resolve every critical conflict and justify any warning kept.',
@@ -89,13 +89,13 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
   },
   {
     id: 'deterministic-factor-scoring',
-    title: 'Factor weights change the order — not the tier classification',
+    title: 'Factor weights change the order: not the tier classification',
     proves: 'The scoring engine ranks by declared weights; changing weights produces a different deterministic order.',
     setup: [
       'Use rank 12500 with homeCity set to Lucknow.',
       'Set placements weight to 5 and all others to 1. Note position of HBTU Kanpur CSE (placementScore 82) vs KIET Ghaziabad CSE (placementScore 80).',
       'Now swap: set fees weight to 5 and placements to 1. UIET Kanpur EE (fee ₹1.2L) should rank above KIET Ghaziabad CSE (fee ₹1.48L) among same-tier options.',
-      'Confirm the inspector shows why each option sits where it does — matching the declared weights.',
+      'Confirm the inspector shows why each option sits where it does: matching the declared weights.',
     ],
     expectedConflictCodes: [],
     expectedLockBlocked: false,
@@ -103,7 +103,7 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
   {
     id: 'hard-distance-filter',
     title: 'Hard distance limit removes distant options before scoring',
-    proves: 'Hard constraints filter before scoring — a far option cannot score its way back onto the list.',
+    proves: 'Hard constraints filter before scoring: a far option cannot score its way back onto the list.',
     setup: [
       'Set homeCity to Lucknow, distance to 100 km hard.',
       'Generate the list. Gorakhpur (≈290 km from Lucknow) must not appear.',
