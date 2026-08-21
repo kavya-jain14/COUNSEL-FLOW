@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { BRANCH_LABELS, CATEGORIES, FACTORS } from '../data/reference'
+import { BRANCH_LABELS, CATEGORIES, DOMICILES, FACTORS, SUB_QUOTAS } from '../data/reference'
 import { formatINRExact, formatKm, formatRank } from '../lib/format'
 import { toPayload, validateProfile } from '../lib/validation'
 import { useAppActions, useAppState } from '../state/store'
@@ -16,6 +16,10 @@ export function ProfileSummary() {
   const payload = useMemo(() => (valid ? toPayload(profile) : null), [profile, valid])
 
   const categoryLabel = CATEGORIES.find((c) => c.value === profile.category)?.label ?? 'Not set'
+  const domicileLabel = DOMICILES.find((d) => d.value === profile.domicile)?.label ?? 'Not set'
+  const quotaLabels = profile.subQuotas.map(
+    (q) => SUB_QUOTAS.find((s) => s.value === q)?.label ?? q,
+  )
   const hardCount =
     (profile.budget.mode === 'hard' ? 1 : 0) +
     (profile.distance.mode === 'hard' ? 1 : 0) +
@@ -66,6 +70,30 @@ export function ProfileSummary() {
             <dd>
               {categoryLabel}
               <small>Decides which closing ranks apply to you</small>
+            </dd>
+          </div>
+          <div className="summary-cell">
+            <dt>Domicile</dt>
+            <dd>
+              {domicileLabel}
+              <small>
+                {profile.domicile === 'UP'
+                  ? 'Home-state pool — the larger share of UPTAC seats'
+                  : profile.domicile === 'OTHER'
+                    ? 'Other-state pool — smaller, so cutoffs run tighter'
+                    : 'Needed before we can pick the right seat pool'}
+              </small>
+            </dd>
+          </div>
+          <div className="summary-cell">
+            <dt>Quotas claimed</dt>
+            <dd>
+              {quotaLabels.length === 0 ? 'None' : quotaLabels.length}
+              <small>
+                {quotaLabels.length === 0
+                  ? 'Only the open and category pools apply'
+                  : `${quotaLabels.join(' · ')} — sample cutoffs are open-category only, so these are recorded but not yet scored`}
+              </small>
             </dd>
           </div>
           <div className="summary-cell">

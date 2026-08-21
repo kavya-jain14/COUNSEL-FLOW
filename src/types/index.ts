@@ -6,6 +6,7 @@ import type {
   Category as WireCategory,
   CollegeOption as WireCollegeOption,
   Confidence as WireConfidence,
+  Domicile as WireDomicile,
   Conflict as WireConflict,
   ConflictAction as WireConflictAction,
   ConflictActionKind as WireConflictActionKind,
@@ -24,11 +25,14 @@ import type {
   Severity as WireSeverity,
   StrategyGenerateResponse as WireStrategyGenerateResponse,
   StrategyItem as WireStrategyItem,
+  SubQuota as WireSubQuota,
   Tier as WireTier,
 } from '@counselflow/contracts'
 
 export type Category = WireCategory
 export type RankType = WireRankType
+export type Domicile = WireDomicile
+export type SubQuota = WireSubQuota
 export type BranchCode = WireBranchCode
 export type FactorKey = WireFactorKey
 export type FactorWeights = WireFactorWeights
@@ -54,6 +58,8 @@ export interface CandidateProfile {
   rank: number | null
   rankType: RankType
   category: Category | null
+  domicile: Domicile | null
+  subQuotas: SubQuota[]
   branchPriority: BranchCode[]
   homeCity: string | null
 
@@ -71,6 +77,8 @@ export type ProfileErrors = Partial<Record<ProfileField, string>>
 export type ProfileField =
   | 'rank'
   | 'category'
+  | 'domicile'
+  | 'subQuotas'
   | 'homeCity'
   | 'branchPriority'
   | 'budget'

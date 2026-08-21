@@ -1,4 +1,4 @@
-import type { Category, FactorKey, InstituteType } from '../types'
+import type { Category, Domicile, FactorKey, InstituteType, SubQuota } from '../types'
 
 export const CATEGORIES: Array<{ value: Category; label: string }> = [
   { value: 'GEN', label: 'General' },
@@ -65,6 +65,42 @@ export const FACTORS: Array<{
     key: 'hostel',
     label: 'Hostel availability',
     hint: 'Prefers colleges with hostel rooms available.',
+  },
+]
+
+export const DOMICILES: Array<{ value: Domicile; label: string; hint: string }> = [
+  {
+    value: 'UP',
+    label: 'Uttar Pradesh',
+    hint: 'Home-state seats. The large majority of UPTAC seats are filled from this pool.',
+  },
+  {
+    value: 'OTHER',
+    label: 'Other state',
+    hint: 'Other-state seats. A much smaller pool, so closing ranks are usually tighter.',
+  },
+]
+
+export const SUB_QUOTAS: Array<{ value: SubQuota; label: string; hint: string }> = [
+  {
+    value: 'GIRLS',
+    label: 'Girls quota',
+    hint: 'Seats reserved for female candidates in participating institutes.',
+  },
+  {
+    value: 'ARMED_FORCES',
+    label: 'Armed forces (AF)',
+    hint: 'For wards of serving or ex-service defence personnel.',
+  },
+  {
+    value: 'PWD',
+    label: 'Person with disability (PwD)',
+    hint: 'Horizontal reservation for candidates with a recognised disability.',
+  },
+  {
+    value: 'FREEDOM_FIGHTER',
+    label: 'Freedom fighter (FF)',
+    hint: 'For dependants of recognised freedom fighters.',
   },
 ]
 

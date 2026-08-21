@@ -7,12 +7,30 @@
     "rank": 12500,
     "rankType": "CRL",
     "category": "GEN",
-    "branchPriority": ["CSE", "IT", "ECE"],
-    "budget": { "value": 150000, "mode": "hard" },
-    "distance": { "value": 300, "mode": "soft" },
+    "branchPriority": [
+      "CSE",
+      "IT",
+      "ECE"
+    ],
+    "budget": {
+      "value": 150000,
+      "mode": "hard"
+    },
+    "distance": {
+      "value": 300,
+      "mode": "soft"
+    },
     "hardExclusions": [
-      { "kind": "instituteType", "value": "PRIVATE" },
-      { "kind": "noHostel", "value": "true" }
+      {
+        "id": "instituteType:PRIVATE",
+        "kind": "instituteType",
+        "value": "PRIVATE"
+      },
+      {
+        "id": "noHostel:true",
+        "kind": "noHostel",
+        "value": "true"
+      }
     ],
     "factorWeights": {
       "placements": 0.3,
@@ -20,7 +38,10 @@
       "location": 0.2,
       "campus": 0.15,
       "hostel": 0.15
-    }
+    },
+    "domicile": "UP",
+    "subQuotas": [],
+    "homeCity": "Lucknow"
   },
   "items": [
     {
@@ -62,7 +83,11 @@
     "profileRevision": "profile-rev-001",
     "listRevision": "list-rev-001",
     "conflicts": [],
-    "counts": { "CRITICAL": 0, "WARNING": 0, "INFO": 0 },
+    "counts": {
+      "CRITICAL": 0,
+      "WARNING": 0,
+      "INFO": 0
+    },
     "canLock": true
   }
 }

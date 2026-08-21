@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { Category, RankType } from '../types'
-import { CATEGORIES } from '../data/reference'
+import type { Category, Domicile, RankType, SubQuota } from '../types'
+import { CATEGORIES, DOMICILES, SUB_QUOTAS } from '../data/reference'
 import { DISTANCE_METHOD_NOTE, HOME_CITIES } from '../data/geo'
 import { formatINR, formatKm } from '../lib/format'
 import {
@@ -123,7 +123,60 @@ export function BuildProfile() {
               ))}
             </select>
           </Field>
+
+          <Field label="Domicile" error={show('domicile')} htmlFor="domicile">
+            <select
+              id="domicile"
+              className="select"
+              value={profile.domicile ?? ''}
+              aria-invalid={Boolean(show('domicile'))}
+              onChange={(e) => patchProfile({ domicile: (e.target.value || null) as Domicile })}
+            >
+              <option value="">Select your domicile…</option>
+              {DOMICILES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+            <span className="field__hint">
+              {DOMICILES.find((d) => d.value === profile.domicile)?.hint ??
+                'Home-state and other-state seats are filled from separate pools.'}
+            </span>
+          </Field>
         </div>
+
+        <fieldset className="quota-set">
+          <legend className="field__label">Reservation quotas you can claim</legend>
+          <span className="field__hint">
+            Optional, and you can claim more than one. These open extra seat pools — they never
+            remove an option from your list.
+          </span>
+          <div className="quota-grid">
+            {SUB_QUOTAS.map((quota) => {
+              const checked = profile.subQuotas.includes(quota.value)
+              return (
+                <label className="quota-opt" key={quota.value} data-checked={checked}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      patchProfile({
+                        subQuotas: e.target.checked
+                          ? [...profile.subQuotas, quota.value]
+                          : profile.subQuotas.filter((q: SubQuota) => q !== quota.value),
+                      })
+                    }
+                  />
+                  <span className="quota-opt__text">
+                    <b>{quota.label}</b>
+                    <small>{quota.hint}</small>
+                  </span>
+                </label>
+              )
+            })}
+          </div>
+        </fieldset>
       </Band>
 
       <Band
