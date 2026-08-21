@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { BRANCH_LABELS, CATEGORIES, DOMICILES, FACTORS, SUB_QUOTAS } from '../data/reference'
 import { formatINRExact, formatKm, formatRank } from '../lib/format'
-import { toPayload, validateProfile } from '../lib/validation'
+import { validateProfile } from '../lib/validation'
 import { useAppActions, useAppState } from '../state/store'
 import { Band, Banner, HardSoftBadge, NextStep, PageHead } from '../components/ui'
 
@@ -13,7 +13,6 @@ export function ProfileSummary() {
 
   const errors = useMemo(() => validateProfile(profile), [profile])
   const valid = Object.keys(errors).length === 0
-  const payload = useMemo(() => (valid ? toPayload(profile) : null), [profile, valid])
 
   const categoryLabel = CATEGORIES.find((c) => c.value === profile.category)?.label ?? 'Not set'
   const domicileLabel = DOMICILES.find((d) => d.value === profile.domicile)?.label ?? 'Not set'
@@ -179,35 +178,6 @@ export function ProfileSummary() {
           ))}
         </div>
       </Band>
-
-      {payload && (
-        <Band
-          num="04"
-          title="Under the hood"
-          note="Nothing hidden: this is the exact request your profile turns into."
-        >
-          <details>
-            <summary>What we send to the strategy API</summary>
-            <p className="field__hint" style={{ margin: '10px 0' }}>
-              <code className="mono">POST /api/strategy/generate</code>: weights are
-              normalised to sum 1.0 before sending. Currently answered by a local mock.
-            </p>
-            <pre
-              className="mono"
-              style={{
-                overflowX: 'auto',
-                background: 'var(--surface-2)',
-                border: '1px solid var(--border)',
-                padding: 16,
-                borderRadius: 8,
-                margin: 0,
-              }}
-            >
-              {JSON.stringify(payload, null, 2)}
-            </pre>
-          </details>
-        </Band>
-      )}
 
       {valid ? (
         <NextStep

@@ -146,9 +146,8 @@ replaced by the shared Zod schemas. The UI only depends on these shapes.
 
 **For Fuzail** — `CandidateProfilePayload` is what the profile screen posts to
 `POST /api/strategy/generate`. Weights are normalised to sum 1.0 client-side
-(`src/lib/validation.ts`). The exact payload is visible in the app under *Profile
-summary → "What we send to the strategy API"*. Frontend validation rules there should be
-mirrored server-side; the server stays authoritative.
+(`src/lib/validation.ts`). Frontend validation rules should be mirrored server-side; the
+server stays authoritative.
 
 **For Kavya** — `StrategyItem` (option, tier, position, `ReasonFact[]`, confidence,
 `manuallyPlaced`) and `Conflict` / `ConflictAction` / `AuditResult`. Conflict ids must be
