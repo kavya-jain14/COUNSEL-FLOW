@@ -1,0 +1,13 @@
+{
+  "profile": {
+    "rank": { "value": 75000, "type": "CRL" },
+    "category": "GEN",
+    "branchPriorities": ["CSE", "IT", "ECE"],
+    "annualBudget": { "amountInr": 150000, "mode": "hard" },
+    "maxDistance": { "km": 120, "mode": "hard" },
+    "factorWeights": { "placements": 40, "fees": 20, "location": 20, "campus": 10, "hostel": 10 },
+    "hardConstraints": { "neverAcceptBranches": [], "excludedCities": [], "excludedInstituteTypes": [], "hostelRequired": false }
+  },
+  "orderedOptionIds": ["ACET-ECE", "ACET-CSE", "NMIT-CSE"],
+  "acknowledgements": []
+}

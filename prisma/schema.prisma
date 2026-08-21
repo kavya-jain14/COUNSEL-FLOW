@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ReferenceOption {
+  id                String   @id
+  canonicalOptionId String   @unique
+  college           String
+  branch            String
+  data              Json
+  datasetVersion    String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model LockedStrategy {
+  id             String   @id
+  strategyHash   String   @unique
+  datasetVersion String
+  engineVersion  String
+  profileJson    Json
+  strategyJson   Json
+  auditJson      Json
+  acknowledgementsJson Json
+  lockedAt       DateTime @default(now())
+}
