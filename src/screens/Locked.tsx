@@ -1,10 +1,16 @@
+import { useState } from 'react'
 import { useAppActions, useAppState } from '../state/store'
+import { AUTHORITIES } from '../data/authorities'
+import { improvementsOver, labelFor } from '../lib/rounds'
 import { formatINRExact, formatKm } from '../lib/format'
 import { Band, Banner, NextStep, PageHead, TierBadge } from '../components/ui'
+import { DecisionImpactModal } from '../features/decision-impact'
 
 export function Locked() {
-  const { lock, items, resolutions, profile } = useAppState()
-  const { goTo, reset } = useAppActions()
+  const { lock, items, resolutions, profile, authorityId, currentRound, allottedOptionId, history } =
+    useAppState()
+  const { goTo, reset, recordAllotment, startNextRound } = useAppActions()
+  const [impactId, setImpactId] = useState<string | null>(null)
 
   if (!lock) {
     return (
@@ -19,6 +25,11 @@ export function Locked() {
 
   const overrides = lock.acknowledgedWarnings
   const fixes = resolutions.filter((r) => r.kind === 'FIXED')
+  const authority = AUTHORITIES[authorityId]
+  const isFinalRound = currentRound >= authority.rounds
+  const preview = improvementsOver(items, allottedOptionId)
+  const heldItem = items.find((it) => it.option.id === allottedOptionId) ?? null
+  const impactItem = items.find((it) => it.itemId === impactId) ?? null
 
   return (
     <>
@@ -43,7 +54,7 @@ export function Locked() {
         <Band
           num={`${items.length} choices`}
           title="Locked preference order"
-          note="This is the order to fill in. Positions are final unless you start a new profile."
+          note="This is the order to fill in. Positions are final unless you start a new profile. Open any row to re-read what that choice means for your profile."
         >
           <div className="ledger">
             <div className="ledger__head" aria-hidden="true">
@@ -54,8 +65,13 @@ export function Locked() {
             </div>
             <ol className="ledger__list">
               {items.map((item) => (
-                <li className="lrow-wrap" data-static="true" key={item.itemId}>
-                  <div className="lrow">
+                <li className="lrow-wrap" key={item.itemId}>
+                  <button
+                    type="button"
+                    className="lrow"
+                    aria-haspopup="dialog"
+                    onClick={() => setImpactId(item.itemId)}
+                  >
                     <span className="lrow__pos" aria-hidden="true">
                       {String(item.position).padStart(2, '0')}
                     </span>
@@ -83,7 +99,7 @@ export function Locked() {
                     <span className="lrow__status mono">
                       {item.option.sourceYear}
                     </span>
-                  </div>
+                  </button>
                 </li>
               ))}
             </ol>
@@ -166,18 +182,118 @@ export function Locked() {
         )}
       </div>
 
-      <NextStep
-        tone="ready"
-        what="You are done — fill this order on the portal"
-        why="Keep the snapshot ID. If the dataset or your circumstances change, start a new profile rather than editing this one."
-      >
-        <button type="button" className="btn" onClick={() => goTo('conflicts')}>
-          Back to inspector
-        </button>
-        <button type="button" className="btn btn--primary" onClick={reset}>
-          Start a new profile
-        </button>
-      </NextStep>
+      <div style={{ marginTop: 34 }}>
+        <Band
+          num={`Round ${currentRound} of ${authority.rounds}`}
+          title="What did you actually get?"
+          note="Allotment decides the next round. We only offer options you would genuinely rather have than the seat in your hand — anything at or below it is not worth floating for."
+        >
+          <div className="field">
+            <label className="field__label" htmlFor="allotment">
+              Seat allotted in round {currentRound}
+            </label>
+            <select
+              id="allotment"
+              className="select"
+              value={allottedOptionId ?? ''}
+              onChange={(e) => recordAllotment(e.target.value || null)}
+            >
+              <option value="">Not allotted anything yet</option>
+              {items.map((item) => (
+                <option key={item.itemId} value={item.option.id}>
+                  #{String(item.position).padStart(2, '0')} — {labelFor(item)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {heldItem && (
+            <Banner
+              tone={preview.exhausted ? 'success' : 'info'}
+              title={
+                preview.exhausted
+                  ? `You hold your #${preview.heldPosition} choice — nothing on this list beats it`
+                  : `${preview.items.length} option${preview.items.length > 1 ? 's' : ''} beat what you hold`
+              }
+            >
+              <span>
+                {preview.exhausted
+                  ? 'Freezing is the rational move. Floating can only get you something you ranked lower.'
+                  : `You were allotted ${labelFor(heldItem)} at #${preview.heldPosition}. Round ${currentRound + 1} would carry only the ${preview.items.length} option${preview.items.length > 1 ? 's' : ''} above it; ${preview.droppedCount} would be dropped as no improvement.`}
+              </span>
+            </Banner>
+          )}
+        </Band>
+
+        {history.length > 0 && (
+          <Band
+            num={`${history.length} done`}
+            title="Rounds so far"
+            note="Each round keeps its own locked snapshot."
+          >
+            <ul className="activity">
+              {history.map((h) => (
+                <li key={h.round} data-tone="locked">
+                  <span className="activity__dot" aria-hidden="true" />
+                  <span>
+                    <b>Round {h.round}</b>
+                    <p>
+                      {h.items.length} choices locked ·{' '}
+                      {h.allottedLabel ? `allotted ${h.allottedLabel}` : 'no allotment recorded'}
+                    </p>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Band>
+        )}
+      </div>
+
+      {isFinalRound || preview.exhausted ? (
+        <NextStep
+          tone="ready"
+          what={
+            preview.exhausted
+              ? 'Freeze — you already hold your best available option'
+              : `Round ${authority.rounds} is the last round for ${authority.label}`
+          }
+          why="Keep the snapshot ID. If the dataset or your circumstances change, start a new profile rather than editing this one."
+        >
+          <button type="button" className="btn" onClick={() => goTo('conflicts')}>
+            Back to inspector
+          </button>
+          <button type="button" className="btn btn--primary" onClick={reset}>
+            Start a new profile
+          </button>
+        </NextStep>
+      ) : (
+        <NextStep
+          tone="go"
+          what={`Build my round ${currentRound + 1} list`}
+          why={
+            allottedOptionId
+              ? 'We carry forward only the options you rank above the seat you hold, then re-audit them against your constraints.'
+              : 'Record your allotment first if you got one — otherwise the next round carries the full list forward.'
+          }
+        >
+          <button type="button" className="btn" onClick={() => goTo('conflicts')}>
+            Back to inspector
+          </button>
+          <button type="button" className="btn btn--primary" onClick={startNextRound}>
+            Start round {currentRound + 1} →
+          </button>
+        </NextStep>
+      )}
+
+      {impactItem && (
+        <DecisionImpactModal
+          item={impactItem}
+          profile={profile}
+          items={items}
+          authority={authorityId}
+          onClose={() => setImpactId(null)}
+        />
+      )}
     </>
   )
 }

@@ -1,3 +1,5 @@
+import type { AuthorityId } from './authorities'
+import { GENERATED_OPTIONS_BY_AUTHORITY } from './generated'
 import type { CollegeOption } from '../types'
 
 const SRC = 'UPTAC sample cycle'
@@ -161,3 +163,13 @@ export const SEED_OPTIONS: CollegeOption[] = [
 export const OPTIONS_BY_ID: Record<string, CollegeOption> = Object.fromEntries(
   SEED_OPTIONS.map((o) => [o.id, o]),
 )
+
+export const OPTIONS_BY_AUTHORITY: Record<AuthorityId, CollegeOption[]> = {
+  UPTAC: SEED_OPTIONS,
+  JOSAA: GENERATED_OPTIONS_BY_AUTHORITY.JOSAA ?? [],
+  IPU: GENERATED_OPTIONS_BY_AUTHORITY.IPU ?? [],
+}
+
+export function optionsFor(authority: AuthorityId): CollegeOption[] {
+  return OPTIONS_BY_AUTHORITY[authority] ?? []
+}

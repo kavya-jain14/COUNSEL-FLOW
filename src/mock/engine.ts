@@ -23,11 +23,14 @@
  */
 
 import type { CandidateProfile, CollegeOption, StrategyItem } from '../types'
-import { SEED_OPTIONS } from '../data/seedOptions'
+
 import { INSTITUTE_TYPE_LABELS } from '../data/reference'
 import { distanceBetweenCities } from '../data/geo'
 import { formatINR, formatKm } from '../lib/format'
 import { TIER_DREAM_RATIO_MAX, TIER_TARGET_RATIO_MAX, confidenceFor } from './strategy'
+import { DEFAULT_AUTHORITY, candidatePools, type AuthorityId } from '../data/authorities'
+import { closingRankFor, CUTOFF_YEAR } from '../data/cutoffs'
+import { optionsFor } from '../data/seedOptions'
 
 // ─── scoring constants ────────────────────────────────────────────────────────
 
@@ -317,9 +320,42 @@ function assignTier(option: CollegeOption, rank: number | null): Tier {
  * This replaces the hardcoded MOCK_ORDER in the old generateMockStrategy.
  * The result is fully deterministic: identical profile → identical order.
  */
-export function runStrategyEngine(profile: CandidateProfile): StrategyItem[] {
+export const MAX_LIST_LENGTH = 60
+
+const FACT_KEYS = [
+  'annualFee',
+  'distanceKm',
+  'hostelAvailable',
+  'placementScore',
+  'campusScore',
+  'closingRank',
+] as const
+
+function deriveMissingFacts(option: CollegeOption): CollegeOption['missingFacts'] {
+  return FACT_KEYS.filter((key) => option[key] == null) as CollegeOption['missingFacts']
+}
+
+export interface EngineContext {
+  authority: AuthorityId
+  year: number
+  round: number
+}
+
+export function runStrategyEngine(
+  profile: CandidateProfile,
+  context: EngineContext = { authority: DEFAULT_AUTHORITY, year: CUTOFF_YEAR, round: 1 },
+): StrategyItem[] {
+  const pools = candidatePools(context.authority, profile.category ?? 'GEN', profile.domicile ?? 'UP')
+  const resolveClosingRank = (optionId: string) => {
+    for (const pool of pools) {
+      const rank = closingRankFor(context.authority, context.year, context.round, optionId, pool)
+      if (rank != null) return rank
+    }
+    return null
+  }
+
   // ── step 1: compute live distanceKm for every option ──────────────────────
-  const withDistances = SEED_OPTIONS.map((option) => ({
+  const withDistances = optionsFor(context.authority).map((option) => ({
     option,
     distanceKm: distanceBetweenCities(profile.homeCity, option.city),
   }))
@@ -374,10 +410,16 @@ export function runStrategyEngine(profile: CandidateProfile): StrategyItem[] {
     return a.option.id.localeCompare(b.option.id)
   })
 
-  return scored.map(({ option, distanceKm }, i) => {
-    const enrichedOption: CollegeOption = distanceKm != null
-      ? { ...option, distanceKm }
-      : option
+  return scored.slice(0, MAX_LIST_LENGTH).map(({ option, distanceKm }, i) => {
+    const resolved: CollegeOption = {
+      ...option,
+      distanceKm: distanceKm ?? option.distanceKm,
+      closingRank: resolveClosingRank(option.id),
+    }
+    const enrichedOption: CollegeOption = {
+      ...resolved,
+      missingFacts: deriveMissingFacts(resolved),
+    }
 
     return {
       itemId: `item-${i + 1}`,

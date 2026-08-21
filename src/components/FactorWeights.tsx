@@ -1,7 +1,5 @@
 import type { FactorKey, FactorWeights as Weights } from '../types'
-import { FACTORS } from '../data/reference'
-
-const WEIGHT_WORDS = ['Ignore', 'Slight', 'Some', 'Matters', 'Important', 'Decisive']
+import { FACTORS, WEIGHT_WORDS } from '../data/reference'
 
 export function FactorWeightSliders({
   weights,

@@ -1,12 +1,22 @@
 import type { Conflict, StrategyItem } from '../types'
+import type { FitBand } from '../features/decision-impact'
 import { formatINRExact, formatKm } from '../lib/format'
 import { TierBadge } from './ui'
+
+const FIT_WORD: Record<FitBand, string> = {
+  BLOCKED: 'blocked',
+  STRONG: 'strong fit',
+  WORKABLE: 'workable',
+  STRAINED: 'strained',
+  POOR: 'poor fit',
+}
 
 const SEVERITY_RANK = { CRITICAL: 0, WARNING: 1, INFO: 2 } as const
 
 export function StrategyRow({
   item,
   conflicts,
+  fit,
   selected,
   isFirst,
   isLast,
@@ -17,6 +27,7 @@ export function StrategyRow({
 }: {
   item: StrategyItem
   conflicts: Conflict[]
+  fit?: { score: number; band: FitBand; coverage: number }
   selected: boolean
   isFirst: boolean
   isLast: boolean
@@ -37,6 +48,7 @@ export function StrategyRow({
         type="button"
         className="lrow"
         aria-current={selected}
+        aria-haspopup="dialog"
         onClick={() => onSelect(item.itemId)}
       >
         <span className="lrow__pos" aria-hidden="true">
@@ -57,8 +69,20 @@ export function StrategyRow({
             </span>
             <span>{option.distanceKm == null ? 'Distance unknown' : formatKm(option.distanceKm)}</span>
           </span>
-          {(item.manuallyPlaced || item.confidence !== 'high') && (
+          {(fit || item.manuallyPlaced || item.confidence !== 'high') && (
             <span className="lrow__flags">
+              {fit && (
+                <span className="lrow__fit" data-band={fit.band}>
+                  {fit.coverage < 1 && <span aria-hidden="true">~</span>}
+                  {fit.score}/100 fit for you
+                  <span className="sr-only">
+                    {' '}— {FIT_WORD[fit.band]} against your profile
+                    {fit.coverage < 1
+                      ? `, measured on ${Math.round(fit.coverage * 100)}% of what you weighted`
+                      : ''}
+                  </span>
+                </span>
+              )}
               {item.manuallyPlaced && <span className="badge badge--neutral">Moved by you</span>}
               {item.confidence !== 'high' && (
                 <span className="badge badge--neutral">{item.confidence} confidence</span>
