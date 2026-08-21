@@ -374,9 +374,7 @@ export function runStrategyEngine(profile: CandidateProfile): StrategyItem[] {
     return a.option.id.localeCompare(b.option.id)
   })
 
-  // ── step 7 + 8: assign tiers, build reason facts, emit StrategyItems ───────
-  return scored.map(({ option, distanceKm, branchScore: bScore, factorScore, totalScore }, i) => {
-    // Attach computed distanceKm to option for downstream audit consumers
+  return scored.map(({ option, distanceKm }, i) => {
     const enrichedOption: CollegeOption = distanceKm != null
       ? { ...option, distanceKm }
       : option
@@ -389,8 +387,6 @@ export function runStrategyEngine(profile: CandidateProfile): StrategyItem[] {
       reasons: buildReasons(enrichedOption, distanceKm, profile),
       confidence: confidenceFor(enrichedOption),
       manuallyPlaced: false,
-      // scoring metadata (not in the StrategyItem type — kept for audit reference)
-      _debug: { factorScore: +factorScore.toFixed(4), branchScore: +bScore.toFixed(4), totalScore: +totalScore.toFixed(4) },
-    } as StrategyItem
+    } satisfies StrategyItem
   })
 }
