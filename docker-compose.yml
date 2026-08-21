@@ -1,0 +1,12 @@
+services:
+  counselflow:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:/app/prisma/dev.db"
+    volumes:
+      - counselflow-data:/app/prisma
+
+volumes:
+  counselflow-data:

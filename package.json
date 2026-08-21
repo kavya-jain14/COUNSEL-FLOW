@@ -17,14 +17,20 @@
     "typecheck": "npm run contracts:build && tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "next": "^15.4.6",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/node": "^22.10.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "prisma": "^6.15.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
   }
 }
