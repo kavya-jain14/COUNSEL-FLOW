@@ -4,12 +4,11 @@ Last updated: 2026-08-21
 
 ## Repository
 
-- Remote: `https://github.com/kavya-jain14/COUNSE-FLOW`
+- Remote: `https://github.com/kavya-jain14/COUNSEL-FLOW`
 - Remote default branch: `main`
 - Foundation PR `#1` was squash-merged into `main` at `25a75cb`.
 - Gargi's existing `feature/gargi-profile-conflicts` branch and history remain preserved.
-- Active feature branch: `feat/shared-contracts`, created from the latest `main`.
-- Main-branch protection is being configured with PR review and the `frontend` CI check.
+- Active feature branch: `feat/strategy-engine` — pushed, Draft PR #6 open.
 
 ## Durable product decisions
 
@@ -21,7 +20,7 @@ Last updated: 2026-08-21
 - An unresolved critical or warning conflict blocks locking. A kept warning becomes an
   explained override, then the changed state must be re-audited.
 
-## Shared-contract checkpoint
+## Shared-contract checkpoint (PR #2 merged)
 
 - Added versioned schemas and inferred types for profile, strategy, audit, lock and API
   error envelopes under `packages/contracts`.
@@ -30,39 +29,60 @@ Last updated: 2026-08-21
 - Added explicit missing-fact/null consistency and immutable snapshot metadata.
 - Added valid/invalid JSON fixtures plus Node contract tests.
 - Root npm workspace/scripts and GitHub CI now include contract compilation/tests.
-- Provisional frontend types remain in place; `packages/contracts/MIGRATION.md` documents
-  the later adapter work instead of mixing it into this branch.
-- Updated lab expectations so unresolved warnings block until a reason and re-audit.
 
-## Strategy-engine checkpoint
+## Strategy-engine checkpoint (PR #6 open — feat/strategy-engine)
 
-- Active branch: `feat/strategy-engine` — pushed, PR to be opened.
-- Tier buffers extracted to `TIER_DREAM_RATIO_MAX` (0.90) and `TIER_TARGET_RATIO_MAX` (1.40)
-  with JSDoc in `src/mock/strategy.ts`.
-- Golden boundary tests added at `src/mock/strategy.test.ts` (run via
-  `npx tsx --test src/mock/strategy.test.ts`).
-- TierBadge and StrategyInspector lede updated to cite buffer boundaries.
-- Lab scenario `tier-boundary-classification` added to `src/lab/scenarios.ts`.
-- macOS ghost duplicate directories (`@types/react 2`, `react-dom 2`,
-  `src/features/contracts/* 2`) cleaned up; pre-existing TS2688 is resolved.
-- `tsconfig.json` now excludes `*.test.ts` from the browser-lib compile.
-- `npm run check` passes: 14 contract tests, typecheck, vite build.
+### Tier buffers (commit 9ceb423)
+- Extracted `TIER_DREAM_RATIO_MAX` (0.90) and `TIER_TARGET_RATIO_MAX` (1.40) with JSDoc.
+- TierBadge and StrategyInspector lede updated to cite buffer boundaries explicitly.
+- Boundary test file: `src/mock/strategy.test.ts`.
+- Lab scenario `tier-boundary-classification` added.
 
-## Validation and blockers
+### Deterministic scoring engine (commit e8d9f99)
+- New `src/mock/engine.ts` implements the full Blueprint §9 pipeline:
+  1. Live `distanceKm` via `haversineKm(homeCity → college city)`.
+  2. Hard filter — budget, distance, exclusions — before any scoring.
+  3. Normalized factor scoring (placements, fees, location, campus, hostel) across surviving set.
+  4. Branch priority contributes `BRANCH_WEIGHT` (30%) separately from factor scores.
+  5. Stable tie-breaker by `option.id`.
+  6. Tier assignment with named ratio buffers.
+  7. Reason facts built from live computed distance, not null.
+- `src/mock/api.ts` wired to `runStrategyEngine` (was `generateMockStrategy`).
+- `ENGINE_VERSION` bumped to `engine-0.2.0` in `src/data/reference.ts`.
 
-- JSON fixtures and lockfile parse successfully; `git diff --check` passes.
-- This workspace cannot reach the npm registry, so dependency installation, TypeScript
-  compilation, contract tests and the production build must be run on Kavya's Mac and
-  then confirmed by the PR's `frontend` GitHub Actions check.
-- Do not run `npm audit fix --force`; dependency audit findings remain separate work.
+### Integration lab dashboard (latest commit on feat/strategy-engine)
+- New `src/screens/LabDashboard.tsx` — golden scenario runner UI.
+- Accessible via the `lab` button in the sidebar footer.
+- Runs all 8 scenarios in `src/lab/scenarios.ts` against the live engine and audit.
+- Shows pass/fail verdict, conflict codes, canLock status, and manual setup steps.
+- **Verified: 8/8 scenarios pass** as of 2026-08-21.
+- `App.tsx` footer now shows live `ENGINE_VERSION` instead of hardcoded string.
+
+### Lab scenarios (8 total)
+| ID | Proves |
+|---|---|
+| golden-fix-and-lock | Full hero loop converges |
+| hard-budget-breach | CF-02 is raised for over-budget options |
+| branch-priority-inversion | CF-01 fires for comparable ECE-over-CSE violations |
+| stale-audit-after-manual-move | Manual (stale-gate requires multi-step interaction) |
+| missing-evidence | CF-08 fires for options with missing facts |
+| tier-boundary-classification | DREAM/TARGET/SAFE boundaries from named ratio buffers |
+| deterministic-factor-scoring | Weights change order deterministically |
+| hard-distance-filter | Gorakhpur filtered out at 100 km hard limit |
+
+## Current validation status
+
+- `npm run check` passes: 14 contract tests, typecheck, vite build
+- `npm run typecheck` passes clean
+- All 8 lab scenarios: 8/8 PASS
+- Hero flow end-to-end verified in browser: generate → audit → lock
 
 ## Next commands after importing this checkpoint
 
 ```bash
-npm ci
+git checkout feat/strategy-engine
 npm run check
-git push -u origin feat/shared-contracts
 ```
 
-Open a Draft PR into `main`, wait for the `frontend` check, and request Fuzail's backend
-contract review plus Gargi's frontend-adapter review before marking it ready.
+Open PR #6 for review. Request Fuzail's review on engine scoring logic and
+Gargi's review on LabDashboard UI copy before marking it ready for merge.

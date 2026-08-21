@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
@@ -11,9 +11,11 @@ import { ProfileSummary } from './screens/ProfileSummary'
 import { Strategy } from './screens/Strategy'
 import { ConflictInspector } from './screens/ConflictInspector'
 import { Locked } from './screens/Locked'
+import { LabDashboard } from './screens/LabDashboard'
 import { isProfileValid } from './lib/validation'
+import { ENGINE_VERSION } from './data/reference'
 
-function Screen({ step }: { step: Step }) {
+function Screen({ step }: { step: Step | 'lab' }) {
   switch (step) {
     case 'landing':
       return <Landing />
@@ -27,6 +29,8 @@ function Screen({ step }: { step: Step }) {
       return <ConflictInspector />
     case 'locked':
       return <Locked />
+    case 'lab':
+      return <LabDashboard />
   }
 }
 
@@ -35,6 +39,7 @@ function Shell() {
   const { goTo, lock } = useAppActions()
   const { theme, toggleTheme } = useTheme()
   const mainRef = useRef<HTMLDivElement>(null)
+  const [showLab, setShowLab] = useState(false)
 
   useEffect(() => {
     mainRef.current?.focus()
@@ -131,7 +136,17 @@ function Shell() {
           })}
         </nav>
 
-        <div className="sidebar__foot">v0.1.0 · mock engine</div>
+        <div className="sidebar__foot">
+          <span>{ENGINE_VERSION}</span>
+          <button
+            type="button"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: 'inherit', opacity: 0.5, padding: '2px 4px' }}
+            title="Integration lab"
+            onClick={() => setShowLab((v) => !v)}
+          >
+            {showLab ? '← app' : 'lab'}
+          </button>
+        </div>
       </aside>
 
       <div className="shell__body">
@@ -168,7 +183,7 @@ function Shell() {
         </header>
 
         <main className="main" id="main" tabIndex={-1} ref={mainRef}>
-          <Screen step={state.step} />
+          <Screen step={showLab ? 'lab' : state.step} />
         </main>
       </div>
 
