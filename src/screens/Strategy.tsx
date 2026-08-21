@@ -6,6 +6,9 @@ import { useAppActions, useAppState } from '../state/store'
 import { StrategyRow } from '../components/StrategyRow'
 import { StrategyInspector } from '../components/StrategyInspector'
 import { Banner, NextStep, PageHead } from '../components/ui'
+import { WhatIfPanel } from '../components/WhatIfPanel'
+import { latestSetFor } from '../data/generated'
+import { CUTOFF_YEAR } from '../data/cutoffs'
 import {
   DecisionImpactModal,
   evaluateDecisionImpact,
@@ -14,7 +17,16 @@ import {
 
 export function Strategy() {
   const { items, audit, auditStale, busy, profile, authorityId } = useAppState()
-  const { goTo, moveItem, removeItem, reaudit } = useAppActions()
+  const { goTo, moveItem, removeItem, reaudit, patchProfile, generate } = useAppActions()
+  const [whatIfOpen, setWhatIfOpen] = useState(false)
+  const engineContext = useMemo(() => {
+    const set = latestSetFor(authorityId)
+    return {
+      authority: authorityId,
+      year: set?.year ?? CUTOFF_YEAR,
+      round: set?.round ?? 1,
+    }
+  }, [authorityId])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [impactId, setImpactId] = useState<string | null>(null)
 
@@ -88,14 +100,24 @@ export function Strategy() {
           </>
         }
         actions={
-          <button
-            type="button"
-            className="btn btn--sm"
-            onClick={reaudit}
-            disabled={busy === 'audit'}
-          >
-            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit list'}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={() => setWhatIfOpen(true)}
+              disabled={items.length === 0}
+            >
+              What if?
+            </button>
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={reaudit}
+              disabled={busy === 'audit'}
+            >
+              {busy === 'audit' ? 'Re-auditing…' : 'Re-audit list'}
+            </button>
+          </>
         }
       />
 
@@ -243,6 +265,20 @@ export function Strategy() {
           </button>
         </NextStep>
       )}
+      {whatIfOpen && (
+        <WhatIfPanel
+          profile={profile}
+          items={items}
+          context={engineContext}
+          onClose={() => setWhatIfOpen(false)}
+          onApply={(next) => {
+            patchProfile(next)
+            setWhatIfOpen(false)
+            void generate()
+          }}
+        />
+      )}
+
     </>
   )
 }
