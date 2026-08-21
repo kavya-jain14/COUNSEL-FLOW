@@ -3,14 +3,6 @@ import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
 import { Banner, LiveRegion } from './components/ui'
-import {
-  IconConflict,
-  IconLock,
-  IconProfile,
-  IconStrategy,
-  IconSummary,
-} from './components/icons'
-import { LiveRegion } from './components/ui'
 import { IconMoon, IconSun } from './components/icons'
 import { useTheme } from './lib/theme'
 import { Landing } from './screens/Landing'
@@ -60,12 +52,6 @@ function Shell() {
     return steps
   }, [state.profile, state.items, state.audit, state.lock])
 
-  const currentIndex = FLOW.findIndex((f) => f.step === state.step)
-  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
-  const activeLabel =
-    FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
-  }, [profileReady, state.items, state.audit, state.lock.locked])
-
   const meta: Record<Step, string> = {
     landing: '',
     profile: profileReady ? 'Rank, limits, priorities' : 'Start here — rank and limits',
@@ -81,11 +67,11 @@ function Shell() {
           ? 'Re-audit pending'
           : 'Nothing blocking'
       : 'Opens after the first audit',
-    locked: state.lock.locked ? 'Snapshot saved' : 'Clear all critical conflicts',
+    locked: state.lock ? 'Snapshot saved' : 'Clear all critical conflicts',
   }
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)
-  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock.locked
+  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
   const activeLabel = FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
 
   return (

@@ -97,14 +97,14 @@ export function Locked() {
         >
           <dl className="summary-grid">
             <div className="summary-cell">
-              <dt>Profile version</dt>
+              <dt>Profile revision</dt>
               <dd className="mono" style={{ fontSize: '0.9rem' }}>
-                {lock.profileVersion}
+                {lock.profileRevision}
               </dd>
             </div>
             <div className="summary-cell">
               <dt>Dataset</dt>
-              <dd style={{ fontSize: '0.94rem' }}>{lock.datasetLabel}</dd>
+              <dd style={{ fontSize: '0.94rem' }}>{lock.datasetVersion}</dd>
             </div>
             <div className="summary-cell">
               <dt>Engine version</dt>

@@ -61,8 +61,6 @@ export function ConflictInspector() {
   const acknowledged = resolutions.filter(
     (resolution) => resolution.severity === 'WARNING' && resolution.kind === 'OVERRIDDEN',
   )
-  const canLock = audit.canLock && !auditStale
-  const acknowledged = resolutions.filter((r) => r.kind !== 'FIXED')
   const handled = audit.conflicts.filter((c) => resolutionMap[c.id]).length
 
   return (
@@ -155,7 +153,6 @@ export function ConflictInspector() {
         <Banner
           tone="success"
           title={snapshot ? 'This strategy is already locked' : 'No unresolved blocking conflicts'}
-          title="Nothing is blocking you — this list can be locked"
           action={
             <button
               className="btn btn--sm btn--primary"

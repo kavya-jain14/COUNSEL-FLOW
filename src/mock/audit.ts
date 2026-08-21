@@ -145,8 +145,6 @@ function distanceConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
           km,
         )} away, further than you prefer, but distance is a soft preference.`,
       evidence: [
-        `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from your home location`,
-        `Your declared limit — ${formatKm(profile.distance.value)} (${hard ? 'hard constraint' : 'soft preference'
         `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from ${profile.homeCity ?? 'your home city'}`,
         `Your declared limit — ${formatKm(profile.distance.value)} (${
           hard ? 'hard constraint' : 'soft preference'
