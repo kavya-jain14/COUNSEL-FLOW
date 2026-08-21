@@ -20,7 +20,8 @@ const GROUP_COPY: Record<Severity, string> = {
 }
 
 export function ConflictInspector() {
-  const { audit, items, resolutions, activity, auditStale, busy } = useAppState()
+  const { audit, items, resolutions, activity, auditStale, busy, lock: snapshot } =
+    useAppState()
   const { goTo, reaudit, lock, applyAction } = useAppActions()
   const resolutionMap = useResolutionMap()
 
@@ -56,8 +57,10 @@ export function ConflictInspector() {
 
   const { counts } = audit
   const total = counts.CRITICAL + counts.WARNING + counts.INFO
-  const canLock = audit.canLock && !auditStale
-  const acknowledged = resolutions.filter((r) => r.kind !== 'FIXED')
+  const canLock = audit.canLock && !auditStale && !snapshot
+  const acknowledged = resolutions.filter(
+    (resolution) => resolution.severity === 'WARNING' && resolution.kind === 'OVERRIDDEN',
+  )
   const handled = audit.conflicts.filter((c) => resolutionMap[c.id]).length
 
   return (
@@ -137,18 +140,31 @@ export function ConflictInspector() {
             Everything else on this page is optional.
           </span>
         </Banner>
+      ) : counts.WARNING > 0 ? (
+        <Banner
+          tone="warning"
+          title={`${counts.WARNING} warning decision${counts.WARNING > 1 ? 's' : ''} required`}
+        >
+          <span>
+            Fix each warning or keep it with a written reason, then re-audit before locking.
+          </span>
+        </Banner>
       ) : (
         <Banner
           tone="success"
-          title="Nothing is blocking you — this list can be locked"
+          title={snapshot ? 'This strategy is already locked' : 'No unresolved blocking conflicts'}
           action={
-            <button className="btn btn--sm btn--primary" onClick={lock} disabled={busy === 'lock'}>
+            <button
+              className="btn btn--sm btn--primary"
+              onClick={lock}
+              disabled={busy === 'lock' || Boolean(snapshot)}
+            >
               {busy === 'lock' ? (
                 <>
                   <span className="spinner" aria-hidden="true" /> Locking…
                 </>
               ) : (
-                'Lock my list'
+                snapshot ? 'Locked' : 'Lock my list'
               )}
             </button>
           }

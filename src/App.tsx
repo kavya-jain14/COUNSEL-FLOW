@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
-import { LiveRegion } from './components/ui'
+import { Banner, LiveRegion } from './components/ui'
 import { IconMoon, IconSun } from './components/icons'
 import { useTheme } from './lib/theme'
 import { Landing } from './screens/Landing'
@@ -44,13 +44,13 @@ function Shell() {
   const counts = state.audit?.counts ?? { CRITICAL: 0, WARNING: 0, INFO: 0 }
 
   const reachable = useMemo(() => {
+    if (state.lock) return ['strategy', 'conflicts', 'locked'] satisfies Step[]
     const steps: Step[] = ['profile']
     if (profileReady) steps.push('summary')
     if (state.items.length > 0) steps.push('strategy')
     if (state.audit) steps.push('conflicts')
-    if (state.lock.locked) steps.push('locked')
     return steps
-  }, [profileReady, state.items, state.audit, state.lock.locked])
+  }, [state.profile, state.items, state.audit, state.lock])
 
   const meta: Record<Step, string> = {
     landing: '',
@@ -67,11 +67,11 @@ function Shell() {
           ? 'Re-audit pending'
           : 'Nothing blocking'
       : 'Opens after the first audit',
-    locked: state.lock.locked ? 'Snapshot saved' : 'Clear all critical conflicts',
+    locked: state.lock ? 'Snapshot saved' : 'Clear all critical conflicts',
   }
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)
-  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock.locked
+  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
   const activeLabel = FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
 
   return (
@@ -148,7 +148,7 @@ function Shell() {
               disabled={!canLock || state.busy === 'lock'}
               onClick={lock}
             >
-              {state.lock.locked ? 'Locked' : 'Lock strategy'}
+              {state.lock ? 'Locked' : 'Lock strategy'}
             </button>
             <button
               type="button"
@@ -168,6 +168,14 @@ function Shell() {
         </header>
 
         <main className="main" id="main" tabIndex={-1} ref={mainRef}>
+          {state.error && (
+            <Banner tone="critical" title="The last operation was rejected" live>
+              <span>
+                {state.error.error.message}
+                {state.error.requestId ? ` Request: ${state.error.requestId}.` : ''}
+              </span>
+            </Banner>
+          )}
           <Screen step={state.step} />
         </main>
       </div>

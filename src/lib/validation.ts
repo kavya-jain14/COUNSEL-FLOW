@@ -4,6 +4,7 @@ import type {
   FactorKey,
   ProfileErrors,
 } from '../types'
+import { candidateProfileSchema } from '@counselflow/contracts'
 import { BRANCH_LABELS } from '../data/reference'
 import { CITY_COORDS } from '../data/geo'
 
@@ -49,7 +50,7 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
   }
 
   const contradicted = profile.hardExclusions.filter(
-    (ex) => ex.kind === 'branch' && profile.branchPriority.includes(ex.value),
+    (ex) => ex.kind === 'branch' && (profile.branchPriority as string[]).includes(ex.value),
   )
   if (contradicted.length > 0) {
     const names = contradicted
@@ -84,7 +85,7 @@ export function normalizeWeights(
 }
 
 export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
-  return {
+  return candidateProfileSchema.parse({
     rank: profile.rank as number,
     rankType: profile.rankType,
     category: profile.category!,
@@ -94,5 +95,5 @@ export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
     distance: { ...profile.distance },
     hardExclusions: profile.hardExclusions.map(({ kind, value }) => ({ kind, value })),
     factorWeights: normalizeWeights(profile.factorWeights),
-  }
+  })
 }

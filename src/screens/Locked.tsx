@@ -6,7 +6,18 @@ export function Locked() {
   const { lock, items, resolutions, profile } = useAppState()
   const { goTo, reset } = useAppActions()
 
-  const overrides = resolutions.filter((r) => r.kind !== 'FIXED')
+  if (!lock) {
+    return (
+      <div className="card empty">
+        <p>No locked snapshot exists yet.</p>
+        <button className="btn btn--primary" onClick={() => goTo('conflicts')}>
+          Return to conflict inspector
+        </button>
+      </div>
+    )
+  }
+
+  const overrides = lock.acknowledgedWarnings
   const fixes = resolutions.filter((r) => r.kind === 'FIXED')
 
   return (
@@ -86,19 +97,25 @@ export function Locked() {
         >
           <dl className="summary-grid">
             <div className="summary-cell">
-              <dt>Profile version</dt>
+              <dt>Profile revision</dt>
               <dd className="mono" style={{ fontSize: '0.9rem' }}>
-                {lock.profileVersion}
+                {lock.profileRevision}
               </dd>
             </div>
             <div className="summary-cell">
               <dt>Dataset</dt>
-              <dd style={{ fontSize: '0.94rem' }}>{lock.datasetLabel}</dd>
+              <dd style={{ fontSize: '0.94rem' }}>{lock.datasetVersion}</dd>
             </div>
             <div className="summary-cell">
               <dt>Engine version</dt>
               <dd className="mono" style={{ fontSize: '0.9rem' }}>
                 {lock.engineVersion}
+              </dd>
+            </div>
+            <div className="summary-cell">
+              <dt>Locked at</dt>
+              <dd style={{ fontSize: '0.88rem' }}>
+                {new Date(lock.lockedAt).toLocaleString('en-IN')}
               </dd>
             </div>
             <div className="summary-cell">

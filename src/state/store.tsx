@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type {
+  ApiErrorEnvelope,
   AuditResult,
   CandidateProfile,
   Conflict,
@@ -15,12 +16,13 @@ import type {
   LockState,
   Resolution,
   ResolutionKind,
+  StrategyGenerateResponse,
   StrategyItem,
   Step,
 } from '../types'
-import { DATASET_LABEL, ENGINE_VERSION, PROFILE_VERSION } from '../data/reference'
 import { renumber } from '../mock/strategy'
 import * as api from '../mock/api'
+import { toApiError } from '../features/contracts'
 
 export interface ActivityEntry {
   id: string
@@ -37,11 +39,10 @@ export interface AppState {
   audit: AuditResult | null
   resolutions: Resolution[]
   activity: ActivityEntry[]
-  lock: LockState
+  lock: LockState | null
   busy: null | 'generate' | 'audit' | 'lock'
-
   auditStale: boolean
-
+  error: ApiErrorEnvelope | null
   announcement: string
 }
 
@@ -71,16 +72,6 @@ export const DEMO_PROFILE: CandidateProfile = {
   homeCity: 'Lucknow',
 }
 
-const INITIAL_LOCK: LockState = {
-  locked: false,
-  snapshotId: null,
-  profileVersion: PROFILE_VERSION,
-  datasetLabel: DATASET_LABEL,
-  engineVersion: ENGINE_VERSION,
-  acknowledgedWarnings: [],
-  itemOrder: [],
-}
-
 const INITIAL_STATE: AppState = {
   step: 'landing',
   profile: DEFAULT_PROFILE,
@@ -88,9 +79,10 @@ const INITIAL_STATE: AppState = {
   audit: null,
   resolutions: [],
   activity: [],
-  lock: INITIAL_LOCK,
+  lock: null,
   busy: null,
   auditStale: false,
+  error: null,
   announcement: '',
 }
 
@@ -99,12 +91,13 @@ type Action =
   | { type: 'PATCH_PROFILE'; patch: Partial<CandidateProfile> }
   | { type: 'LOAD_DEMO_PROFILE' }
   | { type: 'BUSY'; busy: AppState['busy'] }
-  | { type: 'GENERATED'; items: StrategyItem[]; audit: AuditResult }
+  | { type: 'GENERATED'; response: StrategyGenerateResponse }
   | { type: 'AUDITED'; audit: AuditResult }
   | { type: 'APPLY_ACTION'; conflict: Conflict; action: ConflictAction; reason?: string }
   | { type: 'MOVE_ITEM'; itemId: string; direction: -1 | 1 }
   | { type: 'REMOVE_ITEM'; itemId: string }
   | { type: 'LOCKED'; lock: LockState }
+  | { type: 'FAILED'; error: ApiErrorEnvelope }
   | { type: 'RESET' }
 
 let activitySeq = 0
@@ -113,19 +106,27 @@ function activityId(): string {
   return `act-${activitySeq}`
 }
 
-function resolutionKindFor(action: ConflictAction): ResolutionKind {
+function resolutionKindFor(conflict: Conflict, action: ConflictAction): ResolutionKind {
   switch (action.kind) {
     case 'KEEP':
     case 'CONVERT_TO_SOFT':
       return 'OVERRIDDEN'
     case 'ACKNOWLEDGE':
-      return 'ACKNOWLEDGED'
+      return conflict.severity === 'WARNING' ? 'OVERRIDDEN' : 'ACKNOWLEDGED'
     default:
       return 'FIXED'
   }
 }
 
 function applyConflictAction(state: AppState, conflict: Conflict, action: ConflictAction, reason?: string): AppState {
+  if (!state.audit) return state
+  if (action.id === 'coverage:review-constraints') {
+    return {
+      ...state,
+      step: 'profile',
+      announcement: 'Review your limits, then re-audit after making a change.',
+    }
+  }
   let items = state.items
   let profile = state.profile
   let step = state.step
@@ -197,14 +198,15 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
       break
   }
 
-  const kind = resolutionKindFor(action)
+  const kind = resolutionKindFor(conflict, action)
   const resolution: Resolution = {
     conflictId: conflict.id,
     code: conflict.code,
+    severity: conflict.severity,
     kind,
     actionLabel: action.label,
     reason,
-    atAuditRun: state.audit?.runId ?? 0,
+    atAuditRun: state.audit.runId,
   }
 
   const entry: ActivityEntry = {
@@ -231,9 +233,13 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_STEP':
+      if (state.lock && !['strategy', 'conflicts', 'locked'].includes(action.step)) {
+        return state
+      }
       return { ...state, step: action.step }
 
     case 'PATCH_PROFILE': {
+      if (state.lock) return state
       const profile = { ...state.profile, ...action.patch }
 
       return {
@@ -244,30 +250,33 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'LOAD_DEMO_PROFILE':
+      if (state.lock) return state
       return { ...state, profile: DEMO_PROFILE, announcement: 'Sample candidate loaded.' }
 
     case 'BUSY':
-      return { ...state, busy: action.busy }
+      return { ...state, busy: action.busy, error: null }
 
-    case 'GENERATED':
+    case 'GENERATED': {
+      const { items, audit } = action.response
       return {
         ...state,
-        items: action.items,
-        audit: action.audit,
+        items,
+        audit,
         resolutions: [],
         activity: [
           {
             id: activityId(),
             tone: 'proposed',
             label: 'Strategy generated',
-            detail: `${action.items.length} options ordered by your declared preferences. ${action.audit.counts.CRITICAL} critical, ${action.audit.counts.WARNING} warning, ${action.audit.counts.INFO} info.`,
+            detail: `${items.length} options ordered by your declared preferences. ${audit.counts.CRITICAL} critical, ${audit.counts.WARNING} warning, ${audit.counts.INFO} info.`,
           },
         ],
         busy: null,
         auditStale: false,
         step: 'strategy',
-        announcement: `Strategy ready with ${action.audit.conflicts.length} conflicts found.`,
+        announcement: `Strategy ready with ${audit.conflicts.length} conflicts found.`,
       }
+    }
 
     case 'AUDITED':
       return {
@@ -284,16 +293,17 @@ function reducer(state: AppState, action: Action): AppState {
           },
           ...state.activity,
         ],
-        announcement:
-          action.audit.counts.CRITICAL === 0
-            ? 'Re-audit complete. No critical conflicts left — you can lock the list.'
-            : `Re-audit complete. ${action.audit.counts.CRITICAL} critical conflicts still block locking.`,
+        announcement: action.audit.canLock
+          ? 'Re-audit complete. No unresolved blocking conflicts — you can lock the list.'
+          : `Re-audit complete. ${action.audit.counts.CRITICAL} critical and ${action.audit.counts.WARNING} warning conflicts still need a decision.`,
       }
 
     case 'APPLY_ACTION':
+      if (state.lock) return state
       return applyConflictAction(state, action.conflict, action.action, action.reason)
 
     case 'MOVE_ITEM': {
+      if (state.lock) return state
       const index = state.items.findIndex((it) => it.itemId === action.itemId)
       const target = index + action.direction
       if (index < 0 || target < 0 || target >= state.items.length) return state
@@ -319,6 +329,7 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'REMOVE_ITEM': {
+      if (state.lock) return state
       const removed = state.items.find((it) => it.itemId === action.itemId)
       if (!removed) return state
       return {
@@ -354,6 +365,14 @@ function reducer(state: AppState, action: Action): AppState {
           ...state.activity,
         ],
         announcement: 'Strategy locked.',
+      }
+
+    case 'FAILED':
+      return {
+        ...state,
+        busy: null,
+        error: action.error,
+        announcement: action.error.error.message,
       }
 
     case 'RESET':
@@ -403,30 +422,44 @@ export function useAppActions() {
 
   const generate = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'generate' })
-    const { items, audit } = await api.generateStrategy(state.profile)
-    dispatch({ type: 'GENERATED', items, audit })
+    try {
+      const response = await api.generateStrategy(state.profile)
+      dispatch({ type: 'GENERATED', response })
+    } catch (cause) {
+      dispatch({ type: 'FAILED', error: toApiError(cause) })
+    }
   }, [dispatch, state.profile])
 
   const reaudit = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'audit' })
-    const audit = await api.auditStrategy(
-      state.profile,
-      state.items,
-      state.resolutions,
-      state.audit?.runId ?? 0,
-    )
-    dispatch({ type: 'AUDITED', audit })
+    try {
+      const audit = await api.auditStrategy(
+        state.profile,
+        state.items,
+        state.resolutions,
+        state.audit?.runId ?? 0,
+      )
+      dispatch({ type: 'AUDITED', audit })
+    } catch (cause) {
+      dispatch({ type: 'FAILED', error: toApiError(cause) })
+    }
   }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
 
   const lock = useCallback(async () => {
+    if (!state.audit) return
     dispatch({ type: 'BUSY', busy: 'lock' })
-    const lockState = await api.lockStrategy(
-      state.items,
-      state.resolutions,
-      state.audit?.runId ?? 0,
-    )
-    dispatch({ type: 'LOCKED', lock: lockState })
-  }, [dispatch, state.items, state.resolutions, state.audit])
+    try {
+      const response = await api.lockStrategy(
+        state.profile,
+        state.items,
+        state.resolutions,
+        state.audit,
+      )
+      dispatch({ type: 'LOCKED', lock: response.snapshot })
+    } catch (cause) {
+      dispatch({ type: 'FAILED', error: toApiError(cause) })
+    }
+  }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
 
   const applyAction = useCallback(
     (conflict: Conflict, action: ConflictAction, reason?: string) =>

@@ -7,9 +7,11 @@ Last updated: 2026-08-19
 - Remote: `https://github.com/kavya-jain14/COUNSE-FLOW`
 - Remote default branch: `main`
 - Foundation PR `#1` was squash-merged into `main` at `25a75cb`.
+- Shared-contract PR `#2` was squash-merged into `main` at `34e09ae` after approvals
+  from Fuzail and Gargi; its `CI/frontend` check passed.
 - Gargi's existing `feature/gargi-profile-conflicts` branch and history remain preserved.
-- Active feature branch: `feat/shared-contracts`, created from the latest `main`.
-- Main-branch protection is being configured with PR review and the `frontend` CI check.
+- Active feature branch: `feat/frontend-contract-adapter`, created from `34e09ae`.
+- Main-branch protection uses PR review and the `frontend` CI check.
 
 ## Durable product decisions
 
@@ -21,25 +23,35 @@ Last updated: 2026-08-19
 - An unresolved critical or warning conflict blocks locking. A kept warning becomes an
   explained override, then the changed state must be re-audited.
 
-## Shared-contract checkpoint
+## Frontend-adapter checkpoint
 
-- Added versioned schemas and inferred types for profile, strategy, audit, lock and API
-  error envelopes under `packages/contracts`.
-- Added revision checks, strict unknown-field rejection, normalized-weight validation,
-  unique IDs, conflict-count checks and stale-audit lock protection.
-- Added explicit missing-fact/null consistency and immutable snapshot metadata.
-- Added valid/invalid JSON fixtures plus Node contract tests.
-- Root npm workspace/scripts and GitHub CI now include contract compilation/tests.
-- Provisional frontend types remain in place; `packages/contracts/MIGRATION.md` documents
-  the later adapter work instead of mixing it into this branch.
-- Updated lab expectations so unresolved warnings block until a reason and re-audit.
+- Frontend domain types now derive from `@counselflow/contracts`; only incomplete form
+  state and display metadata remain UI-local.
+- Added `src/features/contracts` as the single boundary for request IDs, stable profile/
+  list revisions, validation failures and API error envelopes.
+- Generate, audit and lock mocks now construct and parse the real versioned wire shapes.
+- Stale profile/list revisions are re-computed after edits and rechecked at lock time.
+- Unresolved warnings now block locking until fixed or overridden with a written reason
+  and a successful re-audit.
+- Locked state is the immutable contract snapshot, including timestamp, dataset/engine
+  versions, audit run and acknowledged warning decisions.
+- Adapter failures clear busy state and surface a shared error envelope in the app shell.
+- Contract compilation now runs before standalone dev, typecheck and build commands.
+
+## Review follow-up
+
+- Fuzail's PR #2 note, “just see the buffer of ranks,” belongs to deterministic strategy
+  classification rather than the transport schema.
+- The next `feat/strategy-engine` branch must replace unexplained tier ratios with named,
+  documented rank buffers and boundary tests. Do not present tier labels as probability.
 
 ## Validation and blockers
 
-- JSON fixtures and lockfile parse successfully; `git diff --check` passes.
-- This workspace cannot reach the npm registry, so dependency installation, TypeScript
-  compilation, contract tests and the production build must be run on Kavya's Mac and
-  then confirmed by the PR's `frontend` GitHub Actions check.
+- PR #2 passed 14 contract tests, root TypeScript and the production Vite build locally
+  on Kavya's Mac; its GitHub Actions check also passed.
+- Current adapter branch passes structural JSON/whitespace checks in this workspace.
+- This workspace cannot reach the npm registry, so the new root typecheck, contract tests
+  and production build must be confirmed on Kavya's Mac and by the PR check.
 - Do not run `npm audit fix --force`; dependency audit findings remain separate work.
 
 ## Next commands after importing this checkpoint
@@ -47,8 +59,8 @@ Last updated: 2026-08-19
 ```bash
 npm ci
 npm run check
-git push -u origin feat/shared-contracts
+git push -u origin feat/frontend-contract-adapter
 ```
 
-Open a Draft PR into `main`, wait for the `frontend` check, and request Fuzail's backend
-contract review plus Gargi's frontend-adapter review before marking it ready.
+Open a Draft PR into `main`, wait for `frontend`, and request Gargi's frontend review plus
+Fuzail's request/revision review before marking it ready.

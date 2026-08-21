@@ -75,12 +75,11 @@ function budgetConflicts(profile: CandidateProfile, items: StrategyItem[]): Conf
       summary: hard
         ? `${formatINR(fee)} option is above your ${formatINR(profile.budget.value)} limit.`
         : `${formatINR(fee)} option is above your preferred ${formatINR(
-            profile.budget.value,
-          )} budget, but budget is a soft preference so it stays eligible.`,
+          profile.budget.value,
+        )} budget, but budget is a soft preference so it stays eligible.`,
       evidence: [
         `${item.option.collegeShort} · ${item.option.branch} — annual fee ${formatINRExact(fee)}`,
-        `Your declared ceiling — ${formatINRExact(profile.budget.value)} per year (${
-          hard ? 'hard constraint' : 'soft preference'
+        `Your declared ceiling — ${formatINRExact(profile.budget.value)} per year (${hard ? 'hard constraint' : 'soft preference'
         })`,
         `Source: ${item.option.sourceLabel} ${item.option.sourceYear}`,
       ],
@@ -88,37 +87,37 @@ function budgetConflicts(profile: CandidateProfile, items: StrategyItem[]): Conf
       itemIds: [item.itemId],
       actions: hard
         ? [
-            removeAction(item.itemId),
-            {
-              id: `${item.itemId}:raise-budget`,
-              kind: 'CHANGE_CONSTRAINT',
-              label: `Raise budget to ${formatINR(headroom)}`,
-              effect: `Changes your hard ceiling to ${formatINRExact(
-                headroom,
-              )}/year. This re-checks every option, not just this one.`,
-              intent: 'secondary',
-              target: { itemId: item.itemId, constraint: 'budget', newValue: headroom },
-            },
-            {
-              id: `${item.itemId}:soften-budget`,
-              kind: 'CONVERT_TO_SOFT',
-              label: 'Make budget a soft preference',
-              effect:
-                'Budget stops blocking options. Expensive colleges rank lower but are no longer removed.',
-              intent: 'secondary',
-              requiresReason: true,
-              target: { constraint: 'budget' },
-            },
-          ]
+          removeAction(item.itemId),
+          {
+            id: `${item.itemId}:raise-budget`,
+            kind: 'CHANGE_CONSTRAINT',
+            label: `Raise budget to ${formatINR(headroom)}`,
+            effect: `Changes your hard ceiling to ${formatINRExact(
+              headroom,
+            )}/year. This re-checks every option, not just this one.`,
+            intent: 'secondary',
+            target: { itemId: item.itemId, constraint: 'budget', newValue: headroom },
+          },
+          {
+            id: `${item.itemId}:soften-budget`,
+            kind: 'CONVERT_TO_SOFT',
+            label: 'Make budget a soft preference',
+            effect:
+              'Budget stops blocking options. Expensive colleges rank lower but are no longer removed.',
+            intent: 'secondary',
+            requiresReason: true,
+            target: { constraint: 'budget' },
+          },
+        ]
         : [
-            {
-              id: `${item.itemId}:ack`,
-              kind: 'ACKNOWLEDGE',
-              label: 'Understood',
-              effect: 'Keeps the option and records that you saw the tradeoff.',
-              intent: 'secondary',
-            },
-          ],
+          {
+            id: `${item.itemId}:ack`,
+            kind: 'ACKNOWLEDGE',
+            label: 'Understood',
+            effect: 'Keeps the option and records that you saw the tradeoff.',
+            intent: 'secondary',
+          },
+        ],
     })
   }
   return out
@@ -140,11 +139,11 @@ function distanceConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
       title: 'Distance violation',
       summary: hard
         ? `${item.option.collegeShort} is ${formatKm(km)} away — past your ${formatKm(
-            profile.distance.value,
-          )} limit.`
+          profile.distance.value,
+        )} limit.`
         : `${item.option.collegeShort} is ${formatKm(
-            km,
-          )} away, further than you prefer, but distance is a soft preference.`,
+          km,
+        )} away, further than you prefer, but distance is a soft preference.`,
       evidence: [
         `${item.option.collegeShort}, ${item.option.city} — ${formatKm(km)} from ${profile.homeCity ?? 'your home city'}`,
         `Your declared limit — ${formatKm(profile.distance.value)} (${
@@ -156,37 +155,37 @@ function distanceConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
       itemIds: [item.itemId],
       actions: hard
         ? [
-            removeAction(item.itemId),
-            {
-              id: `${item.itemId}:raise-distance`,
-              kind: 'CHANGE_CONSTRAINT',
-              label: `Extend limit to ${formatKm(headroom)}`,
-              effect: `Changes your hard travel radius to ${formatKm(
-                headroom,
-              )}. This re-checks every option.`,
-              intent: 'secondary',
-              target: { itemId: item.itemId, constraint: 'distance', newValue: headroom },
-            },
-            {
-              id: `${item.itemId}:soften-distance`,
-              kind: 'CONVERT_TO_SOFT',
-              label: 'Make distance a soft preference',
-              effect:
-                'Distance stops blocking options. Far colleges rank lower but stay on the list.',
-              intent: 'secondary',
-              requiresReason: true,
-              target: { constraint: 'distance' },
-            },
-          ]
+          removeAction(item.itemId),
+          {
+            id: `${item.itemId}:raise-distance`,
+            kind: 'CHANGE_CONSTRAINT',
+            label: `Extend limit to ${formatKm(headroom)}`,
+            effect: `Changes your hard travel radius to ${formatKm(
+              headroom,
+            )}. This re-checks every option.`,
+            intent: 'secondary',
+            target: { itemId: item.itemId, constraint: 'distance', newValue: headroom },
+          },
+          {
+            id: `${item.itemId}:soften-distance`,
+            kind: 'CONVERT_TO_SOFT',
+            label: 'Make distance a soft preference',
+            effect:
+              'Distance stops blocking options. Far colleges rank lower but stay on the list.',
+            intent: 'secondary',
+            requiresReason: true,
+            target: { constraint: 'distance' },
+          },
+        ]
         : [
-            {
-              id: `${item.itemId}:ack`,
-              kind: 'ACKNOWLEDGE',
-              label: 'Understood',
-              effect: 'Keeps the option and records that you saw the tradeoff.',
-              intent: 'secondary',
-            },
-          ],
+          {
+            id: `${item.itemId}:ack`,
+            kind: 'ACKNOWLEDGE',
+            label: 'Understood',
+            effect: 'Keeps the option and records that you saw the tradeoff.',
+            intent: 'secondary',
+          },
+        ],
     })
   }
   return out
@@ -241,7 +240,7 @@ function branchPriorityConflicts(
   items: StrategyItem[],
 ): Conflict[] {
   const out: Conflict[] = []
-  const rankOf = (branch: string) => profile.branchPriority.indexOf(branch)
+  const rankOf = (branch: string) => (profile.branchPriority as string[]).indexOf(branch)
 
   for (let i = 0; i < items.length - 1; i++) {
     const upper = items[i]
@@ -262,11 +261,9 @@ function branchPriorityConflicts(
       upperQuality == null || lowerQuality == null || lowerQuality >= upperQuality
 
     const positions = [
-      `#${upper.position} ${upper.option.collegeShort} · ${upper.option.branch} (your #${
-        upperRank + 1
+      `#${upper.position} ${upper.option.collegeShort} · ${upper.option.branch} (your #${upperRank + 1
       } branch)`,
-      `#${lower.position} ${lower.option.collegeShort} · ${lower.option.branch} (your #${
-        lowerRank + 1
+      `#${lower.position} ${lower.option.collegeShort} · ${lower.option.branch} (your #${lowerRank + 1
       } branch)`,
     ]
 
@@ -283,8 +280,8 @@ function branchPriorityConflicts(
           'Both options satisfy every hard constraint.',
           lowerQuality != null && upperQuality != null
             ? `The lower option is not the weaker college either (${lowerQuality.toFixed(
-                0,
-              )} vs ${upperQuality.toFixed(0)} on placements and campus), so swapping costs you nothing.`
+              0,
+            )} vs ${upperQuality.toFixed(0)} on placements and campus), so swapping costs you nothing.`
             : 'We have no college-quality evidence that would justify the current order.',
         ],
         causedBy: `Soft preference · Branch order — you ranked ${lower.option.branch} above ${upper.option.branch}`,
@@ -401,11 +398,10 @@ function compareAdjacent(
   if (profile.factorWeights.hostel > 0) {
     cmp.push({
       label: 'Hostel',
-      betterBelow: b.hostelAvailable && !a.hostelAvailable,
+      betterBelow: b.hostelAvailable === true && a.hostelAvailable !== true,
       equal: b.hostelAvailable === a.hostelAvailable,
-      detail: `${b.hostelAvailable ? 'available' : 'not listed'} vs ${
-        a.hostelAvailable ? 'available' : 'not listed'
-      }`,
+      detail: `${b.hostelAvailable ? 'available' : 'not listed'} vs ${a.hostelAvailable ? 'available' : 'not listed'
+        }`,
     })
   }
   return cmp
@@ -436,8 +432,7 @@ function dominatedConflicts(profile: CandidateProfile, items: StrategyItem[]): C
       summary: `#${lower.position} ${lower.option.collegeShort} matches or beats #${upper.position} ${upper.option.collegeShort} on every factor you weighted.`,
       evidence: cmp.map(
         (c) =>
-          `${c.label} — ${c.detail} (${
-            c.equal ? 'equal' : c.betterBelow ? 'better below' : 'better above'
+          `${c.label} — ${c.detail} (${c.equal ? 'equal' : c.betterBelow ? 'better below' : 'better above'
           })`,
       ),
       causedBy: 'Soft preferences · Your factor weights',
@@ -495,6 +490,7 @@ function coverageConflicts(profile: CandidateProfile, items: StrategyItem[]): Co
           effect:
             'Takes you back to your profile. Widening budget, distance or branches may surface a safe fallback.',
           intent: 'primary',
+          target: { constraint: 'budget', newValue: profile.budget.value },
         },
         {
           id: 'coverage:accept-risk',
@@ -617,5 +613,9 @@ export function runAudit(
   const counts: Record<Severity, number> = { CRITICAL: 0, WARNING: 0, INFO: 0 }
   for (const c of conflicts) counts[c.severity] += 1
 
-  return { conflicts, counts, canLock: counts.CRITICAL === 0 }
+  return {
+    conflicts,
+    counts,
+    canLock: counts.CRITICAL === 0 && counts.WARNING === 0,
+  }
 }

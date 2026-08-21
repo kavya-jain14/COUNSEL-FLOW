@@ -13,7 +13,6 @@ revision and version metadata explicit.
 | `LockState` | `lockStrategyResponseSchema` | Becomes an immutable, timestamped snapshot whose warning decisions are validated |
 | thrown/ad-hoc error | `apiErrorEnvelopeSchema` | Stable machine code plus human message and field errors |
 
-The next frontend integration PR should add an adapter at `src/mock/api.ts`; it should
-not make screens import backend-specific types or change the current hero flow. That
-adapter also needs to change provisional warning `ACKNOWLEDGED` records to wire-level
-`OVERRIDDEN` records and carry the conflict severity.
+The frontend integration lives behind `src/features/contracts` and `src/mock/api.ts`.
+Screens do not import backend-specific types. Warning acceptance is translated from the
+UI action into a wire-level `OVERRIDDEN` resolution carrying the original severity.

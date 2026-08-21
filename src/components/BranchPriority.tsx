@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { BranchCode } from '../types'
 import { BRANCHES, BRANCH_LABELS } from '../data/reference'
 import { Field } from './ui'
 
@@ -7,11 +8,11 @@ export function BranchPriority({
   error,
   onChange,
 }: {
-  value: string[]
+  value: BranchCode[]
   error?: string
-  onChange: (next: string[]) => void
+  onChange: (next: BranchCode[]) => void
 }) {
-  const [toAdd, setToAdd] = useState('')
+  const [toAdd, setToAdd] = useState<BranchCode | ''>('')
   const available = BRANCHES.filter((b) => !value.includes(b))
 
   function move(index: number, direction: -1 | 1) {
@@ -97,7 +98,7 @@ export function BranchPriority({
             className="select"
             style={{ maxWidth: 280 }}
             value={toAdd}
-            onChange={(e) => setToAdd(e.target.value)}
+            onChange={(e) => setToAdd(e.target.value as BranchCode | '')}
           >
             <option value="">Add a branch…</option>
             {available.map((b) => (
