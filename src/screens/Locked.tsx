@@ -38,7 +38,7 @@ export function Locked() {
         total={5}
         kicker="Locked"
         title="Your list is locked"
-        lede={`${items.length} choices, in this order, with zero unresolved critical conflicts. Everything below is reproducible from the snapshot.`}
+        lede={`${items.length} choices, in this order, with zero unresolved decisions. Everything below is reproducible from the snapshot.`}
         actions={
           <button type="button" className="btn btn--sm" onClick={() => goTo('conflicts')}>
             Back to inspector

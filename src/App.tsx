@@ -77,6 +77,19 @@ function Shell() {
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)
   const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
+  const showLockAction =
+    Boolean(state.audit) && (state.step === 'strategy' || state.step === 'conflicts')
+  const status = state.lock
+    ? 'FILED'
+    : state.auditStale
+      ? 'REVIEW DUE'
+      : counts.CRITICAL + counts.WARNING > 0
+        ? 'ACTION NEEDED'
+        : state.audit
+          ? 'AUDIT CLEAR'
+          : profileReady
+            ? 'PROFILE READY'
+            : 'WORKING COPY'
   const activeLabel = FLOW.find((f) => f.step === state.step)?.label ?? 'Overview'
 
   return (
@@ -156,16 +169,18 @@ function Shell() {
             </nav>
           </div>
           <div className="row" style={{ gap: 12, flexWrap: 'nowrap' }}>
-            <button
-              type="button"
-              className="btn btn--sm"
-              disabled={!canLock || state.busy === 'lock'}
-              onClick={lock}
-            >
-              {state.lock ? 'Locked' : 'Lock strategy'}
-            </button>
+            {showLockAction && (
+              <button
+                type="button"
+                className="btn btn--sm"
+                disabled={!canLock || state.busy === 'lock'}
+                onClick={lock}
+              >
+                {canLock ? 'Lock strategy' : 'Resolve before locking'}
+              </button>
+            )}
             <span className="topbar__status mono" aria-label="Current strategy status">
-              {state.lock ? 'FILED' : state.auditStale ? 'REVIEW DUE' : 'WORKING COPY'}
+              {status}
             </span>
           </div>
         </header>

@@ -2945,3 +2945,56 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* Final candidate-flow fit pass */
+
+.branch-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.branch-item__actions .icon-btn {
+  width: auto;
+  min-width: 58px;
+  padding-inline: 9px;
+}
+
+.branch-add-row .select {
+  flex: 1 1 240px;
+  width: auto;
+  max-width: none;
+}
+
+.evidence li::before {
+  width: 10px;
+  height: 1px;
+  margin-top: 0.72em;
+  background: var(--cf-blue);
+  content: '';
+}
+
+@media (max-width: 680px) {
+  .branch-item {
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 10px;
+  }
+
+  .branch-item__actions {
+    grid-column: 2;
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .branch-item__actions .icon-btn {
+    flex: 1 1 64px;
+  }
+
+  .branch-add-row .btn,
+  .branch-add-row .select {
+    flex: 1 1 100%;
+  }
+}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { BRANCH_LABELS, CATEGORIES, DOMICILES, FACTORS, SUB_QUOTAS } from '../data/reference'
+import { BRANCH_LABELS, CATEGORIES, FACTORS, SUB_QUOTAS } from '../data/reference'
+import { AUTHORITIES } from '../data/authorities'
 import { formatINRExact, formatKm, formatRank } from '../lib/format'
 import { validateProfile } from '../lib/validation'
 import { useAppActions, useAppState } from '../state/store'
@@ -8,14 +9,20 @@ import { Band, Banner, HardSoftBadge, NextStep, PageHead } from '../components/u
 const WEIGHT_WORDS = ['ignored', 'slight', 'some', 'matters', 'important', 'decisive']
 
 export function ProfileSummary() {
-  const { profile, busy } = useAppState()
+  const { profile, busy, authorityId } = useAppState()
   const { goTo, generate } = useAppActions()
 
   const errors = useMemo(() => validateProfile(profile), [profile])
   const valid = Object.keys(errors).length === 0
 
+  const authority = AUTHORITIES[authorityId]
   const categoryLabel = CATEGORIES.find((c) => c.value === profile.category)?.label ?? 'Not set'
-  const domicileLabel = DOMICILES.find((d) => d.value === profile.domicile)?.label ?? 'Not set'
+  const domicileLabel =
+    profile.domicile === 'UP'
+      ? authority.region.home
+      : profile.domicile === 'OTHER'
+        ? authority.region.other
+        : 'Not set'
   const quotaLabels = profile.subQuotas.map(
     (q) => SUB_QUOTAS.find((s) => s.value === q)?.label ?? q,
   )
@@ -63,7 +70,7 @@ export function ProfileSummary() {
           </p>
         </div>
         <dl className="review-brief__facts">
-          <div><dt>Rank pool</dt><dd className="mono">{profile.rank == null ? 'Not set' : formatRank(profile.rank)} · {categoryLabel}</dd></div>
+          <div><dt>Rank pool</dt><dd className="mono">{profile.rank == null ? 'Not set' : formatRank(profile.rank)} · {categoryLabel} · {authority.label}</dd></div>
           <div><dt>Branch order</dt><dd>{profile.branchPriority.join(' › ') || 'Not set'}</dd></div>
           <div><dt>Budget</dt><dd className="mono">{formatINRExact(profile.budget.value)} · {profile.budget.mode}</dd></div>
           <div><dt>Distance</dt><dd className="mono">{formatKm(profile.distance.value)} · {profile.distance.mode}</dd></div>
@@ -84,9 +91,16 @@ export function ProfileSummary() {
       <Band
         num="01"
         title="Candidate"
-        note="Every position on your list is computed from these three."
+        note="These determine which seat pools and closing ranks can apply to you."
       >
         <dl className="summary-grid">
+          <div className="summary-cell">
+            <dt>Counselling</dt>
+            <dd>
+              {authority.label}
+              <small>{authority.datasetLabel}</small>
+            </dd>
+          </div>
           <div className="summary-cell">
             <dt>Rank</dt>
             <dd>
@@ -102,16 +116,10 @@ export function ProfileSummary() {
             </dd>
           </div>
           <div className="summary-cell">
-            <dt>Domicile</dt>
+            <dt>{authority.region.label}</dt>
             <dd>
               {domicileLabel}
-              <small>
-                {profile.domicile === 'UP'
-                  ? 'Home-state pool: the larger share of UPTAC seats'
-                  : profile.domicile === 'OTHER'
-                    ? 'Other-state pool: smaller, so cutoffs run tighter'
-                    : 'Needed before we can pick the right seat pool'}
-              </small>
+              <small>{profile.domicile ? authority.region.hint : 'Needed before we can pick the right seat pool'}</small>
             </dd>
           </div>
           <div className="summary-cell">
@@ -120,8 +128,8 @@ export function ProfileSummary() {
               {quotaLabels.length === 0 ? 'None' : quotaLabels.length}
               <small>
                 {quotaLabels.length === 0
-                  ? 'Only the open and category pools apply'
-                  : `${quotaLabels.join(' · ')}: sample cutoffs are open-category only, so these are recorded but not yet scored`}
+                  ? 'Only the standard category and region pools apply'
+                  : `${quotaLabels.join(' · ')}: eligibility is recorded for ${authority.label}; availability follows the source rows`}
               </small>
             </dd>
           </div>

@@ -44,7 +44,7 @@ export function BranchPriority({
                 <b>{branch}</b>
                 <small>{BRANCH_LABELS[branch] ?? branch}</small>
               </span>
-              <span className="row" style={{ gap: 4, flexWrap: 'nowrap' }}>
+              <span className="branch-item__actions">
                 <button
                   type="button"
                   className="icon-btn"
@@ -89,14 +89,13 @@ export function BranchPriority({
       )}
 
       {available.length > 0 && (
-        <div className="row" style={{ marginTop: 4 }}>
+        <div className="row branch-add-row" style={{ marginTop: 4 }}>
           <label className="sr-only" htmlFor="branch-add">
             Add a branch to your priority order
           </label>
           <select
             id="branch-add"
             className="select"
-            style={{ maxWidth: 280 }}
             value={toAdd}
             onChange={(e) => setToAdd(e.target.value as BranchCode | '')}
           >
