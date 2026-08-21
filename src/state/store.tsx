@@ -22,6 +22,10 @@ import type {
 } from '../types'
 import { renumber } from '../mock/strategy'
 import * as api from '../mock/api'
+import { AUTHORITIES, DEFAULT_AUTHORITY, type AuthorityId } from '../data/authorities'
+import { improvementsOver, labelFor, type RoundRecord } from '../lib/rounds'
+import { CUTOFF_YEAR } from '../data/cutoffs'
+import { latestSetFor } from '../data/generated'
 import { toApiError } from '../features/contracts'
 
 export interface ActivityEntry {
@@ -34,6 +38,10 @@ export interface ActivityEntry {
 
 export interface AppState {
   step: Step
+  authorityId: AuthorityId
+  currentRound: number
+  history: RoundRecord[]
+  allottedOptionId: string | null
   profile: CandidateProfile
   items: StrategyItem[]
   audit: AuditResult | null
@@ -78,6 +86,10 @@ export const DEMO_PROFILE: CandidateProfile = {
 
 const INITIAL_STATE: AppState = {
   step: 'landing',
+  authorityId: DEFAULT_AUTHORITY,
+  currentRound: 1,
+  history: [],
+  allottedOptionId: null,
   profile: DEFAULT_PROFILE,
   items: [],
   audit: null,
@@ -102,6 +114,9 @@ type Action =
   | { type: 'REMOVE_ITEM'; itemId: string }
   | { type: 'LOCKED'; lock: LockState }
   | { type: 'FAILED'; error: ApiErrorEnvelope }
+  | { type: 'SET_AUTHORITY'; authorityId: AuthorityId }
+  | { type: 'RECORD_ALLOTMENT'; optionId: string | null }
+  | { type: 'START_NEXT_ROUND' }
   | { type: 'RESET' }
 
 let activitySeq = 0
@@ -379,6 +394,72 @@ function reducer(state: AppState, action: Action): AppState {
         announcement: action.error.error.message,
       }
 
+    case 'SET_AUTHORITY':
+      return {
+        ...state,
+        authorityId: action.authorityId,
+        currentRound: 1,
+        history: [],
+        allottedOptionId: null,
+        items: [],
+        audit: null,
+        resolutions: [],
+        lock: null,
+        auditStale: false,
+        announcement: `Switched to ${AUTHORITIES[action.authorityId].label}.`,
+      }
+
+    case 'RECORD_ALLOTMENT': {
+      const held = state.items.find((it) => it.option.id === action.optionId)
+      return {
+        ...state,
+        allottedOptionId: action.optionId,
+        announcement: held
+          ? `Recorded ${labelFor(held)} as your round ${state.currentRound} seat.`
+          : 'Recorded that you were not allotted a seat.',
+      }
+    }
+
+    case 'START_NEXT_ROUND': {
+      const record: RoundRecord = {
+        round: state.currentRound,
+        items: state.items,
+        snapshotId: state.lock?.snapshotId ?? null,
+        allottedOptionId: state.allottedOptionId,
+        allottedLabel: (() => {
+          const held = state.items.find((it) => it.option.id === state.allottedOptionId)
+          return held ? labelFor(held) : null
+        })(),
+      }
+      const next = improvementsOver(state.items, state.allottedOptionId)
+      return {
+        ...state,
+        history: [...state.history, record],
+        currentRound: state.currentRound + 1,
+        items: next.items,
+        audit: null,
+        resolutions: [],
+        lock: null,
+        allottedOptionId: null,
+        auditStale: true,
+        step: 'strategy',
+        activity: [
+          {
+            id: activityId(),
+            tone: 'proposed',
+            label: `Round ${state.currentRound + 1} list drafted`,
+            detail: next.exhausted
+              ? 'Nothing on your list beats the seat you already hold. Freezing is the rational move.'
+              : `${next.items.length} option${next.items.length > 1 ? 's' : ''} you prefer over ${record.allottedLabel ?? 'your current position'}. ${next.droppedCount} dropped as no better than what you hold.`,
+          },
+          ...state.activity,
+        ],
+        announcement: next.exhausted
+          ? 'No option beats your current seat. Consider freezing.'
+          : `Round ${state.currentRound + 1} list ready with ${next.items.length} improvements.`,
+      }
+    }
+
     case 'RESET':
       return { ...INITIAL_STATE, profile: DEFAULT_PROFILE }
 
@@ -427,12 +508,17 @@ export function useAppActions() {
   const generate = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'generate' })
     try {
-      const response = await api.generateStrategy(state.profile)
+      const set = latestSetFor(state.authorityId)
+      const response = await api.generateStrategy(state.profile, {
+        authority: state.authorityId,
+        year: set?.year ?? CUTOFF_YEAR,
+        round: set ? set.round : state.currentRound,
+      })
       dispatch({ type: 'GENERATED', response })
     } catch (cause) {
       dispatch({ type: 'FAILED', error: toApiError(cause) })
     }
-  }, [dispatch, state.profile])
+  }, [dispatch, state.profile, state.authorityId, state.currentRound])
 
   const reaudit = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'audit' })
@@ -483,11 +569,26 @@ export function useAppActions() {
 
   const reset = useCallback(() => dispatch({ type: 'RESET' }), [dispatch])
 
+  const setAuthority = useCallback(
+    (authorityId: AuthorityId) => dispatch({ type: 'SET_AUTHORITY', authorityId }),
+    [dispatch],
+  )
+
+  const recordAllotment = useCallback(
+    (optionId: string | null) => dispatch({ type: 'RECORD_ALLOTMENT', optionId }),
+    [dispatch],
+  )
+
+  const startNextRound = useCallback(() => dispatch({ type: 'START_NEXT_ROUND' }), [dispatch])
+
   return useMemo(
     () => ({
       goTo,
       patchProfile,
       loadDemoProfile,
+      setAuthority,
+      recordAllotment,
+      startNextRound,
       generate,
       reaudit,
       lock,
@@ -500,6 +601,9 @@ export function useAppActions() {
       goTo,
       patchProfile,
       loadDemoProfile,
+      setAuthority,
+      recordAllotment,
+      startNextRound,
       generate,
       reaudit,
       lock,

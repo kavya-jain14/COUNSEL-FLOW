@@ -31,6 +31,7 @@ export function StrategyInspector({
   onMove,
   onRemove,
   onOpenConflicts,
+  onExplain,
 }: {
   item: StrategyItem | null
   conflicts: Conflict[]
@@ -40,6 +41,7 @@ export function StrategyInspector({
   onMove: (itemId: string, direction: -1 | 1) => void
   onRemove: (itemId: string) => void
   onOpenConflicts: () => void
+  onExplain?: (itemId: string) => void
 }) {
   if (!item) {
     return (
@@ -77,6 +79,17 @@ export function StrategyInspector({
       </h2>
 
       <p className="rail__lede">{TIER_LEDE[item.tier]}</p>
+
+      {onExplain && (
+        <button
+          type="button"
+          className="btn btn--primary btn--sm"
+          aria-haspopup="dialog"
+          onClick={() => onExplain(item.itemId)}
+        >
+          What choosing this means for you →
+        </button>
+      )}
 
       {conflicts.length > 0 && (
         <div className="rail__alert">

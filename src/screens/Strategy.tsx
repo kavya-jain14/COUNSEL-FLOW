@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Conflict } from '../types'
 import { DATASET_LABEL } from '../data/reference'
 import { formatRank } from '../lib/format'
@@ -6,11 +6,17 @@ import { useAppActions, useAppState } from '../state/store'
 import { StrategyRow } from '../components/StrategyRow'
 import { StrategyInspector } from '../components/StrategyInspector'
 import { Banner, NextStep, PageHead } from '../components/ui'
+import {
+  DecisionImpactModal,
+  evaluateDecisionImpact,
+  type FitBand,
+} from '../features/decision-impact'
 
 export function Strategy() {
-  const { items, audit, auditStale, busy, profile } = useAppState()
+  const { items, audit, auditStale, busy, profile, authorityId } = useAppState()
   const { goTo, moveItem, removeItem, reaudit } = useAppActions()
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [impactId, setImpactId] = useState<string | null>(null)
 
   const byItem = useMemo(() => {
     const map: Record<string, Conflict[]> = {}
@@ -22,7 +28,26 @@ export function Strategy() {
     return map
   }, [audit])
 
+  const fits = useMemo(() => {
+    const map: Record<string, { score: number; band: FitBand; coverage: number }> = {}
+    for (const item of items) {
+      const { fit } = evaluateDecisionImpact(item, {
+        profile,
+        items,
+        authority: authorityId,
+      })
+      map[item.itemId] = { score: fit.score, band: fit.band, coverage: fit.coverage }
+    }
+    return map
+  }, [items, profile, authorityId])
+
   const selected = items.find((i) => i.itemId === selectedId) ?? items[0] ?? null
+  const impactItem = items.find((i) => i.itemId === impactId) ?? null
+
+  const openImpact = useCallback((itemId: string) => {
+    setSelectedId(itemId)
+    setImpactId(itemId)
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -56,9 +81,10 @@ export function Strategy() {
         title="Your list, in the order you would fill it"
         lede={
           <>
-            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : ' - '}{' '}
-            and the limits you declared. Select any row to see exactly why it sits where it
-            does.
+            {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '—'}{' '}
+            and the limits you declared. Open any row for its decision impact: what
+            choosing that one costs and gains <em>you</em>, measured against your own
+            profile.
           </>
         }
         actions={
@@ -117,11 +143,12 @@ export function Strategy() {
                   key={item.itemId}
                   item={item}
                   conflicts={byItem[item.itemId] ?? []}
+                  fit={fits[item.itemId]}
                   selected={selected?.itemId === item.itemId}
                   isFirst={i === 0}
                   isLast={i === items.length - 1}
                   disabled={busy != null}
-                  onSelect={setSelectedId}
+                  onSelect={openImpact}
                   onMove={moveItem}
                   onRemove={removeItem}
                 />
@@ -146,8 +173,27 @@ export function Strategy() {
           onMove={moveItem}
           onRemove={removeItem}
           onOpenConflicts={() => goTo('conflicts')}
+          onExplain={openImpact}
         />
       </div>
+
+      {impactItem && (
+        <DecisionImpactModal
+          item={impactItem}
+          profile={profile}
+          items={items}
+          conflicts={byItem[impactItem.itemId] ?? []}
+          authority={authorityId}
+          disabled={busy != null}
+          onClose={() => setImpactId(null)}
+          onMove={moveItem}
+          onRemove={removeItem}
+          onOpenConflicts={() => {
+            setImpactId(null)
+            goTo('conflicts')
+          }}
+        />
+      )}
 
       {auditStale ? (
         <NextStep

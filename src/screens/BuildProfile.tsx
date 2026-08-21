@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Category, Domicile, RankType, SubQuota } from '../types'
 import { CATEGORIES, DOMICILES, SUB_QUOTAS } from '../data/reference'
+import { AUTHORITY_LIST, AUTHORITIES } from '../data/authorities'
 import { DISTANCE_METHOD_NOTE, HOME_CITIES } from '../data/geo'
 import { formatINR, formatKm } from '../lib/format'
 import {
@@ -23,8 +24,8 @@ const RANK_TYPES: Array<{ value: RankType; label: string }> = [
 ]
 
 export function BuildProfile() {
-  const { profile } = useAppState()
-  const { patchProfile, goTo, loadDemoProfile } = useAppActions()
+  const { profile, authorityId } = useAppState()
+  const { patchProfile, goTo, loadDemoProfile, setAuthority } = useAppActions()
   const [submitted, setSubmitted] = useState(false)
 
   const errors = useMemo(() => validateProfile(profile), [profile])
@@ -105,6 +106,26 @@ export function BuildProfile() {
                 </label>
               ))}
             </div>
+          </Field>
+
+          <Field label="Counselling" htmlFor="authority">
+            <select
+              id="authority"
+              className="select"
+              value={authorityId}
+              onChange={(e) => setAuthority(e.target.value as typeof authorityId)}
+            >
+              {AUTHORITY_LIST.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.label} — {a.fullName}
+                </option>
+              ))}
+            </select>
+            <span className="field__hint">
+              {AUTHORITIES[authorityId].datasetLoaded
+                ? `${AUTHORITIES[authorityId].rounds} rounds · ${AUTHORITIES[authorityId].datasetLabel}`
+                : AUTHORITIES[authorityId].datasetNote}
+            </span>
           </Field>
 
           <Field label="Category" error={show('category')} htmlFor="category">
