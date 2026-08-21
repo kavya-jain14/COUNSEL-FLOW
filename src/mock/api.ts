@@ -20,9 +20,9 @@ import {
   profileRevisionFor,
   validateContract,
 } from '../features/contracts'
+import { runStrategyEngine } from './engine'
 import { toPayload } from '../lib/validation'
 import { runAudit } from './audit'
-import { generateMockStrategy } from './strategy'
 
 const LATENCY = 450
 
@@ -37,7 +37,7 @@ export async function generateStrategy(
 
   const response = validateContract(requestId, () => {
     const profilePayload = toPayload(profile)
-    const items = generateMockStrategy(profile)
+    const items = runStrategyEngine(profile)
     const profileRevision = profileRevisionFor(profilePayload)
     const listRevision = listRevisionFor(items)
     const result = runAudit(profile, items, [])

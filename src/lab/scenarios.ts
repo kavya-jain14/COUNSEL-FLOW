@@ -73,4 +73,43 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     expectedConflictCodes: ['CF-08'],
     expectedLockBlocked: true,
   },
+  {
+    id: 'tier-boundary-classification',
+    title: 'Tier labels derive from named ratio buffers, not opaque guesses',
+    proves: 'The deterministic classification is transparent: DREAM < 90% of rank, TARGET 90–140%, SAFE ≥ 140%.',
+    setup: [
+      'Use rank 10000 with the default seed dataset.',
+      'Verify HBTU Kanpur CSE (closingRank 8900, ratio ≈ 0.89) shows as Dream.',
+      'Verify IET Lucknow IT (closingRank 11400, ratio 1.14) shows as Target.',
+      'Verify HBTU Kanpur EE (closingRank 19500, ratio 1.95) shows as Safe.',
+      'Hover each tier badge to confirm the tooltip cites the buffer boundary, not a "chance" or "probability".',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
+  {
+    id: 'deterministic-factor-scoring',
+    title: 'Factor weights change the order — not the tier classification',
+    proves: 'The scoring engine ranks by declared weights; changing weights produces a different deterministic order.',
+    setup: [
+      'Use rank 12500 with homeCity set to Lucknow.',
+      'Set placements weight to 5 and all others to 1. Note position of HBTU Kanpur CSE (placementScore 82) vs KIET Ghaziabad CSE (placementScore 80).',
+      'Now swap: set fees weight to 5 and placements to 1. UIET Kanpur EE (fee ₹1.2L) should rank above KIET Ghaziabad CSE (fee ₹1.48L) among same-tier options.',
+      'Confirm the inspector shows why each option sits where it does — matching the declared weights.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
+  {
+    id: 'hard-distance-filter',
+    title: 'Hard distance limit removes distant options before scoring',
+    proves: 'Hard constraints filter before scoring — a far option cannot score its way back onto the list.',
+    setup: [
+      'Set homeCity to Lucknow, distance to 100 km hard.',
+      'Generate the list. Gorakhpur (≈290 km from Lucknow) must not appear.',
+      'Switch distance to soft. Gorakhpur should reappear but rank lower among non-distance-weighted profiles.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
 ] as const
