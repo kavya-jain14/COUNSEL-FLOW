@@ -20,6 +20,8 @@ const BASE_PROFILE: CandidateProfile = {
   rank: 12500,
   rankType: 'CRL',
   category: 'GEN',
+  domicile: 'UP',
+  subQuotas: [],
   homeCity: 'Lucknow',
   branchPriority: ['CSE', 'IT', 'ECE'],
   budget: { value: 150000, mode: 'hard' },

@@ -25,6 +25,10 @@ export function validateProfile(profile: CandidateProfile): ProfileErrors {
     errors.rank = `That looks too large. Enter a rank up to ${MAX_RANK.toLocaleString('en-IN')}.`
   }
 
+  if (!profile.domicile) {
+    errors.domicile = 'Select your domicile — home-state and other-state seats are filled from different pools.'
+  }
+
   if (!profile.homeCity) {
     errors.homeCity = 'Choose your home city — the distance limit is measured from it.'
   } else if (!CITY_COORDS[profile.homeCity]) {
@@ -89,11 +93,13 @@ export function toPayload(profile: CandidateProfile): CandidateProfilePayload {
     rank: profile.rank as number,
     rankType: profile.rankType,
     category: profile.category!,
+    domicile: profile.domicile!,
+    subQuotas: [...profile.subQuotas],
     homeCity: profile.homeCity!,
     branchPriority: [...profile.branchPriority],
     budget: { ...profile.budget },
     distance: { ...profile.distance },
-    hardExclusions: profile.hardExclusions.map(({ kind, value }) => ({ kind, value })),
+    hardExclusions: profile.hardExclusions.map(({ id, kind, value }) => ({ id, kind, value })),
     factorWeights: normalizeWeights(profile.factorWeights),
   })
 }

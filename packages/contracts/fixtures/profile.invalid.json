@@ -2,12 +2,15 @@
   "rank": 0,
   "rankType": "CRL",
   "category": "GEN",
+  "domicile": "UP",
+  "subQuotas": [],
+  "homeCity": "Lucknow",
   "branchPriority": ["CSE", "CSE"],
   "budget": { "value": 1000, "mode": "hard" },
   "distance": { "value": 0, "mode": "soft" },
   "hardExclusions": [
-    { "kind": "branch", "value": "CSE" },
-    { "kind": "branch", "value": "CSE" }
+    { "id": "branch:CSE", "kind": "branch", "value": "CSE" },
+    { "id": "branch:CSE", "kind": "branch", "value": "CSE" }
   ],
   "factorWeights": {
     "placements": 0.9,

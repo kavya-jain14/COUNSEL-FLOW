@@ -2,12 +2,15 @@
   "rank": 12500,
   "rankType": "CRL",
   "category": "GEN",
+  "domicile": "UP",
+  "subQuotas": ["GIRLS"],
+  "homeCity": "Lucknow",
   "branchPriority": ["CSE", "IT", "ECE"],
   "budget": { "value": 150000, "mode": "hard" },
   "distance": { "value": 300, "mode": "soft" },
   "hardExclusions": [
-    { "kind": "instituteType", "value": "PRIVATE" },
-    { "kind": "noHostel", "value": "true" }
+    { "id": "instituteType:PRIVATE", "kind": "instituteType", "value": "PRIVATE" },
+    { "id": "noHostel:true", "kind": "noHostel", "value": "true" }
   ],
   "factorWeights": {
     "placements": 0.3,
