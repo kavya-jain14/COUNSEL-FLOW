@@ -20,7 +20,7 @@ import {
   profileRevisionFor,
   validateContract,
 } from '../features/contracts'
-import { runStrategyEngine } from './engine'
+import { runStrategyEngine, type EngineContext } from './engine'
 import { toPayload } from '../lib/validation'
 import { runAudit } from './audit'
 
@@ -32,12 +32,13 @@ function delay<T>(value: T, ms = LATENCY): Promise<T> {
 
 export async function generateStrategy(
   profile: CandidateProfile,
+  context?: EngineContext,
 ): Promise<StrategyGenerateResponse> {
   const requestId = nextRequestId('generate')
 
   const response = validateContract(requestId, () => {
     const profilePayload = toPayload(profile)
-    const items = runStrategyEngine(profile)
+    const items = runStrategyEngine(profile, context)
     const profileRevision = profileRevisionFor(profilePayload)
     const listRevision = listRevisionFor(items)
     const result = runAudit(profile, items, [])

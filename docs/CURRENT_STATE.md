@@ -34,6 +34,29 @@ Last updated: 2026-08-21
   the later adapter work instead of mixing it into this branch.
 - Updated lab expectations so unresolved warnings block until a reason and re-audit.
 
+## Decision-impact checkpoint
+
+- Added `src/features/decision-impact` — a per-option "what does choosing this mean for
+  me" evaluator, opened as a modal from any row of the generated list and from the
+  locked snapshot.
+- Two layers, strictly separated: `lib/evaluate.ts` forms every verdict and emits
+  structured findings (code, label, satisfaction state, raw facts, no prose);
+  `lib/narrate.ts` holds one renderer per code and only turns those facts into
+  sentences. An AI explanation adapter would implement `ImpactNarrator` and could not
+  change a verdict, per the architecture rule; the template renderer stays the fallback.
+- Findings are labelled `HARD_CONSTRAINT_VIOLATION`, `CONTRADICTION`, `SOFT_COMPROMISE`,
+  `POTENTIAL_RISK`, `STRONG_MATCH` or `EVIDENCE_GAP`. Hard violations render in their own
+  alarm block above everything else and force the fit band to `BLOCKED`.
+- A factor weighted 0 produces no statement at all, so the output cannot drift into
+  generic praise. Reachability is stated as last cycle's closing rank in the candidate's
+  own category/domicile seat pool, never as a chance.
+- The fit score reuses `BRANCH_WEIGHT` from the ordering engine so the two cannot drift,
+  and reports its own evidence coverage when a weighted factor is missing from the data.
+- Lab scenarios `decision-impact-is-personal` and `decision-impact-is-deterministic`
+  added; 14 unit cases in `src/features/decision-impact/tests/evaluate.test.ts`.
+- `WEIGHT_WORDS` moved from `FactorWeights.tsx` into `src/data/reference.ts` so the modal
+  quotes the candidate's own slider wording.
+
 ## Validation and blockers
 
 - JSON fixtures and lockfile parse successfully; `git diff --check` passes.

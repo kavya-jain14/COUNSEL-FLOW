@@ -118,3 +118,5 @@ export const CITIES = [
 export const DATASET_LABEL = 'UPTAC sample cycle 2024 (verified subset)'
 export const ENGINE_VERSION = 'engine-0.2.0'
 export const PROFILE_VERSION = 'profile-v1'
+
+export const WEIGHT_WORDS = ['Ignore', 'Slight', 'Some', 'Matters', 'Important', 'Decisive']

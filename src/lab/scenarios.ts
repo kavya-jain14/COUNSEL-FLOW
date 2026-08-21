@@ -112,4 +112,34 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     expectedConflictCodes: [],
     expectedLockBlocked: false,
   },
+  {
+    id: 'decision-impact-is-personal',
+    title: 'Decision impact reads the candidate profile, never the college reputation',
+    proves:
+      'Every advantage and cost in the modal is derived from a declared preference; nothing generic is emitted.',
+    setup: [
+      'Use rank 12500, GEN, UP domicile, homeCity Lucknow, branches CSE > IT > ECE.',
+      'Generate the list and open any row to see the Decision Impact modal.',
+      'Set every factor weight to 0 except hostel. Reopen the modal: placement and campus statements must disappear entirely rather than turn neutral.',
+      'Set distance to 60 km hard. Reopen a Gorakhpur or Jhansi option: it must appear under HARD CONSTRAINT VIOLATION, not as a compromise.',
+      'Switch the same limit to soft. The identical option must move to "What you are compromising" and the fit band must stop being BLOCKED.',
+      'Open an IT option while CSE is your first choice: the compromise must name CSE and count the steps down your own order.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
+  {
+    id: 'decision-impact-is-deterministic',
+    title: 'The same profile and list produce the same impact wording every time',
+    proves:
+      'The constraint layer decides and the narration layer only renders, so no explanation can invent a verdict.',
+    setup: [
+      'Open the Decision Impact modal for any option and note the bottom line.',
+      'Close it, reopen the same option, and confirm the wording is identical.',
+      'Change one factor weight, reopen, and confirm the wording changes because the structured evaluation changed.',
+      'Confirm no statement claims an admission chance or calls a college good or bad on its own.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
+  },
 ] as const
