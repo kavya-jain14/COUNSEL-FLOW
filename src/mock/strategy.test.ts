@@ -6,11 +6,10 @@
  *   1. update these expected values;
  *   2. bump the engine version in packages/contracts/src/strategy.ts.
  *
- * Run with:  npx tsx --test src/mock/strategy.test.ts
+ * Run with:  npx vitest run src/mock/strategy.test.ts
  */
 
-import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { describe, expect, it } from 'vitest'
 import {
   TIER_DREAM_RATIO_MAX,
   TIER_TARGET_RATIO_MAX,
@@ -48,6 +47,8 @@ const MOCK_PROFILE: CandidateProfile = {
   homeCity: null,
   rankType: 'CRL',
   category: 'GEN',
+  domicile: 'UP',
+  subQuotas: [],
   branchPriority: ['CSE', 'IT'],
   budget: { value: 200000, mode: 'soft' },
   distance: { value: 500, mode: 'soft' },
@@ -59,15 +60,15 @@ const MOCK_PROFILE: CandidateProfile = {
 
 describe('exported buffer constants', () => {
   it('TIER_DREAM_RATIO_MAX equals 0.90', () => {
-    assert.equal(TIER_DREAM_RATIO_MAX, 0.90)
+    expect(TIER_DREAM_RATIO_MAX).toBe(0.90)
   })
 
   it('TIER_TARGET_RATIO_MAX equals 1.40', () => {
-    assert.equal(TIER_TARGET_RATIO_MAX, 1.40)
+    expect(TIER_TARGET_RATIO_MAX).toBe(1.40)
   })
 
   it('DREAM_RATIO_MAX < TARGET_RATIO_MAX', () => {
-    assert.ok(TIER_DREAM_RATIO_MAX < TIER_TARGET_RATIO_MAX)
+    expect(TIER_DREAM_RATIO_MAX).toBeLessThan(TIER_TARGET_RATIO_MAX)
   })
 })
 
@@ -75,15 +76,15 @@ describe('exported buffer constants', () => {
 
 describe('tierFor — UNKNOWN when data is absent', () => {
   it('null candidateRank → UNKNOWN', () => {
-    assert.equal(tierFor(makeOption(10000), null), 'UNKNOWN')
+    expect(tierFor(makeOption(10000), null)).toBe('UNKNOWN')
   })
 
   it('null option.closingRank → UNKNOWN', () => {
-    assert.equal(tierFor(makeOption(null), 10000), 'UNKNOWN')
+    expect(tierFor(makeOption(null), 10000)).toBe('UNKNOWN')
   })
 
   it('both null → UNKNOWN', () => {
-    assert.equal(tierFor(makeOption(null), null), 'UNKNOWN')
+    expect(tierFor(makeOption(null), null)).toBe('UNKNOWN')
   })
 })
 
@@ -91,15 +92,15 @@ describe('tierFor — UNKNOWN when data is absent', () => {
 
 describe('tierFor — DREAM', () => {
   it('ratio=0.50 → DREAM', () => {
-    assert.equal(tierFor(makeOption(5000), 10000), 'DREAM')
+    expect(tierFor(makeOption(5000), 10000)).toBe('DREAM')
   })
 
   it('ratio=0.8999 (just below boundary) → DREAM', () => {
-    assert.equal(tierFor(makeOption(8999), 10000), 'DREAM')
+    expect(tierFor(makeOption(8999), 10000)).toBe('DREAM')
   })
 
   it('ratio=0.90 (exactly at boundary) → NOT DREAM — TARGET', () => {
-    assert.equal(tierFor(makeOption(9000), 10000), 'TARGET')
+    expect(tierFor(makeOption(9000), 10000)).toBe('TARGET')
   })
 })
 
@@ -107,23 +108,23 @@ describe('tierFor — DREAM', () => {
 
 describe('tierFor — TARGET', () => {
   it('ratio=0.90 (lower boundary) → TARGET', () => {
-    assert.equal(tierFor(makeOption(9000), 10000), 'TARGET')
+    expect(tierFor(makeOption(9000), 10000)).toBe('TARGET')
   })
 
   it('ratio=1.00 (equal ranks) → TARGET', () => {
-    assert.equal(tierFor(makeOption(10000), 10000), 'TARGET')
+    expect(tierFor(makeOption(10000), 10000)).toBe('TARGET')
   })
 
   it('ratio=1.20 → TARGET', () => {
-    assert.equal(tierFor(makeOption(12000), 10000), 'TARGET')
+    expect(tierFor(makeOption(12000), 10000)).toBe('TARGET')
   })
 
   it('ratio=1.3999 (just below upper boundary) → TARGET', () => {
-    assert.equal(tierFor(makeOption(13999), 10000), 'TARGET')
+    expect(tierFor(makeOption(13999), 10000)).toBe('TARGET')
   })
 
   it('ratio=1.40 (exactly at upper boundary) → NOT TARGET — SAFE', () => {
-    assert.equal(tierFor(makeOption(14000), 10000), 'SAFE')
+    expect(tierFor(makeOption(14000), 10000)).toBe('SAFE')
   })
 })
 
@@ -131,11 +132,11 @@ describe('tierFor — TARGET', () => {
 
 describe('tierFor — SAFE', () => {
   it('ratio=1.40 (boundary) → SAFE', () => {
-    assert.equal(tierFor(makeOption(14000), 10000), 'SAFE')
+    expect(tierFor(makeOption(14000), 10000)).toBe('SAFE')
   })
 
   it('ratio=3.00 → SAFE', () => {
-    assert.equal(tierFor(makeOption(30000), 10000), 'SAFE')
+    expect(tierFor(makeOption(30000), 10000)).toBe('SAFE')
   })
 })
 
@@ -143,15 +144,15 @@ describe('tierFor — SAFE', () => {
 
 describe('tierFor — edge ranks', () => {
   it('rank=1, closing=1 → ratio=1.00 → TARGET', () => {
-    assert.equal(tierFor(makeOption(1), 1), 'TARGET')
+    expect(tierFor(makeOption(1), 1)).toBe('TARGET')
   })
 
   it('rank=2000000, closing=1000000 → ratio=0.50 → DREAM', () => {
-    assert.equal(tierFor(makeOption(1000000), 2000000), 'DREAM')
+    expect(tierFor(makeOption(1000000), 2000000)).toBe('DREAM')
   })
 
   it('rank=2000000, closing=3000000 → ratio=1.50 → SAFE', () => {
-    assert.equal(tierFor(makeOption(3000000), 2000000), 'SAFE')
+    expect(tierFor(makeOption(3000000), 2000000)).toBe('SAFE')
   })
 })
 
@@ -159,19 +160,19 @@ describe('tierFor — edge ranks', () => {
 
 describe('confidenceFor', () => {
   it('no missing facts → high', () => {
-    assert.equal(confidenceFor(makeOption(10000, [])), 'high')
+    expect(confidenceFor(makeOption(10000, []))).toBe('high')
   })
 
   it('one missing fact → medium', () => {
-    assert.equal(confidenceFor(makeOption(10000, ['annualFee'])), 'medium')
+    expect(confidenceFor(makeOption(10000, ['annualFee']))).toBe('medium')
   })
 
   it('two missing facts → low', () => {
-    assert.equal(confidenceFor(makeOption(null, ['annualFee', 'closingRank'])), 'low')
+    expect(confidenceFor(makeOption(null, ['annualFee', 'closingRank']))).toBe('low')
   })
 
   it('three missing facts → low', () => {
-    assert.equal(confidenceFor(makeOption(null, ['annualFee', 'closingRank', 'placementScore'])), 'low')
+    expect(confidenceFor(makeOption(null, ['annualFee', 'closingRank', 'placementScore']))).toBe('low')
   })
 })
 
@@ -185,13 +186,13 @@ describe('renumber', () => {
       { itemId: 'c', position: 1 } as unknown as StrategyItem,
     ]
     const result = renumber(items)
-    assert.deepEqual(result.map((i) => i.position), [1, 2, 3])
+    expect(result.map((i) => i.position)).toEqual([1, 2, 3])
   })
 
   it('preserves all other item fields', () => {
     const items = [{ itemId: 'x', position: 99, extra: 'preserved' } as unknown as StrategyItem]
     const [result] = renumber(items)
-    assert.equal((result as unknown as { extra: string }).extra, 'preserved')
+    expect((result as unknown as { extra: string }).extra).toBe('preserved')
   })
 })
 
@@ -201,36 +202,36 @@ describe('generateMockStrategy — integration with seed data', () => {
   it('positions match array index (1-based)', () => {
     const items = generateMockStrategy(MOCK_PROFILE)
     items.forEach((item, idx) => {
-      assert.equal(item.position, idx + 1, `item[${idx}].position should be ${idx + 1}`)
+      expect(item.position, `item[${idx}].position should be ${idx + 1}`).toBe(idx + 1)
     })
   })
 
   it('HBTU CSE (closingRank=8900, rank=10000, ratio≈0.89) → DREAM', () => {
     const items = generateMockStrategy(MOCK_PROFILE)
     const item = items.find((i) => i.option.id === 'hbtu-kanpur-cse')
-    assert.ok(item, 'hbtu-kanpur-cse must be in the mock list')
-    assert.equal(item!.tier, 'DREAM')
+    expect(item, 'hbtu-kanpur-cse must be in the mock list').toBeTruthy()
+    expect(item!.tier).toBe('DREAM')
   })
 
   it('IET Lucknow IT (closingRank=11400, rank=10000, ratio=1.14) → TARGET', () => {
     const items = generateMockStrategy(MOCK_PROFILE)
     // the mock order contains iet-lucknow-it twice; find first occurrence
     const item = items.find((i) => i.option.id === 'iet-lucknow-it')
-    assert.ok(item, 'iet-lucknow-it must be in the mock list')
-    assert.equal(item!.tier, 'TARGET')
+    expect(item, 'iet-lucknow-it must be in the mock list').toBeTruthy()
+    expect(item!.tier).toBe('TARGET')
   })
 
   it('HBTU Kanpur EE (closingRank=19500, rank=10000, ratio=1.95) → SAFE', () => {
     const items = generateMockStrategy(MOCK_PROFILE)
     const item = items.find((i) => i.option.id === 'hbtu-kanpur-ee')
-    assert.ok(item, 'hbtu-kanpur-ee must be in the mock list')
-    assert.equal(item!.tier, 'SAFE')
+    expect(item, 'hbtu-kanpur-ee must be in the mock list').toBeTruthy()
+    expect(item!.tier).toBe('SAFE')
   })
 
   it('REC Banda (closingRank=null) → UNKNOWN', () => {
     const items = generateMockStrategy(MOCK_PROFILE)
     const item = items.find((i) => i.option.id === 'rec-banda-cse')
-    assert.ok(item, 'rec-banda-cse must be in the mock list')
-    assert.equal(item!.tier, 'UNKNOWN')
+    expect(item, 'rec-banda-cse must be in the mock list').toBeTruthy()
+    expect(item!.tier).toBe('UNKNOWN')
   })
 })

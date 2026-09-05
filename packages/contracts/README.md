@@ -25,6 +25,8 @@ a later feature PR migrates screens to this package.
 - informational conflicts may be acknowledged without pretending they were warnings;
 - snapshot warning decisions contain only explained warning overrides;
 - missing option facts are `null` and must be named in `missingFacts` exactly.
+- generation may return zero items when hard constraints remove every option; re-audit and
+  lock requests still require at least one strategy item.
 
 ## Commands
 
@@ -36,8 +38,8 @@ npm run contracts:test
 npm run contracts:build
 ```
 
-Use `npm run check` to run the root frontend typecheck, contract tests and production
-build in the same order used for local handoff.
+Use `npm run check` to run the root typecheck, contract tests, application tests and
+production build in the same order used for local handoff.
 
 ## Versioning
 

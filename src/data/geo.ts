@@ -8,6 +8,7 @@ export const CITY_COORDS: Record<string, Coords> = {
   Aligarh: { lat: 27.8974, lon: 78.088 },
   Banda: { lat: 25.4759, lon: 80.335 },
   Bareilly: { lat: 28.367, lon: 79.4304 },
+  Delhi: { lat: 28.6139, lon: 77.209 },
   Ghaziabad: { lat: 28.6692, lon: 77.4538 },
   Gorakhpur: { lat: 26.7606, lon: 83.3732 },
   Jhansi: { lat: 25.4484, lon: 78.5685 },

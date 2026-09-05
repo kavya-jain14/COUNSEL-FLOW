@@ -49,6 +49,48 @@ test('accepts a versioned generated strategy with matching audit revisions', asy
   assert.equal(strategyGenerateResponseSchema.safeParse(response).success, true)
 })
 
+test('accepts an empty generated result but not an empty audit or lock request', async () => {
+  const response = await loadFixture('generate-response.valid.json')
+  const profile = await loadFixture('profile.valid.json')
+  const emptyAudit = {
+    ...response.audit,
+    conflicts: [],
+    counts: { CRITICAL: 0, WARNING: 0, INFO: 0 },
+    canLock: true,
+  }
+  const generated = strategyGenerateResponseSchema.safeParse({
+    ...response,
+    items: [],
+    audit: emptyAudit,
+  })
+  const requestBase = {
+    contractVersion: '1.0.0',
+    requestId: 'req-empty-001',
+    profileRevision: response.profileRevision,
+    listRevision: response.listRevision,
+    profile,
+    items: [],
+  }
+
+  assert.equal(generated.success, true)
+  assert.equal(
+    auditStrategyRequestSchema.safeParse({
+      ...requestBase,
+      previousRunId: 1,
+      resolutions: [],
+    }).success,
+    false,
+  )
+  assert.equal(
+    lockStrategyRequestSchema.safeParse({
+      ...requestBase,
+      resolutions: [],
+      audit: emptyAudit,
+    }).success,
+    false,
+  )
+})
+
 test('accepts the generate and re-audit endpoint request shapes', async () => {
   const profile = await loadFixture('profile.valid.json')
   const response = await loadFixture('generate-response.valid.json')

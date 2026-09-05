@@ -14,6 +14,7 @@ import {
 } from '@counselflow/contracts'
 import type { CandidateProfile } from '../types'
 import { DATASET_LABEL, ENGINE_VERSION } from '../data/reference'
+import { AUTHORITIES } from '../data/authorities'
 import {
   listRevisionFor,
   nextRequestId,
@@ -25,6 +26,11 @@ import { toPayload } from '../lib/validation'
 import { runAudit } from './audit'
 
 const LATENCY = 450
+
+function datasetVersionFor(context?: EngineContext): string {
+  if (!context) return DATASET_LABEL
+  return `${AUTHORITIES[context.authority].datasetLabel} · reference round ${context.round}`
+}
 
 function delay<T>(value: T, ms = LATENCY): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -48,7 +54,7 @@ export async function generateStrategy(
       requestId,
       profileRevision,
       listRevision,
-      datasetVersion: DATASET_LABEL,
+      datasetVersion: datasetVersionFor(context),
       engineVersion: ENGINE_VERSION,
       items,
       audit: {
@@ -107,6 +113,7 @@ export async function lockStrategy(
   items: StrategyItem[],
   resolutions: Resolution[],
   audit: AuditResult,
+  context?: EngineContext,
 ): Promise<LockStrategyResponse> {
   const requestId = nextRequestId('lock')
 
@@ -140,7 +147,7 @@ export async function lockStrategy(
         lockedAt: new Date().toISOString(),
         profileRevision,
         listRevision,
-        datasetVersion: DATASET_LABEL,
+        datasetVersion: datasetVersionFor(context),
         engineVersion: ENGINE_VERSION,
         auditRunId: audit.runId,
         acknowledgedWarnings,

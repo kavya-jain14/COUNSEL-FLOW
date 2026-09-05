@@ -7,7 +7,7 @@ import {
 } from './common.js'
 import { auditResultSchema } from './audit.js'
 import { candidateProfileSchema } from './profile.js'
-import { strategyItemsSchema } from './strategy.js'
+import { generatedStrategyItemsSchema } from './strategy.js'
 
 export const strategyGenerateRequestSchema = z.strictObject({
   contractVersion: contractVersionSchema,
@@ -24,7 +24,7 @@ export const strategyGenerateResponseSchema = z
     listRevision: revisionSchema,
     datasetVersion: versionLabelSchema,
     engineVersion: versionLabelSchema,
-    items: strategyItemsSchema,
+    items: generatedStrategyItemsSchema,
     audit: auditResultSchema,
   })
   .superRefine((response, ctx) => {
