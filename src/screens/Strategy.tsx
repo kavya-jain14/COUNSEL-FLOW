@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { Conflict } from '../types'
-import { DATASET_LABEL } from '../data/reference'
+import { AUTHORITIES } from '../data/authorities'
 import { formatRank } from '../lib/format'
 import { useAppActions, useAppState } from '../state/store'
 import { StrategyRow } from '../components/StrategyRow'
@@ -16,8 +16,8 @@ import {
 } from '../features/decision-impact'
 
 export function Strategy() {
-  const { items, audit, auditStale, busy, profile, authorityId } = useAppState()
-  const { goTo, moveItem, removeItem, reaudit, patchProfile, generate } = useAppActions()
+  const { items, audit, auditStale, busy, profile, authorityId, lock: snapshot } = useAppState()
+  const { goTo, moveItem, removeItem, reaudit, patchProfile, generateForProfile } = useAppActions()
   const [whatIfOpen, setWhatIfOpen] = useState(false)
   const engineContext = useMemo(() => {
     const set = latestSetFor(authorityId)
@@ -73,19 +73,28 @@ export function Strategy() {
   }, [])
 
   if (items.length === 0) {
+    const generatedEmpty = Boolean(audit)
     return (
       <>
         <PageHead
           step={3}
           total={5}
           kicker="My strategy"
-          title="Nothing to rank yet"
-          lede="Your choice list is built from the profile you fill in: your rank, your limits, and the branches you actually want."
+          title={generatedEmpty ? 'No option survives your hard limits' : 'Nothing to rank yet'}
+          lede={
+            generatedEmpty
+              ? `We checked the ${AUTHORITIES[authorityId].label} reference set, but every option was removed by a hard limit or exclusion. Your rank is still saved.`
+              : 'Your choice list is built from the profile you fill in: your rank, your limits, and the branches you actually want.'
+          }
         />
         <div className="empty">
-          <p>Finish your profile and generate a strategy to see it here.</p>
+          <p>
+            {generatedEmpty
+              ? 'Widen one limit, turn it into a soft preference, or remove an exclusion. We will never insert an option that breaks a hard rule without telling you.'
+              : 'Finish your profile and generate a strategy to see it here.'}
+          </p>
           <button className="btn btn--primary" onClick={() => goTo('profile')}>
-            Build my profile
+            {generatedEmpty ? 'Review my limits' : 'Build my profile'}
           </button>
         </div>
       </>
@@ -103,12 +112,16 @@ export function Strategy() {
         lede={
           <>
             {items.length} options built from rank {profile.rank ? formatRank(profile.rank) : '-'}{' '}
-            and the limits you declared. Open any row for its decision impact: what
+            and the limits you declared. {snapshot ? 'This locked version is read-only. ' : ''}Open any row for its decision impact: what
             choosing that one costs and gains <em>you</em>, measured against your own
             profile.
           </>
         }
-        actions={
+        actions={snapshot ? (
+          <button type="button" className="btn btn--sm btn--primary" onClick={() => goTo('locked')}>
+            View locked snapshot
+          </button>
+        ) : (
           <>
             <button
               type="button"
@@ -118,21 +131,37 @@ export function Strategy() {
             >
               What if?
             </button>
-            <button
-              type="button"
-              className="btn btn--sm"
-              onClick={reaudit}
-              disabled={busy === 'audit'}
-            >
-              {busy === 'audit' ? 'Re-auditing…' : 'Re-audit list'}
-            </button>
+            {auditStale && (
+              <button
+                type="button"
+                className="btn btn--sm"
+                onClick={reaudit}
+                disabled={busy === 'audit'}
+              >
+                {busy === 'audit' ? 'Re-auditing…' : 'Re-audit list'}
+              </button>
+            )}
           </>
-        }
+        )}
       />
 
       <div className="page page--rail">
         <div className="page__flow">
-          {auditStale && (
+          {snapshot && (
+            <Banner
+              tone="success"
+              title="Locked snapshot: editing is off"
+              action={
+                <button className="btn btn--sm btn--primary" onClick={() => goTo('locked')}>
+                  View snapshot
+                </button>
+              }
+            >
+              <span>Start a new round or a new profile from the locked dossier if your situation changes.</span>
+            </Banner>
+          )}
+
+          {auditStale && !snapshot && (
             <Banner
               tone="stale"
               title="These flags are one version behind"
@@ -149,7 +178,7 @@ export function Strategy() {
             </Banner>
           )}
 
-          {attentionConflicts.length > 0 && !auditStale && (
+          {attentionConflicts.length > 0 && !auditStale && !snapshot && (
             <section className="attention-queue" aria-labelledby="attention-title">
               <div className="attention-queue__lead">
                 <span className="section-label">Start here</span>
@@ -218,7 +247,7 @@ export function Strategy() {
           <p className="band__note" style={{ marginTop: 18, maxWidth: '62ch' }}>
             Reach labels come from historical closing ranks and are not a guarantee. They tell
             you how much coverage your list has: they never decide what you prefer. Source:{' '}
-            {DATASET_LABEL}.
+            {AUTHORITIES[authorityId].datasetLabel}.
           </p>
 
         </div>
@@ -228,7 +257,7 @@ export function Strategy() {
           conflicts={selected ? (byItem[selected.itemId] ?? []) : []}
           profile={profile}
           total={items.length}
-          disabled={busy != null}
+          disabled={busy != null || Boolean(snapshot)}
           onMove={moveItem}
           onRemove={removeItem}
           onOpenConflicts={() => goTo('conflicts')}
@@ -243,7 +272,7 @@ export function Strategy() {
           items={items}
           conflicts={byItem[impactItem.itemId] ?? []}
           authority={authorityId}
-          disabled={busy != null}
+          disabled={busy != null || Boolean(snapshot)}
           onClose={() => setImpactId(null)}
           onMove={moveItem}
           onRemove={removeItem}
@@ -254,7 +283,17 @@ export function Strategy() {
         />
       )}
 
-      {auditStale ? (
+      {snapshot ? (
+        <NextStep
+          tone="ready"
+          what="This preference order is locked"
+          why="The controls above are read-only so the visible list cannot drift away from the filed snapshot."
+        >
+          <button className="btn btn--primary" onClick={() => goTo('locked')}>
+            View locked dossier
+          </button>
+        </NextStep>
+      ) : auditStale ? (
         <NextStep
           tone="wait"
           what="Re-audit before you go further"
@@ -302,7 +341,7 @@ export function Strategy() {
           </button>
         </NextStep>
       )}
-      {whatIfOpen && (
+      {whatIfOpen && !snapshot && (
         <WhatIfPanel
           profile={profile}
           items={items}
@@ -311,7 +350,7 @@ export function Strategy() {
           onApply={(next) => {
             patchProfile(next)
             setWhatIfOpen(false)
-            void generate()
+            void generateForProfile(next)
           }}
         />
       )}

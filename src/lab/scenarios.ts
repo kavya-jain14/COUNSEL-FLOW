@@ -63,15 +63,29 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
   },
   {
     id: 'missing-evidence',
-    title: 'Missing fee/rank facts lower confidence instead of becoming fiction',
-    proves: 'Unknown data is explicit and cannot be invented by an explanation layer.',
+    title: 'Shared evidence gaps become one decision, not warning spam',
+    proves: 'Unknown data is explicit and grouped without being invented or repeated per option.',
     setup: [
       'Include REC Banda from the seed dataset.',
       'Inspect reasons and evidence for its missing fee, closing-rank and placement facts.',
-      'Leave the warning unresolved; accepting uncertainty with a reason and re-auditing unblocks it.',
+      'For JoSAA or IPU, verify options missing the same facts share one warning decision.',
+      'Leave the warning unresolved; accepting uncertainty with one written reason and re-auditing unblocks it.',
     ],
     expectedConflictCodes: ['CF-08'],
     expectedLockBlocked: true,
+  },
+  {
+    id: 'locked-snapshot-is-read-only',
+    title: 'A locked dossier cannot be regenerated or edited',
+    proves: 'The immutable snapshot and the visible strategy cannot drift apart after filing.',
+    setup: [
+      'Resolve the audit and lock the current strategy.',
+      'Navigate back to the ranked list and conflicts from the sidebar.',
+      'Verify What If, reorder, remove, conflict actions and re-audit controls are unavailable.',
+      'Open the locked snapshot and confirm its order, audit and dataset version are unchanged.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: false,
   },
   {
     id: 'tier-boundary-classification',

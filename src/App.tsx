@@ -76,9 +76,10 @@ function Shell() {
   }
 
   const currentIndex = FLOW.findIndex((f) => f.step === state.step)
-  const canLock = Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
+  const canLock =
+    state.items.length > 0 && Boolean(state.audit?.canLock) && !state.auditStale && !state.lock
   const showLockAction =
-    Boolean(state.audit) && (state.step === 'strategy' || state.step === 'conflicts')
+    !state.lock && Boolean(state.audit) && (state.step === 'strategy' || state.step === 'conflicts')
   const status = state.lock
     ? 'FILED'
     : state.auditStale
@@ -100,7 +101,11 @@ function Shell() {
 
       <aside className="sidebar">
         <div className="sidebar__masthead">
-          <button className="brand" onClick={() => goTo('landing')} aria-label="CounselFlow home">
+          <button
+            className="brand"
+            onClick={() => goTo(state.lock ? 'locked' : 'landing')}
+            aria-label={state.lock ? 'CounselFlow locked snapshot' : 'CounselFlow home'}
+          >
             <span className="brand__mark" aria-hidden="true">
               <img src="/brand/counselflow-mark-light.svg" alt="" />
             </span>

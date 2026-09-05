@@ -55,6 +55,32 @@ export function ConflictInspector() {
     )
   }
 
+  if (items.length === 0) {
+    return (
+      <>
+        <PageHead
+          step={4}
+          total={5}
+          kicker="Conflicts"
+          title="Your hard limits leave nothing to review"
+          lede="There is no ranked option to audit or lock. CounselFlow kept every hard rule intact instead of silently widening it."
+        />
+        <Banner tone="warning" title="Review the profile before trying again">
+          <span>Widen a limit, make it soft, or remove an exclusion, then generate a new list.</span>
+        </Banner>
+        <NextStep
+          tone="blocked"
+          what="Adjust one hard rule"
+          why="A new generation is required because the current strategy contains no options."
+        >
+          <button className="btn btn--primary" onClick={() => goTo('profile')}>
+            Review my limits
+          </button>
+        </NextStep>
+      </>
+    )
+  }
+
   const { counts } = audit
   const total = counts.CRITICAL + counts.WARNING + counts.INFO
   const canLock = audit.canLock && !auditStale && !snapshot
@@ -87,18 +113,24 @@ export function ConflictInspector() {
             : `Audit run #${audit.runId} over ${items.length} options. Work top to bottom. Critical flags and unresolved warnings must be settled before locking.`
         }
         actions={
-          <button
-            type="button"
-            className="btn btn--sm"
-            onClick={reaudit}
-            disabled={busy === 'audit'}
-          >
-            {busy === 'audit' ? 'Re-auditing…' : 'Re-audit'}
-          </button>
+          snapshot ? (
+            <button type="button" className="btn btn--sm" onClick={() => goTo('locked')}>
+              View locked snapshot
+            </button>
+          ) : auditStale ? (
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={reaudit}
+              disabled={busy === 'audit'}
+            >
+              {busy === 'audit' ? 'Re-auditing…' : 'Re-audit'}
+            </button>
+          ) : null
         }
       />
 
-      {firstUnresolved && !auditStale && (
+      {firstUnresolved && !auditStale && !snapshot && (
         <section className="decision-brief" aria-labelledby="decision-brief-title">
           <span className="decision-brief__number mono">01</span>
           <div>
@@ -139,7 +171,19 @@ export function ConflictInspector() {
         </div>
       )}
 
-      {auditStale ? (
+      {snapshot ? (
+        <Banner
+          tone="success"
+          title="This is a locked decision record"
+          action={
+            <button className="btn btn--sm btn--primary" onClick={() => goTo('locked')}>
+              View locked snapshot
+            </button>
+          }
+        >
+          <span>The order, audit and written reasons below are read-only.</span>
+        </Banner>
+      ) : auditStale ? (
         <Banner
           tone="stale"
           title="Changes applied: not yet re-audited"
@@ -177,14 +221,14 @@ export function ConflictInspector() {
       ) : (
         <Banner
           tone="success"
-          title={snapshot ? 'This strategy is already locked' : 'No unresolved blocking conflicts'}
+          title="No unresolved blocking conflicts"
           action={
             <button
               className="btn btn--sm btn--primary"
               onClick={lock}
-              disabled={busy === 'lock' || Boolean(snapshot)}
+              disabled={busy === 'lock'}
             >
-              {busy === 'lock' ? 'Filing strategy…' : snapshot ? 'Locked' : 'Lock my list'}
+              {busy === 'lock' ? 'Filing strategy…' : 'Lock my list'}
             </button>
           }
         >
@@ -215,7 +259,7 @@ export function ConflictInspector() {
                   conflict={conflict}
                   resolution={resolutionMap[conflict.id]}
                   items={items}
-                  disabled={busy != null}
+                  disabled={busy != null || Boolean(snapshot)}
                   priority={conflict.id === firstUnresolved?.id}
                   onApply={applyAction}
                 />
@@ -246,7 +290,20 @@ export function ConflictInspector() {
         )}
       </div>
 
-      {auditStale ? (
+      {snapshot ? (
+        <NextStep
+          tone="ready"
+          what="Your reviewed list is already locked"
+          why="Open the immutable snapshot to record an allotment or continue to the next counselling round."
+        >
+          <button className="btn" onClick={() => goTo('strategy')}>
+            View ranked list
+          </button>
+          <button className="btn btn--primary" onClick={() => goTo('locked')}>
+            View locked dossier
+          </button>
+        </NextStep>
+      ) : auditStale ? (
         <NextStep
           tone="wait"
           what="Re-audit to confirm your fixes worked"

@@ -41,7 +41,7 @@ export function ProfileSummary() {
         lede={
           hardCount === 0
             ? 'You have set no hard limits, so nothing will be removed outright: every option will be ranked instead.'
-            : `${hardCount} hard limit${hardCount > 1 ? 's' : ''} can remove options and block your final list. Everything else only changes the order.`
+            : `${hardCount} hard limit${hardCount > 1 ? 's' : ''} remove ineligible options before ranking. Everything else only changes the order.`
         }
         actions={
           <button type="button" className="btn btn--sm" onClick={() => goTo('profile')}>
@@ -129,7 +129,7 @@ export function ProfileSummary() {
               <small>
                 {quotaLabels.length === 0
                   ? 'Only the standard category and region pools apply'
-                  : `${quotaLabels.join(' · ')}: eligibility is recorded for ${authority.label}; availability follows the source rows`}
+                  : `${quotaLabels.join(' · ')}: recorded for review; the current shortlist still uses the main category and region pool unless a source row confirms the quota`}
               </small>
             </dd>
           </div>
@@ -150,7 +150,7 @@ export function ProfileSummary() {
       <Band
         num="02"
         title="Hard limits"
-        note="These can remove an option outright and stop your list from locking until you deal with them."
+        note="These remove an option before ranking. Unknown evidence remains visible instead of being treated as a pass."
       >
         <div className="band__head">
           <span className="section-label">Can block your list</span>
@@ -163,7 +163,7 @@ export function ProfileSummary() {
               {formatINRExact(profile.budget.value)}
               <small>
                 {profile.budget.mode === 'hard'
-                  ? 'Hard ceiling: over-budget options are flagged critical'
+                  ? 'Hard ceiling: over-budget options are removed before ranking'
                   : 'Soft preference: over-budget options only rank lower'}
               </small>
             </dd>
@@ -174,7 +174,7 @@ export function ProfileSummary() {
               {formatKm(profile.distance.value)}
               <small>
                 {profile.distance.mode === 'hard'
-                  ? 'Hard limit: further colleges are flagged critical'
+                  ? 'Hard limit: further colleges are removed before ranking'
                   : 'Soft preference: further colleges only rank lower'}
               </small>
             </dd>

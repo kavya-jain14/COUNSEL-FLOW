@@ -49,6 +49,7 @@ export interface AppState {
   activity: ActivityEntry[]
   lock: LockState | null
   busy: null | 'generate' | 'audit' | 'lock'
+  activeOperationToken: number | null
   auditStale: boolean
   error: ApiErrorEnvelope | null
   announcement: string
@@ -84,7 +85,7 @@ export const DEMO_PROFILE: CandidateProfile = {
   homeCity: 'Lucknow',
 }
 
-const INITIAL_STATE: AppState = {
+export const INITIAL_STATE: AppState = {
   step: 'landing',
   authorityId: DEFAULT_AUTHORITY,
   currentRound: 1,
@@ -97,29 +98,37 @@ const INITIAL_STATE: AppState = {
   activity: [],
   lock: null,
   busy: null,
+  activeOperationToken: null,
   auditStale: false,
   error: null,
   announcement: '',
 }
 
-type Action =
+export type Action =
   | { type: 'SET_STEP'; step: Step }
   | { type: 'PATCH_PROFILE'; patch: Partial<CandidateProfile> }
   | { type: 'LOAD_DEMO_PROFILE' }
-  | { type: 'BUSY'; busy: AppState['busy'] }
-  | { type: 'GENERATED'; response: StrategyGenerateResponse }
-  | { type: 'AUDITED'; audit: AuditResult }
+  | { type: 'BUSY'; busy: Exclude<AppState['busy'], null>; token: number }
+  | { type: 'GENERATED'; response: StrategyGenerateResponse; token: number }
+  | { type: 'AUDITED'; audit: AuditResult; token: number }
   | { type: 'APPLY_ACTION'; conflict: Conflict; action: ConflictAction; reason?: string }
   | { type: 'MOVE_ITEM'; itemId: string; direction: -1 | 1 }
   | { type: 'REMOVE_ITEM'; itemId: string }
-  | { type: 'LOCKED'; lock: LockState }
-  | { type: 'FAILED'; error: ApiErrorEnvelope }
+  | { type: 'LOCKED'; lock: LockState; token: number }
+  | { type: 'FAILED'; error: ApiErrorEnvelope; token: number }
   | { type: 'SET_AUTHORITY'; authorityId: AuthorityId }
   | { type: 'RECORD_ALLOTMENT'; optionId: string | null }
   | { type: 'START_NEXT_ROUND' }
   | { type: 'RESET' }
 
 let activitySeq = 0
+let operationSeq = 0
+
+function nextOperationToken(): number {
+  operationSeq += 1
+  return operationSeq
+}
+
 function activityId(): string {
   activitySeq += 1
   return `act-${activitySeq}`
@@ -128,7 +137,6 @@ function activityId(): string {
 function resolutionKindFor(conflict: Conflict, action: ConflictAction): ResolutionKind {
   switch (action.kind) {
     case 'KEEP':
-    case 'CONVERT_TO_SOFT':
       return 'OVERRIDDEN'
     case 'ACKNOWLEDGE':
       return conflict.severity === 'WARNING' ? 'OVERRIDDEN' : 'ACKNOWLEDGED'
@@ -195,7 +203,6 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
         }
         detail = dropped ? `Removed the exclusion "${dropped.label}".` : detail
       } else {
-
         step = 'profile'
       }
       break
@@ -245,11 +252,14 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
     resolutions: [...state.resolutions.filter((r) => r.conflictId !== conflict.id), resolution],
     activity: [entry, ...state.activity],
     auditStale: true,
+    busy: null,
+    activeOperationToken: null,
+    error: null,
     announcement: `${action.label} applied. Re-audit to confirm the list is clean.`,
   }
 }
 
-function reducer(state: AppState, action: Action): AppState {
+export function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_STEP':
       if (state.lock && !['strategy', 'conflicts', 'locked'].includes(action.step)) {
@@ -264,7 +274,10 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         profile,
-        auditStale: state.items.length > 0 ? true : state.auditStale,
+        busy: null,
+        activeOperationToken: null,
+        error: null,
+        auditStale: state.audit ? true : state.auditStale,
       }
     }
 
@@ -283,15 +296,23 @@ function reducer(state: AppState, action: Action): AppState {
         activity: [],
         lock: null,
         busy: null,
+        activeOperationToken: null,
         auditStale: false,
         error: null,
         announcement: 'UPTAC sample candidate loaded.',
       }
 
     case 'BUSY':
-      return { ...state, busy: action.busy, error: null }
+      if (state.lock) return state
+      return {
+        ...state,
+        busy: action.busy,
+        activeOperationToken: action.token,
+        error: null,
+      }
 
     case 'GENERATED': {
+      if (state.lock || state.activeOperationToken !== action.token) return state
       const { items, audit } = action.response
       return {
         ...state,
@@ -307,6 +328,7 @@ function reducer(state: AppState, action: Action): AppState {
           },
         ],
         busy: null,
+        activeOperationToken: null,
         auditStale: false,
         step: 'strategy',
         announcement: `Strategy ready with ${audit.conflicts.length} conflicts found.`,
@@ -314,10 +336,12 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'AUDITED':
+      if (state.lock || state.activeOperationToken !== action.token) return state
       return {
         ...state,
         audit: action.audit,
         busy: null,
+        activeOperationToken: null,
         auditStale: false,
         activity: [
           {
@@ -350,6 +374,9 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         items: renumber(next),
         auditStale: true,
+        busy: null,
+        activeOperationToken: null,
+        error: null,
         activity: [
           {
             id: activityId(),
@@ -371,6 +398,9 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         items: renumber(state.items.filter((it) => it.itemId !== action.itemId)),
         auditStale: true,
+        busy: null,
+        activeOperationToken: null,
+        error: null,
         activity: [
           {
             id: activityId(),
@@ -385,10 +415,12 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'LOCKED':
+      if (state.lock || state.activeOperationToken !== action.token) return state
       return {
         ...state,
         lock: action.lock,
         busy: null,
+        activeOperationToken: null,
         step: 'locked',
         activity: [
           {
@@ -403,14 +435,18 @@ function reducer(state: AppState, action: Action): AppState {
       }
 
     case 'FAILED':
+      if (state.activeOperationToken !== action.token) return state
       return {
         ...state,
         busy: null,
+        activeOperationToken: null,
         error: action.error,
         announcement: action.error.error.message,
       }
 
     case 'SET_AUTHORITY': {
+      if (state.lock) return state
+      if (state.authorityId === action.authorityId) return state
       const authority = AUTHORITIES[action.authorityId]
       const category =
         state.profile.category && authority.categories.includes(state.profile.category)
@@ -425,7 +461,10 @@ function reducer(state: AppState, action: Action): AppState {
         authorityId: action.authorityId,
         profile: {
           ...state.profile,
+          rank: null,
+          rankType: 'CRL',
           category,
+          domicile: null,
           subQuotas,
         },
         currentRound: 1,
@@ -435,13 +474,24 @@ function reducer(state: AppState, action: Action): AppState {
         audit: null,
         resolutions: [],
         lock: null,
+        activity: [],
+        busy: null,
+        activeOperationToken: null,
+        error: null,
         auditStale: false,
-        announcement: `Switched to ${AUTHORITIES[action.authorityId].label}.`,
+        announcement: `Switched to ${AUTHORITIES[action.authorityId].label}. Enter its rank and confirm your ${authority.region.label.toLowerCase()}.`,
       }
     }
 
     case 'RECORD_ALLOTMENT': {
+      if (!state.lock) return state
       const held = state.items.find((it) => it.option.id === action.optionId)
+      if (action.optionId && !held) {
+        return {
+          ...state,
+          announcement: 'That seat is not part of this locked preference list.',
+        }
+      }
       return {
         ...state,
         allottedOptionId: action.optionId,
@@ -452,6 +502,16 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'START_NEXT_ROUND': {
+      if (!state.lock || state.currentRound >= AUTHORITIES[state.authorityId].rounds) {
+        return state
+      }
+      const next = improvementsOver(state.items, state.allottedOptionId)
+      if (next.exhausted) {
+        return {
+          ...state,
+          announcement: 'No option ranks above the seat you already hold, so there is nothing to float for.',
+        }
+      }
       const record: RoundRecord = {
         round: state.currentRound,
         items: state.items,
@@ -462,7 +522,6 @@ function reducer(state: AppState, action: Action): AppState {
           return held ? labelFor(held) : null
         })(),
       }
-      const next = improvementsOver(state.items, state.allottedOptionId)
       return {
         ...state,
         history: [...state.history, record],
@@ -472,6 +531,9 @@ function reducer(state: AppState, action: Action): AppState {
         resolutions: [],
         lock: null,
         allottedOptionId: null,
+        busy: null,
+        activeOperationToken: null,
+        error: null,
         auditStale: true,
         step: 'strategy',
         activity: [
@@ -492,7 +554,18 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case 'RESET':
-      return { ...INITIAL_STATE, profile: DEFAULT_PROFILE }
+      return {
+        ...INITIAL_STATE,
+        profile: {
+          ...DEFAULT_PROFILE,
+          budget: { ...DEFAULT_PROFILE.budget },
+          distance: { ...DEFAULT_PROFILE.distance },
+          branchPriority: [...DEFAULT_PROFILE.branchPriority],
+          hardExclusions: [],
+          subQuotas: [],
+          factorWeights: { ...DEFAULT_PROFILE.factorWeights },
+        },
+      }
 
     default:
       return state
@@ -503,7 +576,7 @@ const StateContext = createContext<AppState | null>(null)
 const DispatchContext = createContext<Dispatch<Action> | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+  const [state, dispatch] = useReducer(appReducer, INITIAL_STATE)
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
@@ -536,23 +609,37 @@ export function useAppActions() {
 
   const loadDemoProfile = useCallback(() => dispatch({ type: 'LOAD_DEMO_PROFILE' }), [dispatch])
 
-  const generate = useCallback(async () => {
-    dispatch({ type: 'BUSY', busy: 'generate' })
-    try {
-      const set = latestSetFor(state.authorityId)
-      const response = await api.generateStrategy(state.profile, {
-        authority: state.authorityId,
-        year: set?.year ?? CUTOFF_YEAR,
-        round: set ? set.round : state.currentRound,
-      })
-      dispatch({ type: 'GENERATED', response })
-    } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
-    }
-  }, [dispatch, state.profile, state.authorityId, state.currentRound])
+  const performGenerate = useCallback(
+    async (profile: CandidateProfile) => {
+      if (state.lock) return
+      const token = nextOperationToken()
+      dispatch({ type: 'BUSY', busy: 'generate', token })
+      try {
+        const set = latestSetFor(state.authorityId)
+        const response = await api.generateStrategy(profile, {
+          authority: state.authorityId,
+          year: set?.year ?? CUTOFF_YEAR,
+          round: set ? set.round : state.currentRound,
+        })
+        dispatch({ type: 'GENERATED', response, token })
+      } catch (cause) {
+        dispatch({ type: 'FAILED', error: toApiError(cause), token })
+      }
+    },
+    [dispatch, state.authorityId, state.currentRound, state.lock],
+  )
+
+  const generate = useCallback(() => performGenerate(state.profile), [performGenerate, state.profile])
+
+  const generateForProfile = useCallback(
+    (profile: CandidateProfile) => performGenerate(profile),
+    [performGenerate],
+  )
 
   const reaudit = useCallback(async () => {
-    dispatch({ type: 'BUSY', busy: 'audit' })
+    if (state.lock || state.items.length === 0 || !state.auditStale) return
+    const token = nextOperationToken()
+    dispatch({ type: 'BUSY', busy: 'audit', token })
     try {
       const audit = await api.auditStrategy(
         state.profile,
@@ -560,27 +647,50 @@ export function useAppActions() {
         state.resolutions,
         state.audit?.runId ?? 0,
       )
-      dispatch({ type: 'AUDITED', audit })
+      dispatch({ type: 'AUDITED', audit, token })
     } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
+      dispatch({ type: 'FAILED', error: toApiError(cause), token })
     }
-  }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
+  }, [dispatch, state.profile, state.items, state.resolutions, state.audit, state.auditStale, state.lock])
 
   const lock = useCallback(async () => {
-    if (!state.audit) return
-    dispatch({ type: 'BUSY', busy: 'lock' })
+    if (
+      state.items.length === 0 ||
+      !state.audit ||
+      state.auditStale ||
+      !state.audit.canLock ||
+      state.lock
+    ) return
+    const token = nextOperationToken()
+    dispatch({ type: 'BUSY', busy: 'lock', token })
     try {
+      const set = latestSetFor(state.authorityId)
       const response = await api.lockStrategy(
         state.profile,
         state.items,
         state.resolutions,
         state.audit,
+        {
+          authority: state.authorityId,
+          year: set?.year ?? CUTOFF_YEAR,
+          round: set ? set.round : state.currentRound,
+        },
       )
-      dispatch({ type: 'LOCKED', lock: response.snapshot })
+      dispatch({ type: 'LOCKED', lock: response.snapshot, token })
     } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
+      dispatch({ type: 'FAILED', error: toApiError(cause), token })
     }
-  }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
+  }, [
+    dispatch,
+    state.profile,
+    state.items,
+    state.resolutions,
+    state.audit,
+    state.auditStale,
+    state.lock,
+    state.authorityId,
+    state.currentRound,
+  ])
 
   const applyAction = useCallback(
     (conflict: Conflict, action: ConflictAction, reason?: string) =>
@@ -621,6 +731,7 @@ export function useAppActions() {
       recordAllotment,
       startNextRound,
       generate,
+      generateForProfile,
       reaudit,
       lock,
       applyAction,
@@ -636,6 +747,7 @@ export function useAppActions() {
       recordAllotment,
       startNextRound,
       generate,
+      generateForProfile,
       reaudit,
       lock,
       applyAction,

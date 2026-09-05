@@ -215,7 +215,7 @@ describe('decision impact — narration layer', () => {
       .map((finding) => finding.yourWords)
       .filter((words): words is string => words != null)
 
-    expect(quoted.some((words) => words.startsWith('Branch order —'))).toBe(true)
+    expect(quoted.some((words) => words.startsWith('Branch order:'))).toBe(true)
     expect(quoted.some((words) => words.includes('hard limit'))).toBe(true)
   })
 

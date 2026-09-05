@@ -68,9 +68,8 @@ export const strategyItemSchema = z.strictObject({
   manuallyPlaced: z.boolean(),
 })
 
-export const strategyItemsSchema = z
+export const generatedStrategyItemsSchema = z
   .array(strategyItemSchema)
-  .min(1)
   .max(100)
   .superRefine((items, ctx) => {
     const ids = new Set<string>()
@@ -93,6 +92,8 @@ export const strategyItemsSchema = z
       }
     })
   })
+
+export const strategyItemsSchema = generatedStrategyItemsSchema.min(1)
 
 export type Tier = z.infer<typeof tierSchema>
 export type Confidence = z.infer<typeof confidenceSchema>

@@ -462,7 +462,34 @@ function dominatedConflicts(profile: CandidateProfile, items: StrategyItem[]): C
 
 function coverageConflicts(profile: CandidateProfile, items: StrategyItem[]): Conflict[] {
   const acceptable = items.filter((it) => !violatesHardConstraint(it, profile))
-  if (acceptable.length === 0) return []
+  if (acceptable.length === 0) {
+    return [
+      {
+        id: conflictId('CF-05', 'empty-coverage'),
+        code: 'CF-05',
+        severity: 'WARNING',
+        title: 'No eligible fallback',
+        summary: 'No option survives the hard limits and exclusions in this profile.',
+        evidence: [
+          'Eligible options after hard filtering: 0',
+          'The engine did not silently relax any limit or insert an ineligible option.',
+        ],
+        causedBy: 'Coverage rule · No option survives the declared hard constraints',
+        itemIds: [],
+        actions: [
+          {
+            id: 'coverage:review-constraints',
+            kind: 'CHANGE_CONSTRAINT',
+            label: 'Review my constraints',
+            effect:
+              'Takes you back to your profile. Widening budget, distance or branches may surface an eligible fallback.',
+            intent: 'primary',
+            target: { constraint: 'budget', newValue: profile.budget.value },
+          },
+        ],
+      },
+    ]
+  }
   if (acceptable.some((it) => it.tier === 'SAFE')) return []
 
   return [
@@ -552,36 +579,62 @@ const FACT_LABELS: Record<string, string> = {
 }
 
 function evidenceConflicts(items: StrategyItem[]): Conflict[] {
-  return items
-    .filter((it) => it.option.missingFacts.length > 0)
-    .map((item) => ({
-      id: conflictId('CF-08', item.itemId),
+  const groups = new Map<string, StrategyItem[]>()
+  for (const item of items) {
+    if (item.option.missingFacts.length === 0) continue
+    const key = [...item.option.missingFacts].sort().join('|')
+    groups.set(key, [...(groups.get(key) ?? []), item])
+  }
+
+  return [...groups.entries()].map(([factKey, affected]) => {
+    const first = affected[0]
+    const labels = affected.map((item) => `${item.option.collegeShort} · ${item.option.branch}`)
+    const visibleLabels = labels.slice(0, 4)
+    const remaining = labels.length - visibleLabels.length
+    const factLabels = factKey.split('|').map((fact) => FACT_LABELS[fact] ?? fact)
+    const groupKey = factKey.split('|').join('-')
+
+    return {
+      id: conflictId('CF-08', groupKey),
       code: 'CF-08' as const,
       severity: 'WARNING' as Severity,
       title: 'Evidence gap',
-      summary: `We cannot verify ${item.option.missingFacts
-        .map((f) => FACT_LABELS[f] ?? f)
-        .join(', ')} for ${item.option.collegeShort}.`,
+      summary: `We cannot verify ${factLabels.join(', ')} for ${affected.length} option${affected.length > 1 ? 's' : ''}.`,
       evidence: [
-        `Missing facts: ${item.option.missingFacts.map((f) => FACT_LABELS[f] ?? f).join(', ')}`,
-        `Source: ${item.option.sourceLabel} ${item.option.sourceYear}`,
+        `Missing facts: ${factLabels.join(', ')}`,
+        `Affected: ${visibleLabels.join('; ')}${remaining > 0 ? `; and ${remaining} more` : ''}`,
+        `Source: ${first.option.sourceLabel} ${first.option.sourceYear}`,
         'Confidence downgraded to low. These facts were excluded from scoring rather than guessed.',
       ],
       causedBy: 'Evidence rule · Required fact missing from the dataset',
-      itemIds: [item.itemId],
-      actions: [
-        removeAction(item.itemId, 'Remove until verified'),
-        {
-          id: `${item.itemId}:keep-unverified`,
-          kind: 'ACKNOWLEDGE',
-          label: 'Keep with low confidence',
-          effect:
-            'Keeps the option and marks it low-confidence. We will not claim it meets your budget.',
-          intent: 'secondary',
-          requiresReason: true,
-        },
-      ],
-    }))
+      itemIds: affected.map((item) => item.itemId),
+      actions:
+        affected.length === 1
+          ? [
+              removeAction(first.itemId, 'Remove until verified'),
+              {
+                id: `${groupKey}:keep-unverified`,
+                kind: 'ACKNOWLEDGE',
+                label: 'Keep with low confidence',
+                effect:
+                  'Keeps the option and records why you accept the missing evidence. No missing value is guessed.',
+                intent: 'secondary',
+                requiresReason: true,
+              },
+            ]
+          : [
+              {
+                id: `${groupKey}:keep-unverified`,
+                kind: 'ACKNOWLEDGE',
+                label: `Keep ${affected.length} with low confidence`,
+                effect:
+                  'Keeps the affected options and records one reason for accepting this shared evidence gap. No missing value is guessed.',
+                intent: 'primary',
+                requiresReason: true,
+              },
+            ],
+    }
+  })
 }
 
 export const SEVERITY_ORDER: Severity[] = ['CRITICAL', 'WARNING', 'INFO']

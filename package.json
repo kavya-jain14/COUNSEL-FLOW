@@ -9,10 +9,12 @@
   "scripts": {
     "dev": "npm run contracts:build && vite",
     "build": "npm run contracts:build && tsc -b && vite build",
-    "check": "npm run typecheck && npm run contracts:test && npm run build",
+    "check": "npm run typecheck && npm run contracts:test && npm run test && npm run build",
     "contracts:build": "tsc -p packages/contracts/tsconfig.json",
     "contracts:test": "npm run contracts:build && node --test packages/contracts/test/*.test.mjs",
     "contracts:typecheck": "tsc -p packages/contracts/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "audit:runtime": "vite-node scripts/dev-audit.ts",
     "preview": "vite preview",
     "typecheck": "npm run contracts:build && tsc --noEmit"
   },

@@ -78,7 +78,12 @@ export function BuildProfile() {
         note="Eligibility and reachability are both computed from this, so it has to be exact."
       >
         <div className="grid-2 profile-core-grid">
-          <Field label="Rank" error={show('rank')} htmlFor="rank">
+          <Field
+            label="Rank"
+            hint={`Enter the rank for ${authority.label}'s supported source: ${authority.rankTypes.join(' or ')}. Changing counselling clears this and the region field so seat pools are never carried across systems.`}
+            error={show('rank')}
+            htmlFor="rank"
+          >
             <input
               id="rank"
               className="input"
@@ -171,8 +176,8 @@ export function BuildProfile() {
         <fieldset className="quota-set">
           <legend className="field__label">Reservation quotas you can claim</legend>
           <span className="field__hint">
-            Optional, and you can claim more than one. These open extra seat pools: they never
-            remove an option from your list.
+            Optional, and you can record more than one. The current shortlist uses the main
+            category and region cutoff pool; no extra quota is assumed without a matching source row.
           </span>
           <div className="quota-grid">
             {availableQuotas.map((quota) => {
@@ -232,7 +237,7 @@ export function BuildProfile() {
           step={5000}
           format={formatINR}
           error={show('budget')}
-          hardBehaviour="Any option above this is removed and flagged critical. Your list will not lock until it is resolved."
+          hardBehaviour="Any option above this is removed before ranking. If you later relax this limit, the regenerated list makes that change explicit."
           softBehaviour="Options above this stay on your list but rank lower, and we explain the cost in the reason."
           onChange={(budget) => patchProfile({ budget })}
         />
@@ -269,7 +274,7 @@ export function BuildProfile() {
           step={10}
           format={formatKm}
           error={show('distance')}
-          hardBehaviour="Anything further than this is removed and flagged critical. Your list will not lock until it is resolved."
+          hardBehaviour="Anything further than this is removed before ranking. Unknown distances stay visible as an evidence gap rather than being guessed."
           softBehaviour="Further colleges stay on your list but rank lower if you weighted location."
           onChange={(distance) => patchProfile({ distance })}
         />
