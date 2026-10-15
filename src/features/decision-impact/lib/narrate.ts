@@ -71,7 +71,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `${str(facts, 'branch')} is your first-choice branch`,
     detail: `You ranked ${str(facts, 'order')}. This option gives you the branch at the top of that list, so nothing about the branch is being traded away here.`,
     clause: `your first-choice branch`,
-    yourWords: `Branch order: ${str(facts, 'order')}`,
+    yourWords: `Branch order — ${str(facts, 'order')}`,
   }),
 
   BRANCH_DOWNGRADE: ({ facts }) => {
@@ -81,7 +81,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
       headline: `${str(facts, 'branch')} is your #${choice} branch, not your first choice`,
       detail: `You ranked ${str(facts, 'order')}. Taking this means accepting ${str(facts, 'branch')} over ${str(facts, 'passedOver')}: ${steps === 1 ? 'a one-step' : `a ${steps}-step`} move down your own order, ${steps === 1 ? 'which is the smallest branch compromise on offer' : 'which is a real branch compromise'}.`,
       clause: `${str(facts, 'branch')} instead of your first-choice ${str(facts, 'firstChoice')}`,
-      yourWords: `Branch order: ${str(facts, 'order')}`,
+      yourWords: `Branch order — ${str(facts, 'order')}`,
     }
   },
 
@@ -89,7 +89,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `${str(facts, 'branch')} is not in your branch order at all`,
     detail: `You ranked ${str(facts, 'order')} and never placed ${str(facts, 'branch')} among them. Choosing this is a branch you did not ask for, not a lower-ranked one you did.`,
     clause: `a branch you never ranked`,
-    yourWords: `Branch order: ${str(facts, 'order')}`,
+    yourWords: `Branch order — ${str(facts, 'order')}`,
   }),
 
   BRANCH_EXCLUDED: ({ facts }) => ({
@@ -343,7 +343,7 @@ const RENDERERS: Record<ImpactCode, (input: RenderInput) => Rendered> = {
     headline: `Sits above ${str(facts, 'counterpartBranch')}, which you ranked higher than ${str(facts, 'thisBranch')}`,
     detail: `Your order is ${str(facts, 'order')}, but ${str(facts, 'thisBranch')} is at #${num(facts, 'position')} and ${str(facts, 'counterpartName')} is at #${maybeNum(facts, 'counterpartPosition') ?? 0}. The audit raised this as a ${str(facts, 'severity').toLowerCase()}: resolve it there if the order was not deliberate.`,
     clause: `an order that inverts your own branch ranking`,
-    yourWords: `Branch order: ${str(facts, 'order')}`,
+    yourWords: `Branch order — ${str(facts, 'order')}`,
   }),
 
   DOMINATED_BY_NEIGHBOUR: ({ facts }) => ({

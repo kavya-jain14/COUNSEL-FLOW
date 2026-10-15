@@ -84,3 +84,9 @@ npm run dev
 Do not run `npm audit fix --force` during the hackathon. Capture one desktop landing
 screenshot, one strategy screenshot and one 375 px profile screenshot for the PR and demo
 deck.
+
+## Application test gate — 2026-10-16
+
+Branch: `fix/application-test-gate`. `npm test` runs the application and engine regression suites through Vitest; `npm run check` and CI now include these tests alongside shared-contract checks. The older strategy tests used the Node test runner and were invisible to the shared Vitest suite. Their assertions now run under the same runner. Branch-order narration retains the declared-order wording expected by its regression test. No API, dataset, migration or strategy-ranking changes.
+
+The larger workspace redesign and Scenario Lab remain in PRs #14 and #15. This checkpoint does not merge those branches or claim live API persistence.
