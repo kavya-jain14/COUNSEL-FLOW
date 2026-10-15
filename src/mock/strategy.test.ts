@@ -6,11 +6,11 @@
  *   1. update these expected values;
  *   2. bump the engine version in packages/contracts/src/strategy.ts.
  *
- * Run with:  npx tsx --test src/mock/strategy.test.ts
+ * Run with:  npx vitest run src/mock/strategy.test.ts
  */
 
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { describe, it } from 'vitest'
 import {
   TIER_DREAM_RATIO_MAX,
   TIER_TARGET_RATIO_MAX,
