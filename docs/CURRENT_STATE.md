@@ -103,13 +103,18 @@ Verification: `npm run check` passed (typecheck, 14 contract tests, production b
 and `git diff --check` passed. An isolated React/jsdom navigation smoke test loaded all
 five deferred screens: sample candidate, summary, seven-option generation, conflicts,
 remove the evidence-gap option, re-audit, and lock the six-option snapshot. This verifies
-component loading and state continuity; desktop/mobile layout and actual browser network
-loading still need a preview pass. Chromium installation returned invalid downloads in
-this environment, so no screenshot or browser performance result is claimed.
+component loading and state continuity. A subsequent Chromium 153 production smoke test
+completed the same flow with zero page errors: the landing requested only the entry
+script, and all five screen chunks were fetched on navigation. Desktop landing and
+375 px locked-page screenshots were inspected; the locked page had no horizontal
+overflow. This is a navigation/loading check, not a network-timing benchmark or a
+complete visual audit. The browser came from the available packaged Chromium binary
+after the standard browser download failed.
 
 This is independent of workspace/Scenario Lab PRs #14 and #15. PR #16 still supplies the
 separate application-test gate and narration fix; neither branch is merged here. Keep
-this loading change in draft until the preview navigation pass and teammate review.
+this loading change in draft until teammate review; the workspace/Scenario Lab release
+and full visual review remain separate gates.
 Rollback is a revert of this screen-loading commit. Next commands:
 
 ```bash
