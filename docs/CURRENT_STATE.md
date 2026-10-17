@@ -1,6 +1,6 @@
 # Current state
 
-Last updated: 2026-08-22
+Last updated: 2026-10-17
 
 ## Repository
 
@@ -84,3 +84,41 @@ npm run dev
 Do not run `npm audit fix --force` during the hackathon. Capture one desktop landing
 screenshot, one strategy screenshot and one 375 px profile screenshot for the PR and demo
 deck.
+
+## Candidate screen loading — 2026-10-17
+
+Branch: `fix/lazy-candidate-screens`, based on `main` at `d116e83`.
+Changed files: `src/App.tsx` and this checkpoint. The landing document remains eager;
+profile, summary, strategy, conflicts and lock screens now load on first use. A live
+status message announces a screen while its module loads. The provider stays mounted
+outside the loading boundary, preserving candidate, audit and lock state during navigation.
+No contract, dataset, engine or audit rule changed.
+
+The production entry JavaScript decreased from 1,242.79 kB to 1,135.56 kB
+(gzip: 185.30 kB to 157.42 kB). The five screens and shared decision-impact code are
+separate chunks. The large-bundle warning remains: generated options/cutoffs still load
+through the shared state/engine graph. Deferring that data needs a separate change.
+
+Verification: `npm run check` passed (typecheck, 14 contract tests, production build),
+and `git diff --check` passed. An isolated React/jsdom navigation smoke test loaded all
+five deferred screens: sample candidate, summary, seven-option generation, conflicts,
+remove the evidence-gap option, re-audit, and lock the six-option snapshot. This verifies
+component loading and state continuity. A subsequent Chromium 153 production smoke test
+completed the same flow with zero page errors: the landing requested only the entry
+script, and all five screen chunks were fetched on navigation. Desktop landing and
+375 px locked-page screenshots were inspected; the locked page had no horizontal
+overflow. This is a navigation/loading check, not a network-timing benchmark or a
+complete visual audit. The browser came from the available packaged Chromium binary
+after the standard browser download failed.
+
+This is independent of workspace/Scenario Lab PRs #14 and #15. PR #16 still supplies the
+separate application-test gate and narration fix; neither branch is merged here. Keep
+this loading change in draft until teammate review; the workspace/Scenario Lab release
+and full visual review remain separate gates.
+Rollback is a revert of this screen-loading commit. Next commands:
+
+```bash
+git switch fix/lazy-candidate-screens
+npm ci
+npm run check
+```

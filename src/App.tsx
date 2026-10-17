@@ -1,16 +1,27 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react'
 import type { Step } from './types'
 import { AppProvider, useAppActions, useAppState } from './state/store'
 import { FLOW } from './state/flow'
 import { Banner, LiveRegion } from './components/ui'
 import { Landing } from './screens/Landing'
-import { BuildProfile } from './screens/BuildProfile'
-import { ProfileSummary } from './screens/ProfileSummary'
-import { Strategy } from './screens/Strategy'
-import { ConflictInspector } from './screens/ConflictInspector'
-import { Locked } from './screens/Locked'
 import { isProfileValid } from './lib/validation'
 import { ENGINE_VERSION } from './data/reference'
+
+const BuildProfile = lazy(() =>
+  import('./screens/BuildProfile').then((module) => ({ default: module.BuildProfile })),
+)
+const ProfileSummary = lazy(() =>
+  import('./screens/ProfileSummary').then((module) => ({ default: module.ProfileSummary })),
+)
+const Strategy = lazy(() =>
+  import('./screens/Strategy').then((module) => ({ default: module.Strategy })),
+)
+const ConflictInspector = lazy(() =>
+  import('./screens/ConflictInspector').then((module) => ({ default: module.ConflictInspector })),
+)
+const Locked = lazy(() =>
+  import('./screens/Locked').then((module) => ({ default: module.Locked })),
+)
 
 function Screen({ step }: { step: Step }) {
   switch (step) {
@@ -194,7 +205,9 @@ function Shell() {
               </span>
             </Banner>
           )}
-          <Screen step={state.step} />
+          <Suspense fallback={<p role="status">Opening {activeLabel.toLowerCase()}…</p>}>
+            <Screen step={state.step} />
+          </Suspense>
         </main>
       </div>
 
