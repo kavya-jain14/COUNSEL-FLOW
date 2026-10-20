@@ -185,6 +185,4 @@ export function generateMockStrategy(profile: CandidateProfile): StrategyItem[] 
   })
 }
 
-export function renumber(items: StrategyItem[]): StrategyItem[] {
-  return items.map((item, i) => ({ ...item, position: i + 1 }))
-}
+export { renumber } from '../lib/itemOrder'

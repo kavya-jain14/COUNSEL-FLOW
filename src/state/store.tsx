@@ -20,12 +20,9 @@ import type {
   StrategyItem,
   Step,
 } from '../types'
-import { renumber } from '../mock/strategy'
-import * as api from '../mock/api'
+import { renumber } from '../lib/itemOrder'
 import { AUTHORITIES, DEFAULT_AUTHORITY, type AuthorityId } from '../data/authorities'
 import { improvementsOver, labelFor, type RoundRecord } from '../lib/rounds'
-import { CUTOFF_YEAR } from '../data/cutoffs'
-import { latestSetFor } from '../data/generated'
 import { toApiError } from '../features/contracts'
 
 export interface ActivityEntry {
@@ -539,6 +536,11 @@ export function useAppActions() {
   const generate = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'generate' })
     try {
+      const [api, { latestSetFor }, { CUTOFF_YEAR }] = await Promise.all([
+        import('../mock/api'),
+        import('../data/generated'),
+        import('../data/cutoffs'),
+      ])
       const set = latestSetFor(state.authorityId)
       const response = await api.generateStrategy(state.profile, {
         authority: state.authorityId,
@@ -554,6 +556,7 @@ export function useAppActions() {
   const reaudit = useCallback(async () => {
     dispatch({ type: 'BUSY', busy: 'audit' })
     try {
+      const api = await import('../mock/api')
       const audit = await api.auditStrategy(
         state.profile,
         state.items,
@@ -570,6 +573,7 @@ export function useAppActions() {
     if (!state.audit) return
     dispatch({ type: 'BUSY', busy: 'lock' })
     try {
+      const api = await import('../mock/api')
       const response = await api.lockStrategy(
         state.profile,
         state.items,
