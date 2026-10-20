@@ -1,6 +1,6 @@
 # Current state
 
-Last updated: 2026-10-17
+Last updated: 2026-10-20
 
 ## Repository
 
@@ -121,4 +121,55 @@ Rollback is a revert of this screen-loading commit. Next commands:
 git switch fix/lazy-candidate-screens
 npm ci
 npm run check
+```
+
+
+## Deferred strategy data — 2026-10-20
+
+Branch: `fix/defer-strategy-dataset`, based on PR #17's
+`fix/lazy-candidate-screens` at `5fc8f7a`. This dependent follow-up requires that screen
+loading boundary; it does not merge PR #17 or the workspace/Scenario Lab/test-gate
+branches (#14–16). Owner: Kavya; frontend review partner: Gargi.
+
+The shared provider now imports the mock API, generated-set metadata and cutoffs only
+when an async strategy operation starts. Independent generation imports start together.
+The pure item-position helper lives in `src/lib/itemOrder.ts`, with its existing mock
+strategy export preserved. This removes the provider's eager path through mock seed data.
+Existing synchronous engine/data APIs, candidate ranking, audit and lock rules are
+unchanged. Import failures follow the existing operation-error path and clear busy state.
+
+Changed files: `src/state/store.tsx`, `src/lib/itemOrder.ts`, `src/mock/strategy.ts`,
+`src/state/store.test.ts`, and this checkpoint. Initial JavaScript fell from 1,135.56 kB
+(gzip 157.42 kB) to 257.76 kB (gzip 79.71 kB) against the PR #17 baseline. The generated
+data is a separate 821.57 kB chunk (gzip 66.61 kB), requested on first generation. The
+large-chunk warning remains for that deferred chunk; this does not reduce total dataset
+bytes or claim a network-timing benchmark.
+
+Verification:
+
+- `npm run check`: typecheck, 14 contract tests and production build passed.
+- `npx vitest run src/state/store.test.ts src/domain`: 8 tests passed, including an
+  initial-render regression that rejects eager API/generated-data/cutoff imports.
+- Existing `src/mock/strategy.test.ts`, bundled with esbuild for the Node test runner:
+  30 tests passed, including item-position preservation.
+- Chromium 153 before/after production checks produced identical strategy-row text and
+  audit counts for UPTAC (7 choices), JoSAA (60) and IPU (43). JoSAA/IPU used the sample
+  profile with budget and distance set to soft preferences to exercise loaded datasets.
+- No strategy/data chunk was requested on landing, profile or summary. First generation
+  loaded it; the sample fix/re-audit/lock flow saved the same six-choice snapshot.
+- A deliberately blocked API chunk displayed the existing rejection banner, restored
+  the Generate button and produced no strategy or uncaught page error.
+- Successful navigation had no page errors. The 375 px locked page had no horizontal
+  overflow; its screenshot was inspected. This is not a complete visual audit.
+- `git diff --check`: passed.
+
+PR #16 still owns inclusion of application tests in `npm run check`/CI. The new boundary
+regression was run explicitly here; no duplicate test-gate change is included. Keep this
+follow-up in draft for teammate review and the dependent PR #17 integration. Rollback:
+revert this dataset-deferral commit. Next commands:
+
+```bash
+git switch fix/defer-strategy-dataset
+npm ci
+npm run check && npx vitest run src/state/store.test.ts src/domain
 ```
