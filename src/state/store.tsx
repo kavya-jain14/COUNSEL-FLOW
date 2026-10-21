@@ -46,6 +46,7 @@ export interface AppState {
   activity: ActivityEntry[]
   lock: LockState | null
   busy: null | 'generate' | 'audit' | 'lock'
+  pendingOperation: symbol | null
   auditStale: boolean
   error: ApiErrorEnvelope | null
   announcement: string
@@ -81,7 +82,7 @@ export const DEMO_PROFILE: CandidateProfile = {
   homeCity: 'Lucknow',
 }
 
-const INITIAL_STATE: AppState = {
+export const INITIAL_STATE: AppState = {
   step: 'landing',
   authorityId: DEFAULT_AUTHORITY,
   currentRound: 1,
@@ -94,6 +95,7 @@ const INITIAL_STATE: AppState = {
   activity: [],
   lock: null,
   busy: null,
+  pendingOperation: null,
   auditStale: false,
   error: null,
   announcement: '',
@@ -103,14 +105,14 @@ type Action =
   | { type: 'SET_STEP'; step: Step }
   | { type: 'PATCH_PROFILE'; patch: Partial<CandidateProfile> }
   | { type: 'LOAD_DEMO_PROFILE' }
-  | { type: 'BUSY'; busy: AppState['busy'] }
-  | { type: 'GENERATED'; response: StrategyGenerateResponse }
-  | { type: 'AUDITED'; audit: AuditResult }
+  | { type: 'BUSY'; busy: AppState['busy']; operation: symbol }
+  | { type: 'GENERATED'; response: StrategyGenerateResponse; operation: symbol }
+  | { type: 'AUDITED'; audit: AuditResult; operation: symbol }
   | { type: 'APPLY_ACTION'; conflict: Conflict; action: ConflictAction; reason?: string }
   | { type: 'MOVE_ITEM'; itemId: string; direction: -1 | 1 }
   | { type: 'REMOVE_ITEM'; itemId: string }
-  | { type: 'LOCKED'; lock: LockState }
-  | { type: 'FAILED'; error: ApiErrorEnvelope }
+  | { type: 'LOCKED'; lock: LockState; operation: symbol }
+  | { type: 'FAILED'; error: ApiErrorEnvelope; operation: symbol }
   | { type: 'SET_AUTHORITY'; authorityId: AuthorityId }
   | { type: 'RECORD_ALLOTMENT'; optionId: string | null }
   | { type: 'START_NEXT_ROUND' }
@@ -246,7 +248,7 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
   }
 }
 
-function reducer(state: AppState, action: Action): AppState {
+function reduceState(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_STEP':
       if (state.lock && !['strategy', 'conflicts', 'locked'].includes(action.step)) {
@@ -286,7 +288,7 @@ function reducer(state: AppState, action: Action): AppState {
       }
 
     case 'BUSY':
-      return { ...state, busy: action.busy, error: null }
+      return { ...state, busy: action.busy, pendingOperation: action.operation, error: null }
 
     case 'GENERATED': {
       const { items, audit } = action.response
@@ -496,11 +498,22 @@ function reducer(state: AppState, action: Action): AppState {
   }
 }
 
+export function appReducer(state: AppState, action: Action): AppState {
+  if ('operation' in action && action.type !== 'BUSY' && action.operation !== state.pendingOperation) {
+    return state
+  }
+
+  const next = reduceState(state, action)
+  if (next === state || action.type === 'BUSY') return next
+  // Every accepted edit/navigation invalidates pending work; a completion consumes its token.
+  return { ...next, busy: null, pendingOperation: null }
+}
+
 const StateContext = createContext<AppState | null>(null)
 const DispatchContext = createContext<Dispatch<Action> | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+  const [state, dispatch] = useReducer(appReducer, INITIAL_STATE)
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
@@ -534,7 +547,8 @@ export function useAppActions() {
   const loadDemoProfile = useCallback(() => dispatch({ type: 'LOAD_DEMO_PROFILE' }), [dispatch])
 
   const generate = useCallback(async () => {
-    dispatch({ type: 'BUSY', busy: 'generate' })
+    const operation = Symbol('generate')
+    dispatch({ type: 'BUSY', busy: 'generate', operation })
     try {
       const [api, { latestSetFor }, { CUTOFF_YEAR }] = await Promise.all([
         import('../mock/api'),
@@ -547,14 +561,15 @@ export function useAppActions() {
         year: set?.year ?? CUTOFF_YEAR,
         round: set ? set.round : state.currentRound,
       })
-      dispatch({ type: 'GENERATED', response })
+      dispatch({ type: 'GENERATED', response, operation })
     } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
+      dispatch({ type: 'FAILED', error: toApiError(cause), operation })
     }
   }, [dispatch, state.profile, state.authorityId, state.currentRound])
 
   const reaudit = useCallback(async () => {
-    dispatch({ type: 'BUSY', busy: 'audit' })
+    const operation = Symbol('audit')
+    dispatch({ type: 'BUSY', busy: 'audit', operation })
     try {
       const api = await import('../mock/api')
       const audit = await api.auditStrategy(
@@ -563,15 +578,16 @@ export function useAppActions() {
         state.resolutions,
         state.audit?.runId ?? 0,
       )
-      dispatch({ type: 'AUDITED', audit })
+      dispatch({ type: 'AUDITED', audit, operation })
     } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
+      dispatch({ type: 'FAILED', error: toApiError(cause), operation })
     }
   }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
 
   const lock = useCallback(async () => {
     if (!state.audit) return
-    dispatch({ type: 'BUSY', busy: 'lock' })
+    const operation = Symbol('lock')
+    dispatch({ type: 'BUSY', busy: 'lock', operation })
     try {
       const api = await import('../mock/api')
       const response = await api.lockStrategy(
@@ -580,9 +596,9 @@ export function useAppActions() {
         state.resolutions,
         state.audit,
       )
-      dispatch({ type: 'LOCKED', lock: response.snapshot })
+      dispatch({ type: 'LOCKED', lock: response.snapshot, operation })
     } catch (cause) {
-      dispatch({ type: 'FAILED', error: toApiError(cause) })
+      dispatch({ type: 'FAILED', error: toApiError(cause), operation })
     }
   }, [dispatch, state.profile, state.items, state.resolutions, state.audit])
 
