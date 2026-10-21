@@ -173,3 +173,48 @@ git switch fix/defer-strategy-dataset
 npm ci
 npm run check && npx vitest run src/state/store.test.ts src/domain
 ```
+
+## Ignore superseded strategy operations — 2026-10-21
+
+Branch: `fix/stale-strategy-operations`, based on PR #18's
+`fix/defer-strategy-dataset` at `dfc886f`. This dependent fix targets that branch;
+integrate #17 and #18 before retargeting it to `main`. Owner: Kavya; frontend review
+partner: Gargi. PRs #14–16 remain separate.
+
+A strategy request could finish after a profile edit, sample reload, authority switch,
+reset, navigation or newer request and replace the current list/audit/lock. Each
+operation now carries a unique token. Accepted state changes invalidate the pending
+token; successful or failed completions only apply while their token is current.
+An old failure cannot clear a newer operation's busy indicator. Ignored edits leave
+current work intact. Mock APIs, contracts, deterministic ranking/audit rules and lazy
+data imports are unchanged.
+
+Changed files: `src/state/store.tsx`, `src/state/operations.test.ts`,
+`src/lab/scenarios.ts` and this checkpoint. The lab includes the delayed generation /
+profile-edit reproduction. Verification:
+
+- `npm run check`: typecheck, 14 contract tests and production build passed.
+- `npx vitest run src/state/operations.test.ts src/state/store.test.ts src/domain
+  --maxWorkers=1 --minWorkers=1`: 20 passed, including 12 operation tests. Removing
+  only the stale-result guard made nine of those regressions fail; the guard was
+  restored and the suite passed. Current re-audit and six-choice lock still succeed.
+- Existing mock-strategy tests bundled with esbuild for Node: 30 passed.
+- Chromium production check delayed the generated-data chunk, changed sample rank
+  to 25,000 while generation waited, then released the chunk. The edited profile
+  remained open with rank 25,000; a subsequent generation succeeded using that rank.
+  No uncaught page errors occurred. The resulting screenshot was inspected; this
+  checks the stale-operation flow, not a complete visual audit.
+- Entry JavaScript: 258.18 kB / gzip 79.81 kB. The generated dataset remains a deferred
+  821.57 kB chunk / gzip 66.61 kB; its existing large-chunk warning remains.
+- `git diff --check`: passed.
+
+PR #16 still owns adding application tests to the default CI gate, so these state
+regressions were run explicitly. Keep the dependent PR in draft for teammate review;
+no merge or deployed-backend verification is included. Rollback: revert this operation
+invalidation commit. Next commands:
+
+```bash
+git switch fix/stale-strategy-operations
+npm ci
+npm run check && npx vitest run src/state/operations.test.ts src/state/store.test.ts src/domain --maxWorkers=1 --minWorkers=1
+```

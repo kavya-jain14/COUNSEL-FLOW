@@ -16,6 +16,18 @@ export interface LabScenario {
  */
 export const LAB_SCENARIOS: readonly LabScenario[] = [
   {
+    id: 'pending-generation-after-profile-edit',
+    title: 'A delayed generation cannot restore a previous candidate profile',
+    proves: 'Only results for the current operation can replace the list or mark an audit current.',
+    setup: [
+      'Throttle the first strategy-data request, open the sample profile, and click Generate.',
+      'Return to the profile and change rank before allowing that request to complete.',
+      'Confirm the old result neither opens Strategy nor creates a list or lock; generate again from the edited summary.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: true,
+  },
+  {
     id: 'golden-fix-and-lock',
     title: 'Critical conflicts are fixed before lock',
     proves: 'The complete profile → audit → fix → re-audit → lock loop converges.',
