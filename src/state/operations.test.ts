@@ -157,3 +157,38 @@ test('ignored edits do not cancel a valid operation', () => {
   const state: AppState = { ...generatedState(), busy: 'audit', pendingOperation: operation }
   expect(appReducer(state, { type: 'REMOVE_ITEM', itemId: 'missing-item' })).toBe(state)
 })
+
+test.each(['generate', 'audit', 'lock'] as const)(
+  'clicking the current sidebar step preserves a pending %s operation',
+  async (busy) => {
+    const operation = Symbol(busy)
+    const step = busy === 'generate' ? 'summary' : 'conflicts'
+    let state = appReducer(
+      { ...generatedState(), step },
+      { type: 'BUSY', busy, operation },
+    )
+    const pending = deferred<void>()
+    const completion = pending.promise.then(() => {
+      if (busy === 'generate') {
+        state = appReducer(state, { type: 'GENERATED', response: generated, operation })
+      } else if (busy === 'audit') {
+        state = appReducer(state, { type: 'AUDITED', audit: cleanAudit, operation })
+      } else {
+        state = appReducer(state, { type: 'LOCKED', lock: snapshot, operation })
+      }
+    })
+
+    const beforeClick = state
+    state = appReducer(state, { type: 'SET_STEP', step })
+    expect(state).toBe(beforeClick)
+    expect(state.busy).toBe(busy)
+    expect(state.pendingOperation).toBe(operation)
+    pending.resolve()
+    await completion
+    expect(state.busy).toBeNull()
+    expect(state.pendingOperation).toBeNull()
+    if (busy === 'generate') expect(state.step).toBe('strategy')
+    if (busy === 'audit') expect(state.audit).toBe(cleanAudit)
+    if (busy === 'lock') expect(state.lock).toBe(snapshot)
+  },
+)
