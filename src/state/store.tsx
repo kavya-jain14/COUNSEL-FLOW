@@ -251,6 +251,7 @@ function applyConflictAction(state: AppState, conflict: Conflict, action: Confli
 function reduceState(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_STEP':
+      if (action.step === state.step) return state
       if (state.lock && !['strategy', 'conflicts', 'locked'].includes(action.step)) {
         return state
       }

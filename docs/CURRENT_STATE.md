@@ -1,6 +1,6 @@
 # Current state
 
-Last updated: 2026-10-20
+Last updated: 2026-10-26
 
 ## Repository
 
@@ -215,6 +215,49 @@ invalidation commit. Next commands:
 
 ```bash
 git switch fix/stale-strategy-operations
+npm ci
+npm run check && npx vitest run src/state/operations.test.ts src/state/store.test.ts src/domain --maxWorkers=1 --minWorkers=1
+```
+
+## Preserve work when clicking the open step — 2026-10-26
+
+Branch: `fix/preserve-current-screen-operation`, based on PR #19's
+`fix/stale-strategy-operations` at `7330ca5`. This dependent fix targets that branch;
+integrate #17, #18 and #19 first. Owner: Kavya; frontend review partner: Gargi.
+PRs #14–16 remain separate. The last durable base checkpoint is `7330ca5`.
+
+Clicking the already-open sidebar step previously dispatched a new state object and
+invalidated the current operation token even though no navigation occurred. A pending
+generation, audit or lock could then finish silently without applying its result.
+`SET_STEP` now leaves the state unchanged when the target is already open. Actual
+navigation and candidate edits continue to discard superseded work as before.
+
+Changed files: `src/state/store.tsx`, `src/state/operations.test.ts`,
+`src/lab/scenarios.ts` and this checkpoint. No engine, audit rule, API contract,
+dataset, screen markup or style changed. Verification:
+
+- Three new delayed-completion regressions (generation, audit and lock) failed on
+  `7330ca5`: the redundant navigation cleared busy state and its operation token.
+- `npm run check` passed: typecheck, 14 contract tests and production build.
+- Explicit Vitest state/domain suite: 23 passed, including all 15 operation tests.
+  Existing tests still prove that real navigation and profile changes cancel stale work.
+- Existing mock-strategy suite bundled for Node: 30 passed. Total tested: 67.
+- Production Chromium held the generated-data request, clicked the open Summary
+  sidebar entry during generation, and confirmed the Preparing state remained active.
+  Releasing the request opened Strategy with all seven sample options and no page errors.
+- Initial JavaScript remains 258.20 kB / gzip 79.82 kB; generated data remains deferred
+  at 821.57 kB / gzip 66.61 kB. The existing deferred-chunk size warning remains.
+- `git diff --check` passed.
+
+Fresh installation used `npm ci --ignore-scripts` followed by `npm exec prisma generate`
+to restore the generated client before typechecking; no database was accessed. PR #16
+still owns putting application tests in the default check/CI gate, so state regressions
+were run explicitly. Keep this dependent PR in draft for teammate review. Broader
+visual review and deployed backend verification remain separate. Rollback: revert
+this same-step navigation fix. Next commands:
+
+```bash
+git switch fix/preserve-current-screen-operation
 npm ci
 npm run check && npx vitest run src/state/operations.test.ts src/state/store.test.ts src/domain --maxWorkers=1 --minWorkers=1
 ```

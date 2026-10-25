@@ -28,6 +28,18 @@ export const LAB_SCENARIOS: readonly LabScenario[] = [
     expectedLockBlocked: true,
   },
   {
+    id: 'pending-operation-current-step',
+    title: 'Clicking the open step keeps pending candidate work alive',
+    proves: 'A redundant navigation click does not cancel generation, re-audit or lock.',
+    setup: [
+      'Throttle the first strategy-data request, open the sample summary, and click Generate.',
+      'Click the already-open Summary entry in the sidebar, then release the request.',
+      'Confirm generation opens Strategy normally; actual navigation to Profile must still discard the pending result.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: true,
+  },
+  {
     id: 'golden-fix-and-lock',
     title: 'Critical conflicts are fixed before lock',
     proves: 'The complete profile → audit → fix → re-audit → lock loop converges.',
