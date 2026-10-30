@@ -17,7 +17,7 @@ import {
 
 export function Strategy() {
   const { items, audit, auditStale, busy, profile, authorityId } = useAppState()
-  const { goTo, moveItem, removeItem, reaudit, patchProfile, generate } = useAppActions()
+  const { goTo, moveItem, removeItem, reaudit, applyProfileAndGenerate } = useAppActions()
   const [whatIfOpen, setWhatIfOpen] = useState(false)
   const engineContext = useMemo(() => {
     const set = latestSetFor(authorityId)
@@ -309,9 +309,8 @@ export function Strategy() {
           context={engineContext}
           onClose={() => setWhatIfOpen(false)}
           onApply={(next) => {
-            patchProfile(next)
             setWhatIfOpen(false)
-            void generate()
+            void applyProfileAndGenerate(next)
           }}
         />
       )}

@@ -16,6 +16,18 @@ export interface LabScenario {
  */
 export const LAB_SCENARIOS: readonly LabScenario[] = [
   {
+    id: 'what-if-applied-profile',
+    title: 'Applying a what-if change uses the profile shown in its preview',
+    proves: 'A same-event profile update cannot regenerate a list or audit from the previous limits.',
+    setup: [
+      'Generate the UPTAC sample strategy, open What if, and change the hard distance limit from 300 km to 50 km.',
+      'Confirm the preview has one feasible option, then apply the change.',
+      'Confirm the saved profile, one-option list and fresh audit all use the new 50 km limit.',
+    ],
+    expectedConflictCodes: [],
+    expectedLockBlocked: true,
+  },
+  {
     id: 'pending-generation-after-profile-edit',
     title: 'A delayed generation cannot restore a previous candidate profile',
     proves: 'Only results for the current operation can replace the list or mark an audit current.',
