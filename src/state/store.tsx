@@ -547,7 +547,7 @@ export function useAppActions() {
 
   const loadDemoProfile = useCallback(() => dispatch({ type: 'LOAD_DEMO_PROFILE' }), [dispatch])
 
-  const generate = useCallback(async () => {
+  const generateForProfile = useCallback(async (profile: CandidateProfile) => {
     const operation = Symbol('generate')
     dispatch({ type: 'BUSY', busy: 'generate', operation })
     try {
@@ -557,7 +557,7 @@ export function useAppActions() {
         import('../data/cutoffs'),
       ])
       const set = latestSetFor(state.authorityId)
-      const response = await api.generateStrategy(state.profile, {
+      const response = await api.generateStrategy(profile, {
         authority: state.authorityId,
         year: set?.year ?? CUTOFF_YEAR,
         round: set ? set.round : state.currentRound,
@@ -566,7 +566,15 @@ export function useAppActions() {
     } catch (cause) {
       dispatch({ type: 'FAILED', error: toApiError(cause), operation })
     }
-  }, [dispatch, state.profile, state.authorityId, state.currentRound])
+  }, [dispatch, state.authorityId, state.currentRound])
+
+  const generate = useCallback(() => generateForProfile(state.profile), [generateForProfile, state.profile])
+
+  const applyProfileAndGenerate = useCallback((profile: CandidateProfile) => {
+    if (state.lock) return
+    dispatch({ type: 'PATCH_PROFILE', patch: profile })
+    return generateForProfile(profile)
+  }, [dispatch, generateForProfile, state.lock])
 
   const reaudit = useCallback(async () => {
     const operation = Symbol('audit')
@@ -642,6 +650,7 @@ export function useAppActions() {
       recordAllotment,
       startNextRound,
       generate,
+      applyProfileAndGenerate,
       reaudit,
       lock,
       applyAction,
@@ -657,6 +666,7 @@ export function useAppActions() {
       recordAllotment,
       startNextRound,
       generate,
+      applyProfileAndGenerate,
       reaudit,
       lock,
       applyAction,

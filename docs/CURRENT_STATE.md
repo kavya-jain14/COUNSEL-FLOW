@@ -1,6 +1,6 @@
 # Current state
 
-Last updated: 2026-10-26
+Last updated: 2026-10-30
 
 ## Repository
 
@@ -260,4 +260,53 @@ this same-step navigation fix. Next commands:
 git switch fix/preserve-current-screen-operation
 npm ci
 npm run check && npx vitest run src/state/operations.test.ts src/state/store.test.ts src/domain --maxWorkers=1 --minWorkers=1
+```
+
+## Apply the what-if profile before generation — 2026-10-30
+
+Branch: `fix/apply-what-if-profile`, based on PR #20's
+`fix/preserve-current-screen-operation` at `41b864e`. This dependent fix targets
+that branch; integrate #17 → #18 → #19 → #20 first. Owner: Kavya; frontend review
+partner: Gargi. Existing PRs #14–16 remain separate.
+
+The What-if panel previously dispatched a profile change and called the ordinary
+Generate callback in the same React event. That callback still captured the old
+profile. The saved inputs changed, but the generated list and its fresh audit used
+the previous limits. Generation now has a shared profile-explicit path; the
+apply-and-generate action passes the exact profile accepted from the preview.
+Ordinary Generate remains a zero-argument event action. Locked snapshots reject the
+new action, and later edits still invalidate pending completions. Lazy imports,
+deterministic ranking/audit rules, contracts and datasets are unchanged.
+
+Changed files: `src/state/store.tsx`, `src/screens/Strategy.tsx`,
+`src/state/whatif.test.ts`, `src/lab/scenarios.ts`, `package.json`,
+`package-lock.json` and this checkpoint. The React 18.3.1 test renderer and its
+matching types are development-only dependencies for real batched-hook regressions;
+they are not imported by the application or included in its production payload.
+Verification:
+
+- Production Chromium on the base reproduced the actual failure: the UPTAC sample
+  started with seven choices, a 50 km hard-distance preview showed one, but Apply
+  regenerated seven. The fixed production build applies one choice, matching the
+  preview, with zero page errors.
+- Four new hook tests pass: applied profile/list/audit agreement, ordinary Generate,
+  invalidation after a later candidate edit, and immutable locked snapshots.
+- `npm run check` passed typecheck, 14 contract tests and production build.
+- Explicit state/domain Vitest suite: 27 tests pass. Existing mock-strategy Node
+  suite: 30 pass. Total tested: 71.
+- Initial JavaScript is 258.35 kB / gzip 79.90 kB. Generated data remains deferred
+  at 821.57 kB / gzip 66.61 kB; its existing large-chunk warning remains.
+- React best-practices review preserves event-based updates, stable dependencies,
+  lazy data loading and existing accessibility. No style or markup redesign.
+- `git diff --check` passed.
+
+PR #16 still owns adding application tests to the default check/CI gate, so these
+hook tests are run explicitly. Keep this dependent PR in draft for teammate review.
+Broader visual and deployed-backend checks remain separate. Rollback: revert this
+apply-and-generate commit. Next commands:
+
+```bash
+git switch fix/apply-what-if-profile
+npm ci
+npm run check && npx vitest run src/state/whatif.test.ts src/state/operations.test.ts src/state/store.test.ts src/domain --maxWorkers=1 --minWorkers=1
 ```
